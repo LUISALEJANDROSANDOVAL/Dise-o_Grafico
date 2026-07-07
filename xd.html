@@ -1,0 +1,895 @@
+<html lang="es"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RULEC — Rueda de colores para tu marca</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&amp;family=Inter:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF6EF;
+    --panel:#FFFFFF;
+    --ink:#241F1A;
+    --ink-soft:#5B564E;
+    --muted:#9A9284;
+    --line: rgba(36,31,26,0.10);
+    --line-strong: rgba(36,31,26,0.18);
+    --pine:#1F4B44;
+    --pine-light: rgba(31,75,68,0.08);
+    --gold:#BE8A3A;
+    --shadow: 0 1px 2px rgba(36,31,26,0.06), 0 8px 24px rgba(36,31,26,0.07);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 28px 24px 80px;
+  }
+
+  /* ---------- Header ---------- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 20px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .brand{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  .brand .mark{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size: 28px;
+    letter-spacing: 0.5px;
+  }
+  .brand .mark span{ color: var(--pine); }
+  .brand .tag{
+    font-size: 12.5px;
+    color: var(--muted);
+    font-style: italic;
+    font-family:'Fraunces', serif;
+  }
+  .tabs{
+    display:flex;
+    gap: 4px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 4px;
+    box-shadow: var(--shadow);
+  }
+  .tab-btn{
+    appearance:none;
+    border:none;
+    background:transparent;
+    padding: 9px 18px;
+    border-radius: 999px;
+    font-family:'Inter';
+    font-size:14px;
+    font-weight:600;
+    color: var(--ink-soft);
+    cursor:pointer;
+    transition: background .2s ease, color .2s ease;
+    white-space:nowrap;
+  }
+  .tab-btn.active{
+    background: var(--pine);
+    color:#fff;
+  }
+
+  .view{ display:none; }
+  .view.active{ display:block; animation: fadeIn .35s ease; }
+  @keyframes fadeIn{ from{opacity:0; transform: translateY(6px);} to{opacity:1; transform:none;} }
+
+  /* ---------- Crear paleta layout ---------- */
+  .builder{
+    display:grid;
+    grid-template-columns: 420px 1fr;
+    gap: 28px;
+    align-items:start;
+  }
+  @media (max-width: 880px){
+    .builder{ grid-template-columns: 1fr; }
+  }
+
+  .wheel-card{
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius: 22px;
+    box-shadow: var(--shadow);
+    padding: 28px 24px 22px;
+    text-align:center;
+    position:relative;
+  }
+  .wheel-card h2{
+    font-family:'Fraunces', serif;
+    font-size: 19px;
+    margin: 0 0 4px;
+    font-weight:600;
+  }
+  .wheel-card p.hint{
+    margin: 0 0 20px;
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+
+  .wheel-stage{
+    position:relative;
+    width: 300px;
+    height: 300px;
+    margin: 0 auto 18px;
+  }
+  .pointer-flag{
+    position:absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 9px solid transparent;
+    border-right: 9px solid transparent;
+    border-top: 14px solid var(--ink);
+    z-index: 5;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.25));
+  }
+  .pointer-flag::after{
+    content:"";
+    position:absolute;
+    top: -32px;
+    left: -1px;
+    width: 2px;
+    height: 20px;
+    background: var(--ink);
+  }
+  .bezel{
+    position:absolute;
+    inset: -10px;
+    border-radius: 50%;
+    background: linear-gradient(155deg, #fff, #d8d2c4 55%, #fff);
+    box-shadow: 0 10px 30px rgba(36,31,26,0.22), inset 0 0 0 1px rgba(0,0,0,0.06);
+  }
+  .wheel-disc-wrap{
+    position:absolute;
+    inset: 8px;
+    border-radius:50%;
+    overflow:hidden;
+    cursor: grab;
+    box-shadow: inset 0 0 0 6px rgba(255,255,255,0.9), inset 0 0 0 7px rgba(0,0,0,0.08);
+  }
+  .wheel-disc-wrap.dragging{ cursor: grabbing; }
+  .wheel-disc{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    will-change: transform;
+  }
+  .ticks{
+    position:absolute; inset:0;
+    pointer-events:none;
+  }
+  .hub{
+    position:absolute;
+    top:50%; left:50%;
+    width: 54px; height:54px;
+    transform: translate(-50%,-50%);
+    border-radius:50%;
+    background: var(--panel);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.18), inset 0 0 0 1px var(--line);
+    display:flex; align-items:center; justify-content:center;
+    z-index:4;
+  }
+  .hub-color{
+    width: 30px; height:30px;
+    border-radius:50%;
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.6), 0 0 0 1px rgba(0,0,0,0.08);
+  }
+
+  .base-readout{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin-top: 4px;
+  }
+  .base-readout .hex{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    color: var(--ink-soft);
+  }
+  .base-readout .dot{
+    width:14px; height:14px; border-radius:50%;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+  }
+  .speed-hint{
+    margin-top:14px;
+    font-size:12px;
+    color: var(--muted);
+    display:flex;
+    justify-content:center;
+    gap:14px;
+  }
+  .speed-hint span{ display:flex; align-items:center; gap:5px; }
+  .speed-hint svg{ width:13px; height:13px; opacity:0.6; }
+
+  /* ---------- Panel derecho ---------- */
+  .panel-col{ display:flex; flex-direction:column; gap: 20px; }
+  .card{
+    background: var(--panel);
+    border:1px solid var(--line);
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    padding: 22px 24px;
+  }
+  .card h3{
+    font-family:'Fraunces', serif;
+    font-size: 16.5px;
+    margin: 0 0 3px;
+    font-weight:600;
+  }
+  .card .sub{
+    font-size:13px;
+    color: var(--muted);
+    margin: 0 0 16px;
+  }
+  .scheme-grid{
+    display:flex;
+    flex-wrap:wrap;
+    gap: 8px;
+  }
+  .scheme-chip{
+    appearance:none;
+    border: 1px solid var(--line-strong);
+    background: #fff;
+    padding: 8px 14px;
+    border-radius: 12px;
+    font-family:'Inter';
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor:pointer;
+    transition: all .15s ease;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    min-width: 128px;
+  }
+  .scheme-chip small{
+    font-weight:500;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .scheme-chip:hover{ border-color: var(--pine); }
+  .scheme-chip.active{
+    background: var(--pine);
+    border-color: var(--pine);
+    color:#fff;
+  }
+  .scheme-chip.active small{ color: rgba(255,255,255,0.75); }
+
+  .swatch-row{
+    display:flex;
+    gap: 10px;
+    margin-top: 18px;
+    flex-wrap:wrap;
+  }
+  .swatch{
+    flex: 1 1 90px;
+    min-width: 90px;
+    border-radius: 14px;
+    overflow:hidden;
+    border:1px solid var(--line);
+    background:#fff;
+  }
+  .swatch .fill{
+    height: 74px;
+    width:100%;
+  }
+  .swatch .meta{
+    padding: 8px 10px 10px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:6px;
+  }
+  .swatch .code{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .swatch button{
+    appearance:none;
+    border:none;
+    background:none;
+    cursor:pointer;
+    padding:2px;
+    color: var(--muted);
+    display:flex;
+  }
+  .swatch button:hover{ color: var(--pine); }
+  .swatch button svg{ width:14px; height:14px; }
+
+  .toast{
+    position:fixed;
+    bottom: 26px;
+    left:50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color:#fff;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    opacity:0;
+    pointer-events:none;
+    transition: all .25s ease;
+    z-index: 50;
+  }
+  .toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------- Preview mock ---------- */
+  .preview-row{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width:520px){ .preview-row{ grid-template-columns:1fr; } }
+  .mock-card{
+    border-radius: 14px;
+    padding: 18px;
+    min-height: 118px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    border: 1px solid var(--line);
+    transition: background .25s ease, color .25s ease;
+  }
+  .mock-card .biz-name{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size: 18px;
+  }
+  .mock-card .biz-sub{
+    font-size: 11.5px;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    opacity: 0.75;
+  }
+  .mock-label{
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  /* ---------- Psicología tab ---------- */
+  .psico-intro{
+    max-width: 640px;
+    margin-bottom: 26px;
+  }
+  .psico-intro h1{
+    font-family:'Fraunces', serif;
+    font-size: 26px;
+    margin: 0 0 8px;
+  }
+  .psico-intro p{
+    color: var(--ink-soft);
+    font-size: 14.5px;
+    line-height:1.55;
+    margin:0;
+  }
+  .psico-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .psico-card{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    overflow:hidden;
+  }
+  .psico-swatch{
+    height: 64px;
+    display:flex;
+    align-items:flex-end;
+    padding: 10px 16px;
+  }
+  .psico-swatch .name{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size: 16px;
+    color:#fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  }
+  .psico-body{ padding: 14px 16px 18px; }
+  .psico-body .meaning{
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    line-height:1.5;
+    margin: 0 0 10px;
+  }
+  .psico-tagrow{
+    display:flex;
+    flex-wrap:wrap;
+    gap: 6px;
+    margin-bottom:10px;
+  }
+  .psico-tag{
+    font-size: 11px;
+    background: var(--pine-light);
+    color: var(--pine);
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-weight:600;
+  }
+  .psico-brands{
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .psico-brands b{ color: var(--ink-soft); font-weight:600; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="mark">RULE<span>C</span></div>
+      <div class="tag">girá la rueda, encontrá tu paleta</div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" data-view="builder">Crear paleta</button>
+      <button class="tab-btn" data-view="psico">Psicología del color</button>
+    </div>
+  </div>
+
+  <!-- ============ VISTA: CREAR PALETA ============ -->
+  <div class="view active" id="view-builder">
+    <div class="builder">
+
+      <div class="wheel-card">
+        <h2>Girá para elegir tu color base</h2>
+        <p class="hint">Arrastrá el círculo despacio para precisión, o soltalo con impulso — vos controlás el giro.</p>
+
+        <div class="wheel-stage">
+          <div class="pointer-flag"></div>
+          <div class="bezel"></div>
+          <div class="wheel-disc-wrap" id="wheelWrap">
+            <div class="wheel-disc" id="wheelDisc" style="background: conic-gradient(from 0deg, rgb(232, 48, 48) 0deg, rgb(232, 67, 48) 6deg, rgb(232, 85, 48) 12deg, rgb(232, 104, 48) 18deg, rgb(232, 122, 48) 24deg, rgb(232, 140, 48) 30deg, rgb(232, 159, 48) 36deg, rgb(232, 177, 48) 42deg, rgb(232, 195, 48) 48deg, rgb(232, 214, 48) 54deg, rgb(232, 232, 48) 60deg, rgb(214, 232, 48) 66deg, rgb(195, 232, 48) 72deg, rgb(177, 232, 48) 78deg, rgb(159, 232, 48) 84deg, rgb(140, 232, 48) 90deg, rgb(122, 232, 48) 96deg, rgb(104, 232, 48) 102deg, rgb(85, 232, 48) 108deg, rgb(67, 232, 48) 114deg, rgb(48, 232, 48) 120deg, rgb(48, 232, 67) 126deg, rgb(48, 232, 85) 132deg, rgb(48, 232, 104) 138deg, rgb(48, 232, 122) 144deg, rgb(48, 232, 140) 150deg, rgb(48, 232, 159) 156deg, rgb(48, 232, 177) 162deg, rgb(48, 232, 195) 168deg, rgb(48, 232, 214) 174deg, rgb(48, 232, 232) 180deg, rgb(48, 214, 232) 186deg, rgb(48, 195, 232) 192deg, rgb(48, 177, 232) 198deg, rgb(48, 159, 232) 204deg, rgb(48, 140, 232) 210deg, rgb(48, 122, 232) 216deg, rgb(48, 104, 232) 222deg, rgb(48, 85, 232) 228deg, rgb(48, 67, 232) 234deg, rgb(48, 48, 232) 240deg, rgb(67, 48, 232) 246deg, rgb(85, 48, 232) 252deg, rgb(104, 48, 232) 258deg, rgb(122, 48, 232) 264deg, rgb(140, 48, 232) 270deg, rgb(159, 48, 232) 276deg, rgb(177, 48, 232) 282deg, rgb(195, 48, 232) 288deg, rgb(214, 48, 232) 294deg, rgb(232, 48, 232) 300deg, rgb(232, 48, 214) 306deg, rgb(232, 48, 195) 312deg, rgb(232, 48, 177) 318deg, rgb(232, 48, 159) 324deg, rgb(232, 48, 140) 330deg, rgb(232, 48, 122) 336deg, rgb(232, 48, 104) 342deg, rgb(232, 48, 85) 348deg, rgb(232, 48, 67) 354deg, rgb(232, 48, 48) 360deg); transform: rotate(-10deg);"></div>
+          </div>
+          <div class="hub"><div class="hub-color" id="hubColor" style="background: rgb(232, 79, 48);"></div></div>
+        </div>
+
+        <div class="base-readout">
+          <div class="dot" id="baseDot" style="background: rgb(232, 79, 48);"></div>
+          <div class="hex" id="baseHex">#E84F30</div>
+        </div>
+
+        <div class="speed-hint">
+          <span>← arrastrar →</span>
+          <span>soltar = inercia</span>
+        </div>
+      </div>
+
+      <div class="panel-col">
+        <div class="card">
+          <h3>Elegí un esquema</h3>
+          <p class="sub">Se genera automáticamente a partir de tu color base.</p>
+          <div class="scheme-grid" id="schemeGrid"><button class="scheme-chip" data-key="mono">Monocromático<small>1 color, variaciones</small></button><button class="scheme-chip" data-key="analogo">Análogo<small>3 colores vecinos</small></button><button class="scheme-chip" data-key="analogoAcento">Análogo + acento<small>vecinos + 1 opuesto</small></button><button class="scheme-chip active" data-key="complementario">Complementario<small>2 colores opuestos</small></button><button class="scheme-chip" data-key="dobleComplementario">Doble complementario<small>4 colores, 2 pares opuestos</small></button><button class="scheme-chip" data-key="splitComplementario">Split-complementario<small>base + 2 vecinos del opuesto</small></button><button class="scheme-chip" data-key="triadico">Triádico<small>3 colores equidistantes</small></button></div>
+
+          <div class="swatch-row" id="swatchRow"><div class="swatch">
+      <div class="fill" style="background:#e44525"></div>
+      <div class="meta">
+        <span class="code">#E44525</span>
+        <button title="Copiar" data-hex="#e44525">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>
+        </button>
+      </div></div><div class="swatch">
+      <div class="fill" style="background:#25c4e4"></div>
+      <div class="meta">
+        <span class="code">#25C4E4</span>
+        <button title="Copiar" data-hex="#25c4e4">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>
+        </button>
+      </div></div></div>
+        </div>
+
+        <div class="card">
+          <h3>Vista previa aplicada</h3>
+          <p class="sub">Así se vería tu paleta en piezas reales de tu marca.</p>
+          <div class="preview-row">
+            <div>
+              <div class="mock-label">Tarjeta de presentación</div>
+              <div class="mock-card" id="mockCard1" style="background: rgb(228, 69, 37); color: rgb(255, 255, 255); border: none;">
+                <div>
+                  <div class="biz-name" id="mockBiz1" style="color: rgb(255, 255, 255);">Tu Marca</div>
+                  <div class="biz-sub">Panadería artesanal</div>
+                </div>
+                <div class="biz-sub">www.tumarca.com</div>
+              </div>
+            </div>
+            <div>
+              <div class="mock-label">Etiqueta / producto</div>
+              <div class="mock-card" id="mockCard2" style="background: rgb(255, 255, 255); color: rgb(36, 31, 26); border: 2px solid rgb(228, 69, 37);">
+                <div>
+                  <div class="biz-name" id="mockBiz2" style="color: rgb(37, 196, 228);">Tu Marca</div>
+                  <div class="biz-sub">Hecho a mano</div>
+                </div>
+                <div class="biz-sub">100% natural</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ VISTA: PSICOLOGÍA DEL COLOR ============ -->
+  <div class="view" id="view-psico">
+    <div class="psico-intro">
+      <h1>Qué comunica cada color</h1>
+      <p>Elegir un color no es solo estética: cada tono despierta asociaciones distintas en quien lo ve. Usá esta guía para elegir con criterio, no solo a ojo.</p>
+    </div>
+    <div class="psico-grid" id="psicoGrid"><div class="psico-card">
+    <div class="psico-swatch" style="background:#D3342A">
+      <div class="name">Rojo</div>
+    </div>
+    <div class="psico-body">
+      <p class="meaning">Estimula, transmite acción inmediata y apetito. Es el color que más rápido capta la atención visual.</p>
+      <div class="psico-tagrow"><span class="psico-tag">energía</span><span class="psico-tag">urgencia</span><span class="psico-tag">pasión</span></div>
+      <div class="psico-brands"><b>Marcas:</b> Coca-Cola, Netflix, YouTube<br><b>Ideal para:</b> Gastronomía, ofertas y liquidaciones, entretenimiento</div>
+    </div></div><div class="psico-card">
+    <div class="psico-swatch" style="background:#E07A2C">
+      <div class="name">Naranja</div>
+    </div>
+    <div class="psico-body">
+      <p class="meaning">Combina la energía del rojo con la calidez del amarillo. Se percibe accesible, juvenil y amigable.</p>
+      <div class="psico-tagrow"><span class="psico-tag">cercanía</span><span class="psico-tag">entusiasmo</span></div>
+      <div class="psico-brands"><b>Marcas:</b> Fanta, Home Depot, SoundCloud<br><b>Ideal para:</b> Comida rápida, marcas jóvenes, deportes</div>
+    </div></div><div class="psico-card">
+    <div class="psico-swatch" style="background:#E3B93A">
+      <div class="name">Amarillo</div>
+    </div>
+    <div class="psico-body">
+      <p class="meaning">Asociado a la luz solar y la alegría. En exceso puede resultar agotador visualmente.</p>
+      <div class="psico-tagrow"><span class="psico-tag">optimismo</span><span class="psico-tag">claridad</span></div>
+      <div class="psico-brands"><b>Marcas:</b> McDonald's, IKEA, Snapchat<br><b>Ideal para:</b> Niños, ocio, productos económicos</div>
+    </div></div><div class="psico-card">
+    <div class="psico-swatch" style="background:#3E8A5B">
+      <div class="name">Verde</div>
+    </div>
+    <div class="psico-body">
+      <p class="meaning">Transmite frescura, crecimiento y tranquilidad. Es el color más asociado a lo natural y saludable.</p>
+      <div class="psico-tagrow"><span class="psico-tag">naturaleza</span><span class="psico-tag">equilibrio</span><span class="psico-tag">salud</span></div>
+      <div class="psico-brands"><b>Marcas:</b> Starbucks, Spotify, Whole Foods<br><b>Ideal para:</b> Alimentos naturales, salud, sustentabilidad, finanzas</div>
+    </div></div><div class="psico-card">
+    <div class="psico-swatch" style="background:#2B5FA8">
+      <div class="name">Azul</div>
+    </div>
+    <div class="psico-body">
+      <p class="meaning">El color con mejor percepción de confiabilidad. Muy usado por bancos y tecnología por transmitir seguridad.</p>
+      <div class="psico-tagrow"><span class="psico-tag">confianza</span><span class="psico-tag">seriedad</span><span class="psico-tag">calma</span></div>
+      <div class="psico-brands"><b>Marcas:</b> Facebook, Visa, Samsung<br><b>Ideal para:</b> Finanzas, tecnología, salud, seguros</div>
+    </div></div><div class="psico-card">
+    <div class="psico-swatch" style="background:#6B4394">
+      <div class="name">Morado</div>
+    </div>
+    <div class="psico-body">
+      <p class="meaning">Combina la calma del azul con la energía del rojo. Se asocia a lo espiritual, lo creativo y lo premium.</p>
+      <div class="psico-tagrow"><span class="psico-tag">creatividad</span><span class="psico-tag">exclusividad</span></div>
+      <div class="psico-brands"><b>Marcas:</b> Cadbury, Twitch, Yahoo<br><b>Ideal para:</b> Belleza, productos premium, creatividad</div>
+    </div></div><div class="psico-card">
+    <div class="psico-swatch" style="background:#D9598B">
+      <div class="name">Rosa</div>
+    </div>
+    <div class="psico-body">
+      <p class="meaning">Percibido como suave y afectuoso. En tonos vivos comunica energía joven; en pasteles, delicadeza.</p>
+      <div class="psico-tagrow"><span class="psico-tag">dulzura</span><span class="psico-tag">cercanía</span></div>
+      <div class="psico-brands"><b>Marcas:</b> Barbie, T-Mobile, Victoria's Secret<br><b>Ideal para:</b> Moda, belleza, productos para bebés y niños</div>
+    </div></div><div class="psico-card">
+    <div class="psico-swatch" style="background:#241F1A">
+      <div class="name">Negro / neutros</div>
+    </div>
+    <div class="psico-body">
+      <p class="meaning">Asociado a la sofisticación y el lujo. Requiere buen contraste con otro color para no resultar frío.</p>
+      <div class="psico-tagrow"><span class="psico-tag">elegancia</span><span class="psico-tag">autoridad</span></div>
+      <div class="psico-brands"><b>Marcas:</b> Chanel, Nike, Apple<br><b>Ideal para:</b> Moda premium, tecnología, marcas minimalistas</div>
+    </div></div></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">Copiado al portapapeles</div>
+
+<script>
+/* ---------------- utilidades de color ---------------- */
+function hslToHex(h, s, l){
+  h = ((h % 360) + 360) % 360;
+  s /= 100; l /= 100;
+  const k = n => (n + h / 30) % 12;
+  const a = s * Math.min(l, 1 - l);
+  const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  const toHex = x => Math.round(255 * x).toString(16).padStart(2, '0');
+  return '#' + toHex(f(0)) + toHex(f(8)) + toHex(f(4));
+}
+function hsl(h,s,l){ return `hsl(${((h%360)+360)%360}, ${s}%, ${l}%)`; }
+
+/* ---------------- construir el disco (conic-gradient) ---------------- */
+const STEP = 6; // grados por parada de color -> disco continuo y suave
+let stops = [];
+for(let a=0; a<=360; a+=STEP){
+  stops.push(`${hsl(a,80,55)} ${a}deg`);
+}
+document.getElementById('wheelDisc').style.background = `conic-gradient(from 0deg, ${stops.join(',')})`;
+
+/* ---------------- estado de rotación / arrastre ---------------- */
+const wheelWrap = document.getElementById('wheelWrap');
+const wheelDisc = document.getElementById('wheelDisc');
+let rotation = 0;        // grados actuales del disco
+let velocity = 0;        // grados / frame (inercia)
+let dragging = false;
+let lastAngle = 0;
+let lastTime = 0;
+let rafId = null;
+
+function angleFromEvent(e){
+  const rect = wheelWrap.getBoundingClientRect();
+  const cx = rect.left + rect.width/2;
+  const cy = rect.top + rect.height/2;
+  const x = (e.touches? e.touches[0].clientX : e.clientX) - cx;
+  const y = (e.touches? e.touches[0].clientY : e.clientY) - cy;
+  return Math.atan2(y, x) * 180 / Math.PI;
+}
+
+function applyRotation(){
+  wheelDisc.style.transform = `rotate(${rotation}deg)`;
+  updateBaseColor();
+}
+
+function updateBaseColor(){
+  const baseHue = ((-rotation) % 360 + 360) % 360;
+  const hex = hslToHex(baseHue, 80, 55);
+  document.getElementById('baseHex').textContent = hex.toUpperCase();
+  document.getElementById('baseDot').style.background = hex;
+  document.getElementById('hubColor').style.background = hex;
+  renderSwatches(baseHue);
+}
+
+function startDrag(e){
+  dragging = true;
+  cancelAnimationFrame(rafId);
+  velocity = 0;
+  wheelWrap.classList.add('dragging');
+  lastAngle = angleFromEvent(e);
+  lastTime = performance.now();
+  e.preventDefault();
+}
+function moveDrag(e){
+  if(!dragging) return;
+  const angle = angleFromEvent(e);
+  let delta = angle - lastAngle;
+  if(delta > 180) delta -= 360;
+  if(delta < -180) delta += 360;
+  const now = performance.now();
+  const dt = Math.max(now - lastTime, 1);
+  velocity = delta / dt * 16; // normalizado a ~60fps
+  rotation += delta;
+  lastAngle = angle;
+  lastTime = now;
+  applyRotation();
+  e.preventDefault();
+}
+function endDrag(){
+  if(!dragging) return;
+  dragging = false;
+  wheelWrap.classList.remove('dragging');
+  inertiaLoop();
+}
+function inertiaLoop(){
+  const friction = 0.945;
+  function step(){
+    velocity *= friction;
+    rotation += velocity;
+    applyRotation();
+    if(Math.abs(velocity) > 0.02){
+      rafId = requestAnimationFrame(step);
+    }
+  }
+  if(Math.abs(velocity) > 0.02){
+    rafId = requestAnimationFrame(step);
+  }
+}
+
+wheelWrap.addEventListener('mousedown', startDrag);
+window.addEventListener('mousemove', moveDrag);
+window.addEventListener('mouseup', endDrag);
+wheelWrap.addEventListener('touchstart', startDrag, {passive:false});
+window.addEventListener('touchmove', moveDrag, {passive:false});
+window.addEventListener('touchend', endDrag);
+
+/* ---------------- esquemas de color ---------------- */
+const SCHEMES = {
+  mono: {
+    label: 'Monocromático',
+    hint: '1 color, variaciones',
+    hues: h => [
+      {h, s:80, l:80}, {h, s:80, l:65}, {h, s:80, l:50}, {h, s:80, l:35}, {h, s:80, l:20}
+    ]
+  },
+  analogo: {
+    label: 'Análogo',
+    hint: '3 colores vecinos',
+    hues: h => [h-30,h,h+30].map(x=>({h:x,s:78,l:55}))
+  },
+  analogoAcento: {
+    label: 'Análogo + acento',
+    hint: 'vecinos + 1 opuesto',
+    hues: h => [h-30,h,h+30,h+180].map(x=>({h:x,s:78,l:55}))
+  },
+  complementario: {
+    label: 'Complementario',
+    hint: '2 colores opuestos',
+    hues: h => [h, h+180].map(x=>({h:x,s:78,l:52}))
+  },
+  dobleComplementario: {
+    label: 'Doble complementario',
+    hint: '4 colores, 2 pares opuestos',
+    hues: h => [h, h+30, h+180, h+210].map(x=>({h:x,s:78,l:52}))
+  },
+  splitComplementario: {
+    label: 'Split-complementario',
+    hint: 'base + 2 vecinos del opuesto',
+    hues: h => [h, h+150, h+210].map(x=>({h:x,s:78,l:52}))
+  },
+  triadico: {
+    label: 'Triádico',
+    hint: '3 colores equidistantes',
+    hues: h => [h, h+120, h+240].map(x=>({h:x,s:78,l:52}))
+  }
+};
+
+let activeScheme = 'complementario';
+
+const schemeGrid = document.getElementById('schemeGrid');
+Object.entries(SCHEMES).forEach(([key, def])=>{
+  const btn = document.createElement('button');
+  btn.className = 'scheme-chip' + (key===activeScheme? ' active':'');
+  btn.dataset.key = key;
+  btn.innerHTML = `${def.label}<small>${def.hint}</small>`;
+  btn.addEventListener('click', ()=>{
+    activeScheme = key;
+    document.querySelectorAll('.scheme-chip').forEach(c=>c.classList.remove('active'));
+    btn.classList.add('active');
+    updateBaseColor();
+  });
+  schemeGrid.appendChild(btn);
+});
+
+function renderSwatches(baseHue){
+  const def = SCHEMES[activeScheme];
+  const colors = def.hues(baseHue).map(c => hslToHex(c.h, c.s, c.l));
+  const row = document.getElementById('swatchRow');
+  row.innerHTML = '';
+  colors.forEach(hex=>{
+    const sw = document.createElement('div');
+    sw.className = 'swatch';
+    sw.innerHTML = `
+      <div class="fill" style="background:${hex}"></div>
+      <div class="meta">
+        <span class="code">${hex.toUpperCase()}</span>
+        <button title="Copiar" data-hex="${hex}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+        </button>
+      </div>`;
+    row.appendChild(sw);
+  });
+  row.querySelectorAll('button[data-hex]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const hex = b.dataset.hex;
+      if(navigator.clipboard){ navigator.clipboard.writeText(hex).catch(()=>{}); }
+      showToast('Copiado ' + hex.toUpperCase());
+    });
+  });
+
+  // aplicar a la vista previa (usa hasta 3 colores de la paleta)
+  const bg = colors[0];
+  const fg = colors[colors.length-1];
+  const accent = colors[Math.min(1, colors.length-1)];
+  [['mockCard1','mockBiz1'], ['mockCard2','mockBiz2']].forEach(([cardId, textId], i)=>{
+    const card = document.getElementById(cardId);
+    card.style.background = i===0 ? bg : '#fff';
+    card.style.color = i===0 ? pickTextColor(bg) : pickTextColor('#ffffff');
+    card.style.border = i===0 ? 'none' : `2px solid ${bg}`;
+    document.getElementById(textId).style.color = i===0 ? pickTextColor(bg) : accent;
+  });
+}
+
+function pickTextColor(hex){
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  const yiq = (r*299 + g*587 + b*114) / 1000;
+  return yiq >= 150 ? '#241F1A' : '#FFFFFF';
+}
+
+let toastTimer = null;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove('show'), 1600);
+}
+
+/* ---------------- tabs ---------------- */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.getElementById('view-' + btn.dataset.view).classList.add('active');
+  });
+});
+
+/* ---------------- psicología del color ---------------- */
+const PSICO = [
+  { name:'Rojo', hex:'#D3342A', tags:['energía','urgencia','pasión'],
+    meaning:'Estimula, transmite acción inmediata y apetito. Es el color que más rápido capta la atención visual.',
+    brands:'Coca-Cola, Netflix, YouTube', rubro:'Gastronomía, ofertas y liquidaciones, entretenimiento' },
+  { name:'Naranja', hex:'#E07A2C', tags:['cercanía','entusiasmo'],
+    meaning:'Combina la energía del rojo con la calidez del amarillo. Se percibe accesible, juvenil y amigable.',
+    brands:'Fanta, Home Depot, SoundCloud', rubro:'Comida rápida, marcas jóvenes, deportes' },
+  { name:'Amarillo', hex:'#E3B93A', tags:['optimismo','claridad'],
+    meaning:'Asociado a la luz solar y la alegría. En exceso puede resultar agotador visualmente.',
+    brands:'McDonald\'s, IKEA, Snapchat', rubro:'Niños, ocio, productos económicos' },
+  { name:'Verde', hex:'#3E8A5B', tags:['naturaleza','equilibrio','salud'],
+    meaning:'Transmite frescura, crecimiento y tranquilidad. Es el color más asociado a lo natural y saludable.',
+    brands:'Starbucks, Spotify, Whole Foods', rubro:'Alimentos naturales, salud, sustentabilidad, finanzas' },
+  { name:'Azul', hex:'#2B5FA8', tags:['confianza','seriedad','calma'],
+    meaning:'El color con mejor percepción de confiabilidad. Muy usado por bancos y tecnología por transmitir seguridad.',
+    brands:'Facebook, Visa, Samsung', rubro:'Finanzas, tecnología, salud, seguros' },
+  { name:'Morado', hex:'#6B4394', tags:['creatividad','exclusividad'],
+    meaning:'Combina la calma del azul con la energía del rojo. Se asocia a lo espiritual, lo creativo y lo premium.',
+    brands:'Cadbury, Twitch, Yahoo', rubro:'Belleza, productos premium, creatividad' },
+  { name:'Rosa', hex:'#D9598B', tags:['dulzura','cercanía'],
+    meaning:'Percibido como suave y afectuoso. En tonos vivos comunica energía joven; en pasteles, delicadeza.',
+    brands:'Barbie, T-Mobile, Victoria\'s Secret', rubro:'Moda, belleza, productos para bebés y niños' },
+  { name:'Negro / neutros', hex:'#241F1A', tags:['elegancia','autoridad'],
+    meaning:'Asociado a la sofisticación y el lujo. Requiere buen contraste con otro color para no resultar frío.',
+    brands:'Chanel, Nike, Apple', rubro:'Moda premium, tecnología, marcas minimalistas' },
+];
+
+const psicoGrid = document.getElementById('psicoGrid');
+PSICO.forEach(c=>{
+  const el = document.createElement('div');
+  el.className = 'psico-card';
+  el.innerHTML = `
+    <div class="psico-swatch" style="background:${c.hex}">
+      <div class="name">${c.name}</div>
+    </div>
+    <div class="psico-body">
+      <p class="meaning">${c.meaning}</p>
+      <div class="psico-tagrow">${c.tags.map(t=>`<span class="psico-tag">${t}</span>`).join('')}</div>
+      <div class="psico-brands"><b>Marcas:</b> ${c.brands}<br/><b>Ideal para:</b> ${c.rubro}</div>
+    </div>`;
+  psicoGrid.appendChild(el);
+});
+
+/* ---------------- estado inicial ---------------- */
+rotation = -10; // color base inicial ~ rojo-coral
+applyRotation();
+</script>
+
+
+</body></html>
