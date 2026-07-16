@@ -35,3 +35,6 @@ Este documento describe las funcionalidades específicas que el sistema RULEC de
 - **RF-20:** El sistema debe permitir compartir la paleta generada a través de un enlace único o un código QR (sin registro previo).
 - **RF-21:** El sistema debe permitir exportar un PDF simple como "kit básico de marca" (perfil microempresario).
 - **RF-22:** El sistema debe permitir exportar la paleta en formatos técnicos (.ase para software Adobe, variables CSS) para el flujo de trabajo del diseñador.
+
+## 7. Módulo Complementario (Estrategia de Marca)
+- **RF-23:** El sistema debe incluir una pestaña o guía educativa donde los usuarios (principalmente microempresarios) puedan aprender cómo elegir un nombre adecuado para sus empresas.
