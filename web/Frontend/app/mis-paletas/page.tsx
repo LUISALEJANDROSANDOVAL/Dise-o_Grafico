@@ -48,7 +48,7 @@ export default async function MisPaletasPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {palettes.map((palette: any) => {
-              const swatches = JSON.parse(palette.swatches) as string[]
+              const swatches = JSON.parse(palette.colores) as string[]
               return (
                 <div key={palette.id} className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-black">
                   {/* Swatches preview */}
@@ -62,26 +62,34 @@ export default async function MisPaletasPage() {
                   <div className="p-5 flex flex-col flex-1">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
-                        <div className="h-4 w-4 rounded-full border border-black/10" style={{ backgroundColor: palette.base_color }} />
+                        <div className="h-4 w-4 rounded-full border border-black/10" style={{ backgroundColor: palette.color_base }} />
                         <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Color Base</span>
                       </div>
                       <span className="text-xs font-mono bg-slate-100 dark:bg-slate-900 px-2 py-1 rounded-md text-slate-600 dark:text-slate-400 uppercase">
-                        {palette.scheme}
+                        {palette.esquema_tipo}
                       </span>
                     </div>
                     
                     <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
                       <span className="text-xs text-slate-400">
-                        {new Date(palette.created_at).toLocaleDateString()}
+                        {new Date(palette.creado_en).toLocaleDateString()}
                       </span>
-                      <form action={async () => {
-                        "use server"
-                        await deletePalette(palette.id)
-                      }}>
-                        <button type="submit" className="text-red-500 hover:text-red-600 p-2 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors" title="Eliminar paleta">
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </form>
+                      <div className="flex items-center gap-1">
+                        <Link 
+                          href={`/herramienta?id=${palette.id}&color=${palette.color_base.replace('#', '')}&scheme=${palette.esquema_tipo}`}
+                          className="text-blue-500 hover:text-blue-600 px-3 py-1.5 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-md transition-colors text-sm font-medium"
+                        >
+                          Abrir
+                        </Link>
+                        <form action={async () => {
+                          "use server"
+                          await deletePalette(palette.id)
+                        }}>
+                          <button type="submit" className="text-red-500 hover:text-red-600 p-2 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors" title="Eliminar paleta">
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </form>
+                      </div>
                     </div>
                   </div>
                 </div>

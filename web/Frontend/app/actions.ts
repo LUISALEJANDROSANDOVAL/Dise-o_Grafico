@@ -3,7 +3,7 @@
 import { createClient } from "@/utils/supabase/server"
 import { revalidatePath } from "next/cache"
 
-export async function savePalette(data: { baseColor: string; scheme: string; swatches: string }) {
+export async function savePalette(data: { id?: string; baseColor: string; scheme: string; swatches: string }) {
   const supabase = await createClient()
   const { data: { session } } = await supabase.auth.getSession()
   
@@ -11,14 +11,28 @@ export async function savePalette(data: { baseColor: string; scheme: string; swa
     throw new Error("Unauthorized")
   }
 
-  const { error } = await supabase.from('palettes').insert({
-    user_id: session.user.id,
-    base_color: data.baseColor,
-    scheme: data.scheme,
-    swatches: data.swatches,
-  })
+  if (data.id) {
+    const { error } = await supabase
+      .from('paletas')
+      .update({
+        color_base: data.baseColor,
+        esquema_tipo: data.scheme,
+        colores: data.swatches,
+      })
+      .eq('id', data.id)
+      .eq('usuario_id', session.user.id)
 
-  if (error) throw new Error(error.message)
+    if (error) throw new Error(error.message)
+  } else {
+    const { error } = await supabase.from('paletas').insert({
+      usuario_id: session.user.id,
+      color_base: data.baseColor,
+      esquema_tipo: data.scheme,
+      colores: data.swatches,
+    })
+
+    if (error) throw new Error(error.message)
+  }
 
   revalidatePath("/mis-paletas")
   return { success: true }
@@ -33,10 +47,10 @@ export async function getPalettes() {
   }
 
   const { data: palettes } = await supabase
-    .from('palettes')
+    .from('paletas')
     .select('*')
-    .eq('user_id', session.user.id)
-    .order('created_at', { ascending: false })
+    .eq('usuario_id', session.user.id)
+    .order('creado_en', { ascending: false })
 
   return palettes || []
 }
@@ -50,10 +64,10 @@ export async function deletePalette(id: string) {
   }
 
   const { error } = await supabase
-    .from('palettes')
+    .from('paletas')
     .delete()
     .eq('id', id)
-    .eq('user_id', session.user.id)
+    .eq('usuario_id', session.user.id)
 
   if (error) throw new Error(error.message)
 

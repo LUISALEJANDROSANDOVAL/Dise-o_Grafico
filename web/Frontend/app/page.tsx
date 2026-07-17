@@ -2,10 +2,19 @@
 
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Palette, Store, Wand2, Eye, ShieldCheck, ArrowRight } from "lucide-react"
+import { Palette, Store, Wand2, Eye, ShieldCheck, ArrowRight, BookOpen } from "lucide-react"
 import { InteractiveParticles } from "@/components/interactive-particles"
+import { RulecHeader } from "@/components/rulec-header"
+import { useState, useEffect } from "react"
 
 export default function LandingPage() {
+  const [theme, setTheme] = useState<"light" | "dark">("light")
+
+  useEffect(() => {
+    const root = document.documentElement
+    root.classList.toggle("dark", theme === "dark")
+    root.classList.toggle("light", theme === "light")
+  }, [theme])
   return (
     <div className="relative flex min-h-dvh flex-col bg-slate-50 text-slate-950 dark:bg-[#0a0a0a] dark:text-slate-50 overflow-hidden font-sans">
       
@@ -38,25 +47,12 @@ export default function LandingPage() {
         />
       </div>
 
-      {/* Header Glassmorphism */}
-      <header className="fixed top-0 z-50 w-full border-b border-slate-200/50 bg-white/40 backdrop-blur-xl dark:border-white/10 dark:bg-black/40">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <div className="flex items-center gap-2">
-            <span className="text-xl font-bold tracking-tight">RULEC</span>
-            <span className="hidden rounded-full bg-slate-200/50 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-slate-600 dark:bg-white/10 dark:text-slate-300 sm:inline">
-              v1.0
-            </span>
-          </div>
-          <nav className="flex items-center">
-            <Link 
-              href="/elegir-nombre" 
-              className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
-            >
-              Guía: Elegir Nombre
-            </Link>
-          </nav>
-        </div>
-      </header>
+      {/* Header */}
+      <RulecHeader 
+        theme={theme}
+        onThemeToggle={() => setTheme(t => t === "dark" ? "light" : "dark")}
+        hideProfileToggle={true}
+      />
 
       <main className="relative z-10 flex-1">
         {/* Hero Section */}
@@ -79,18 +75,18 @@ export default function LandingPage() {
             
             {/* Subtitle */}
             <p className="max-w-2xl text-pretty text-lg font-medium leading-relaxed text-slate-600 dark:text-slate-400 sm:text-xl">
-              RULEC te guía paso a paso para crear la paleta de colores perfecta. Basada en psicología del color, accesibilidad y previsualización en tiempo real.
+              CROMATIC te guía paso a paso para crear la paleta de colores perfecta. Basada en psicología del color, accesibilidad y previsualización en tiempo real.
             </p>
           </motion.div>
         </section>
 
         {/* Choice Cards (CTAs) */}
-        <section className="mx-auto max-w-5xl px-6 pb-24 sm:pb-32">
+        <section className="mx-auto max-w-7xl px-6 pb-24 sm:pb-32">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}
-            className="grid gap-6 md:grid-cols-2"
+            className="grid gap-6 md:grid-cols-3"
           >
             {/* Entrepreneur Card */}
             <div className="group relative flex h-full flex-col rounded-[2rem] border border-slate-200/60 bg-white/50 p-8 shadow-sm backdrop-blur-xl transition-all duration-300 hover:border-blue-500/30 hover:shadow-xl hover:shadow-blue-500/5 dark:border-white/10 dark:bg-black/40 dark:hover:border-blue-500/30">
@@ -126,6 +122,25 @@ export default function LandingPage() {
                   className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-slate-200 bg-transparent px-6 font-semibold text-slate-900 transition-all hover:border-slate-300 hover:bg-slate-50 active:scale-[0.98] dark:border-white/10 dark:text-white dark:hover:border-white/20 dark:hover:bg-white/5"
                 >
                   Abrir herramientas avanzadas <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Guide Card */}
+            <div className="group relative flex h-full flex-col rounded-[2rem] border border-slate-200/60 bg-white/50 p-8 shadow-sm backdrop-blur-xl transition-all duration-300 hover:border-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/5 dark:border-white/10 dark:bg-black/40 dark:hover:border-emerald-500/30">
+              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+                <BookOpen className="h-7 w-7" strokeWidth={1.5} />
+              </div>
+              <h3 className="mb-3 text-3xl font-bold tracking-tight">Busco un nombre</h3>
+              <p className="mb-8 text-slate-600 dark:text-slate-400 leading-relaxed">
+                Aún no tengo un nombre para mi marca. Quiero una guía práctica que me ayude a elegir el nombre perfecto paso a paso.
+              </p>
+              <div className="mt-auto">
+                <Link 
+                  href="/elegir-nombre"
+                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-emerald-200 bg-emerald-50/50 px-6 font-semibold text-emerald-900 transition-all hover:border-emerald-300 hover:bg-emerald-100 active:scale-[0.98] dark:border-emerald-900/50 dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:border-emerald-800 dark:hover:bg-emerald-900/40"
+                >
+                  Leer la guía <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
             </div>
