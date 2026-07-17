@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import QRCode from "qrcode"
-import { Eye, FileDown, QrCode, Check, X } from "lucide-react"
+import { Eye, FileDown, QrCode, Check, X, Save, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { type ColorblindMode, CB_LABELS, type Swatch } from "@/lib/color"
@@ -14,9 +14,11 @@ type Props = {
   onColorblindChange: (m: ColorblindMode) => void
   palette: Swatch[]
   onExport: () => void
+  onSave?: () => void
+  isSaving?: boolean
 }
 
-export function ToolBar({ colorblind, onColorblindChange, palette, onExport }: Props) {
+export function ToolBar({ colorblind, onColorblindChange, palette, onExport, onSave, isSaving }: Props) {
   const [cbOpen, setCbOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -86,7 +88,7 @@ export function ToolBar({ colorblind, onColorblindChange, palette, onExport }: P
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {/* Share */}
           <div className="relative">
             <Button variant="outline" onClick={() => setShareOpen((o) => !o)} aria-expanded={shareOpen}>
@@ -123,10 +125,19 @@ export function ToolBar({ colorblind, onColorblindChange, palette, onExport }: P
             )}
           </div>
 
+          {/* Save Palette */}
+          {onSave && (
+            <Button onClick={onSave} disabled={isSaving} className="bg-blue-600 hover:bg-blue-700 text-white">
+              {isSaving ? <Loader2 className="animate-spin" /> : <Save />}
+              <span className="hidden sm:inline">Guardar Paleta</span>
+              <span className="sm:hidden">Guardar</span>
+            </Button>
+          )}
+
           {/* Export */}
-          <Button onClick={onExport}>
+          <Button onClick={onExport} variant="secondary">
             <FileDown />
-            <span className="hidden sm:inline">Exportar PDF (Kit de marca)</span>
+            <span className="hidden sm:inline">Exportar PDF</span>
             <span className="sm:hidden">PDF</span>
           </Button>
         </div>

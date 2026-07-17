@@ -7,7 +7,7 @@ const geistSans = Geist({ subsets: ['latin'], variable: '--font-geist-sans' })
 const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' })
 
 export const metadata: Metadata = {
-  title: 'RULEC — Generador de paletas de marca',
+  title: 'CROMATIC — Generador de paletas de marca',
   description:
     'Crea paletas de color para tu identidad de marca. Esquemas cromáticos, mockups en tiempo real y validación de accesibilidad para microempresarios y diseñadores.',
   generator: 'v0.app',

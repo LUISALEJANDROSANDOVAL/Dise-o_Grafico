@@ -1,22 +1,50 @@
 "use client"
 
-import { useEffect, useMemo, useState, Suspense } from "react"
+import { useEffect, useMemo, useState, Suspense, useTransition } from "react"
 import { useSearchParams } from "next/navigation"
 import { RulecHeader, type Profile } from "@/components/rulec-header"
 import { ColorEngine } from "@/components/color-engine"
 import { PalettePreview } from "@/components/palette-preview"
 import { ToolBar } from "@/components/tool-bar"
-import { type HSL, type Scheme, type ColorblindMode, type Swatch, generatePalette, hslToHex } from "@/lib/color"
+import { type HSL, type Scheme, type ColorblindMode, type Swatch, generatePalette, hslToHex, hexToHsl } from "@/lib/color"
+import { savePalette } from "@/app/actions"
+import { createClient } from "@/utils/supabase/client"
 
 function HerramientaContent() {
   const searchParams = useSearchParams()
+  const idParam = searchParams.get("id")
+  const colorParam = searchParams.get("color")
+  const schemeParam = searchParams.get("scheme")
   const initialProfile = (searchParams.get("profile") as Profile) || "entrepreneur"
 
   const [theme, setTheme] = useState<"light" | "dark">("light")
   const [profile, setProfile] = useState<Profile>(initialProfile)
-  const [base, setBase] = useState<HSL>({ h: 18, s: 78, l: 52 })
-  const [scheme, setScheme] = useState<Scheme>("analogous")
+  
+  const initialBase = useMemo(() => {
+    if (colorParam) {
+      const hex = colorParam.startsWith("#") ? colorParam : `#${colorParam}`
+      try {
+        return hexToHsl(hex)
+      } catch (e) {
+        // En caso de error, volver al default
+      }
+    }
+    return { h: 18, s: 78, l: 52 }
+  }, [colorParam])
+
+  const [base, setBase] = useState<HSL>(initialBase)
+  const [scheme, setScheme] = useState<Scheme>((schemeParam as Scheme) || "analogous")
   const [colorblind, setColorblind] = useState<ColorblindMode>("none")
+  
+  const supabase = createClient()
+  const [session, setSession] = useState<any>(null)
+  const [isPending, startTransition] = useTransition()
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+    })
+  }, [supabase.auth])
 
   const generated = useMemo(() => generatePalette(base, scheme), [base, scheme])
   // Editable copy — lets Designer profile tweak individual swatches.
@@ -42,6 +70,32 @@ function HerramientaContent() {
 
   function handleExport() {
     window.print()
+  }
+
+  function handleSave() {
+    if (!session) {
+      supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+      return
+    }
+    
+    startTransition(async () => {
+      try {
+        await savePalette({
+          id: idParam || undefined,
+          baseColor: hslToHex(base),
+          scheme: scheme,
+          swatches: JSON.stringify(palette.map(s => s.hex))
+        })
+        alert("¡Paleta guardada exitosamente en Mis Paletas!")
+      } catch (e) {
+        alert("Ocurrió un error al guardar la paleta.")
+      }
+    })
   }
 
   return (
@@ -91,6 +145,8 @@ function HerramientaContent() {
         onColorblindChange={setColorblind}
         palette={palette}
         onExport={handleExport}
+        onSave={handleSave}
+        isSaving={isPending}
       />
     </div>
   )

@@ -3,7 +3,7 @@
 import type React from "react"
 import { useRef } from "react"
 import { motion } from "framer-motion"
-import { ImageIcon, Pipette } from "lucide-react"
+import { ImageIcon, Pipette, BrainCircuit } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { type HSL, type Scheme, SCHEMES, hslToHex, hexToHsl } from "@/lib/color"
@@ -17,11 +17,23 @@ type Props = {
   profile: Profile
 }
 
+function getColorPsychology(h: number) {
+  if (h >= 345 || h < 15) return { name: "Rojo", meaning: "Energía, Pasión, Acción", desc: "Excelente para marcas de comida, deportes o entretenimiento. Crea urgencia y llama la atención rápido." }
+  if (h >= 15 && h < 45) return { name: "Naranja", meaning: "Creatividad, Juventud, Aventura", desc: "Ideal para marcas accesibles, divertidas o dirigidas a un público joven. Transmite calidez y amabilidad." }
+  if (h >= 45 && h < 75) return { name: "Amarillo", meaning: "Alegría, Optimismo, Claridad", desc: "El primer color que procesa el ojo humano. Úsalo para destacar promociones, pero con moderación." }
+  if (h >= 75 && h < 160) return { name: "Verde", meaning: "Naturaleza, Crecimiento, Salud", desc: "El color de la armonía y la tranquilidad. Perfecto para marcas ecológicas, financieras o de bienestar." }
+  if (h >= 160 && h < 260) return { name: "Azul", meaning: "Confianza, Seguridad, Lógica", desc: "El color más usado corporativamente. Transmite fiabilidad y calma. Ideal para tecnología y finanzas." }
+  if (h >= 260 && h < 315) return { name: "Morado", meaning: "Lujo, Sabiduría, Imaginación", desc: "Asociado a lo premium y espiritual. Bueno para marcas de lujo, creatividad o productos innovadores." }
+  if (h >= 315 && h < 345) return { name: "Rosa", meaning: "Dulzura, Empatía, Cuidado", desc: "Suave y compasivo. Frecuentemente usado en belleza, cuidado personal y marcas que buscan cercanía." }
+  return { name: "Neutro", meaning: "Balance", desc: "" }
+}
+
 export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profile }: Props) {
   const wheelRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const baseHex = hslToHex(base)
+  const psycho = getColorPsychology(base.h)
 
   function pickFromWheel(e: React.PointerEvent<HTMLDivElement>) {
     const el = wheelRef.current
@@ -182,6 +194,25 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
           ))}
         </div>
       </div>
+      
+      {/* Psychology Context Module */}
+      {profile === "entrepreneur" && (
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          key={psycho.name}
+          className="mt-2 flex flex-col gap-2 rounded-xl border border-blue-100 bg-blue-50/50 p-4 dark:border-blue-900/30 dark:bg-blue-950/20"
+        >
+          <div className="flex items-center gap-2">
+            <BrainCircuit className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <span className="font-semibold text-sm tracking-tight text-blue-900 dark:text-blue-300">Psicología del {psycho.name}</span>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">{psycho.meaning}</p>
+            <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">{psycho.desc}</p>
+          </div>
+        </motion.div>
+      )}
     </section>
   )
 }
