@@ -10,7 +10,7 @@ export default function MockupsScreen() {
         <TouchableOpacity className="active:scale-95">
           <Ionicons name="menu-outline" size={24} color="#0b0704" />
         </TouchableOpacity>
-        <Text className="font-display-lg text-[32px] font-bold tracking-tight text-primary">
+        <Text className="font-display-lg text-[32px] tracking-tight text-primary">
           RULEC
         </Text>
         <TouchableOpacity className="active:scale-95">
@@ -21,7 +21,7 @@ export default function MockupsScreen() {
       <ScrollView className="flex-1 px-margin-mobile pt-8 pb-32">
         {/* Header Section */}
         <View className="mb-12">
-          <Text className="font-display-lg text-[32px] font-bold text-primary mb-4 text-center">
+          <Text className="font-display-lg text-[32px] text-primary mb-4 text-center">
             Visualización Real
           </Text>
           <Text className="font-body-md text-[16px] text-secondary text-center max-w-[300px] mx-auto">
@@ -41,13 +41,13 @@ export default function MockupsScreen() {
                 <View className="w-8 h-8 rounded-full bg-ink-text items-center justify-center">
                   <Ionicons name="triangle-outline" size={16} color="#ffffff" />
                 </View>
-                <Text className="font-label-caps text-[12px] font-bold text-secondary uppercase tracking-widest">
+                <Text className="font-label-caps text-[12px] text-secondary uppercase tracking-widest">
                   Estudio
                 </Text>
               </View>
               
               <View>
-                <Text className="font-headline-sm text-[24px] font-bold text-ink-text mb-1">Aura Noir</Text>
+                <Text className="font-headline-sm text-[24px] text-ink-text mb-1">Aura Noir</Text>
                 <Text className="font-body-md text-[14px] text-secondary opacity-70">Dirección de Arte</Text>
               </View>
             </TouchableOpacity>
@@ -56,7 +56,7 @@ export default function MockupsScreen() {
           {/* Contrast Alert Badge */}
           <View className="flex-row items-center justify-center gap-2 px-4 py-2 rounded-full border border-border-subtle bg-surface-container-lowest">
             <Ionicons name="checkmark-circle" size={18} color="#645d57" />
-            <Text className="font-label-caps text-[12px] font-bold text-secondary uppercase">Legibilidad: Alta</Text>
+            <Text className="font-label-caps text-[12px] text-secondary uppercase">Legibilidad: Alta</Text>
           </View>
         </View>
 
@@ -71,9 +71,9 @@ export default function MockupsScreen() {
               <View className="w-3 h-3 rounded-full bg-surface-container-low border border-border-subtle absolute top-6" style={styles.innerShadow} />
               
               <View className="items-center mt-6 w-full">
-                <Text className="font-label-caps text-[12px] font-bold text-ink-text opacity-60 uppercase tracking-widest mb-4">Essence</Text>
+                <Text className="font-label-caps text-[12px] text-ink-text opacity-60 uppercase tracking-widest mb-4">Essence</Text>
                 <View className="w-full h-[1px] bg-ink-text opacity-10 mb-4" />
-                <Text className="font-headline-sm text-[24px] font-bold text-ink-text">No. 04</Text>
+                <Text className="font-headline-sm text-[24px] text-ink-text">No. 04</Text>
               </View>
               
               <View className="items-center w-full mt-auto">
@@ -86,7 +86,7 @@ export default function MockupsScreen() {
           {/* Contrast Alert Badge */}
           <View className="flex-row items-center justify-center gap-2 px-4 py-2 rounded-full border border-border-subtle bg-surface-container-lowest">
             <Ionicons name="contrast-outline" size={18} color="#645d57" />
-            <Text className="font-label-caps text-[12px] font-bold text-secondary uppercase">Balance Óptimo</Text>
+            <Text className="font-label-caps text-[12px] text-secondary uppercase">Balance Óptimo</Text>
           </View>
         </View>
 

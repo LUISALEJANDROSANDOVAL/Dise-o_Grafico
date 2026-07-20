@@ -20,7 +20,7 @@ export default function PaletteScreen() {
         <TouchableOpacity className="active:scale-95">
           <Ionicons name="menu-outline" size={24} color="#0b0704" />
         </TouchableOpacity>
-        <Text className="font-display-lg text-[32px] font-bold tracking-tight text-primary">
+        <Text className="font-display-lg text-[32px] tracking-tight text-primary">
           RULEC
         </Text>
         <TouchableOpacity className="active:scale-95">
@@ -31,7 +31,7 @@ export default function PaletteScreen() {
       <ScrollView className="flex-1 px-margin-mobile pt-8 pb-32">
         {/* Title Section */}
         <View className="w-full items-center mb-12">
-          <Text className="font-display-lg text-[32px] font-bold text-ink-text mb-4 text-center">
+          <Text className="font-display-lg text-[32px] text-ink-text mb-4 text-center">
             Paleta de Color
           </Text>
           <Text className="font-body-md text-[16px] text-on-surface-variant text-center max-w-[300px]">
@@ -110,7 +110,7 @@ function Swatch({ color, label }: { color: string, label: string }) {
         style={{ backgroundColor: color }} 
       />
       <View className="px-1">
-        <Text className="font-label-caps text-[12px] font-bold text-ink-text uppercase">{color}</Text>
+        <Text className="font-label-caps text-[12px] text-ink-text uppercase">{color}</Text>
         <Text className="font-body-md text-[12px] text-on-surface-variant mt-0.5">{label}</Text>
       </View>
     </TouchableOpacity>

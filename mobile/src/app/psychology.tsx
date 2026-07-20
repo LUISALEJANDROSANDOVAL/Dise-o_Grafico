@@ -10,7 +10,7 @@ export default function PsychologyScreen() {
         <TouchableOpacity className="active:scale-95">
           <Ionicons name="menu-outline" size={24} color="#0b0704" />
         </TouchableOpacity>
-        <Text className="font-display-lg text-[32px] font-bold tracking-tight text-primary">
+        <Text className="font-display-lg text-[32px] tracking-tight text-primary">
           RULEC
         </Text>
         <TouchableOpacity className="active:scale-95">
@@ -21,7 +21,7 @@ export default function PsychologyScreen() {
       <ScrollView className="flex-1 px-margin-mobile pt-8 pb-32">
         {/* Header Section */}
         <View className="mb-12">
-          <Text className="font-display-lg text-[32px] font-bold text-ink-text mb-4">El Alma del Color</Text>
+          <Text className="font-display-lg text-[32px] text-ink-text mb-4">El Alma del Color</Text>
           <Text className="font-body-lg text-[18px] text-on-surface-variant max-w-[300px]">
             Descubre la narrativa oculta detrás de cada tono. La psicología del color es la herramienta más silenciosa pero poderosa.
           </Text>
@@ -35,8 +35,8 @@ export default function PsychologyScreen() {
             style={{ backgroundColor: '#2A4B3C' }}
           >
             <View className="relative z-10">
-              <Text className="font-label-caps text-[12px] font-bold text-paper-bg opacity-80 mb-2 uppercase tracking-widest">Color en Foco</Text>
-              <Text className="font-headline-md text-[32px] font-bold text-paper-bg leading-tight">Verde{"\n"}Bosque</Text>
+              <Text className="font-label-caps text-[12px] text-paper-bg opacity-80 mb-2 uppercase tracking-widest">Color en Foco</Text>
+              <Text className="font-headline-md text-[32px] text-paper-bg leading-tight">Verde{"\n"}Bosque</Text>
               
               <View className="mt-8 pt-4 border-t border-white/20 flex-row justify-between items-center">
                 <Text className="font-button-text text-[14px] text-paper-bg opacity-90 font-medium">HEX #2A4B3C</Text>
@@ -49,7 +49,7 @@ export default function PsychologyScreen() {
 
           {/* Editorial Info Panel */}
           <View>
-            <Text className="font-headline-md text-[24px] font-bold text-ink-text mb-6 leading-tight">
+            <Text className="font-headline-md text-[24px] text-ink-text mb-6 leading-tight">
               Naturaleza, Equilibrio y Crecimiento.
             </Text>
             
@@ -65,7 +65,7 @@ export default function PsychologyScreen() {
             
             {/* Associated Emotions List (Tags) */}
             <View className="mt-8 pt-8 border-t border-border-subtle">
-              <Text className="font-label-caps text-[12px] font-bold text-secondary mb-4 uppercase">Emociones Asociadas</Text>
+              <Text className="font-label-caps text-[12px] text-secondary mb-4 uppercase">Emociones Asociadas</Text>
               <View className="flex-row flex-wrap gap-3">
                 <EmotionTag label="Estabilidad" />
                 <EmotionTag label="Renovación" />
@@ -80,7 +80,7 @@ export default function PsychologyScreen() {
         {/* Inspiring Brands Grid */}
         <View className="mb-12">
           <View className="flex-row justify-between items-end border-b border-border-subtle pb-4 mb-8">
-            <Text className="font-headline-sm text-[20px] font-bold text-ink-text">Marcas Inspiradoras</Text>
+            <Text className="font-headline-sm text-[20px] text-ink-text">Marcas Inspiradoras</Text>
             <TouchableOpacity className="flex-row items-center gap-1">
               <Text className="font-button-text text-[14px] font-medium text-secondary">Ver más</Text>
               <Ionicons name="arrow-forward" size={16} color="#605e59" />
@@ -131,8 +131,8 @@ function BrandCase({ title, category, imageUri }: { title: string, category: str
           resizeMode="cover"
         />
       </View>
-      <Text className="font-label-caps text-[12px] font-bold text-on-surface-variant uppercase tracking-wider">{category}</Text>
-      <Text className="font-headline-sm text-[24px] font-bold text-ink-text mt-1">{title}</Text>
+      <Text className="font-label-caps text-[12px] text-on-surface-variant uppercase tracking-wider">{category}</Text>
+      <Text className="font-headline-sm text-[24px] text-ink-text mt-1">{title}</Text>
     </TouchableOpacity>
   );
 }

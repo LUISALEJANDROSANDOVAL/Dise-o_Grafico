@@ -64,7 +64,7 @@ export default function NamingScreen() {
 
           {/* Input Area */}
           <View className="w-full relative pt-6">
-            <Text className="font-label-caps text-[10px] font-bold text-secondary uppercase tracking-widest absolute top-0 left-0">
+            <Text className="font-label-caps text-[10px] text-secondary uppercase tracking-widest absolute top-0 left-0">
               Prueba tu nombre aquí
             </Text>
             <TextInput
