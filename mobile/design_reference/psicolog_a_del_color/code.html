@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Psicología del Color - RULEC</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Playfair+Display:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-bright": "#fff8f1",
+                    "accent-warm": "#D9D2C5",
+                    "on-tertiary-fixed": "#1a1b1e",
+                    "tertiary-container": "#1f2023",
+                    "on-secondary-fixed-variant": "#484742",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "border-subtle": "rgba(36, 31, 26, 0.08)",
+                    "outline": "#7e766e",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-fixed-dim": "#c7c6ca",
+                    "primary-container": "#241f1a",
+                    "inverse-surface": "#32302c",
+                    "surface-container": "#f3ede6",
+                    "error": "#ba1a1a",
+                    "on-secondary-fixed": "#1c1c18",
+                    "error-container": "#ffdad6",
+                    "on-primary-container": "#8e867f",
+                    "on-tertiary-container": "#87878b",
+                    "inverse-on-surface": "#f6f0e9",
+                    "tertiary-fixed": "#e3e2e6",
+                    "on-primary-fixed-variant": "#4c4640",
+                    "on-secondary-container": "#66645f",
+                    "secondary-fixed-dim": "#c9c6c0",
+                    "primary-fixed-dim": "#cfc5bd",
+                    "secondary": "#605e59",
+                    "on-tertiary-fixed-variant": "#46474a",
+                    "primary": "#0b0704",
+                    "on-surface-variant": "#4c463f",
+                    "on-error": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "secondary-container": "#e6e2db",
+                    "paper-bg": "#FAF6EF",
+                    "background": "#fff8f1",
+                    "on-primary-fixed": "#201b16",
+                    "surface-container-highest": "#e7e2db",
+                    "on-background": "#1d1b17",
+                    "inverse-primary": "#cfc5bd",
+                    "surface": "#fff8f1",
+                    "on-surface": "#1d1b17",
+                    "surface-container-low": "#f9f3eb",
+                    "on-error-container": "#93000a",
+                    "surface-dim": "#dfd9d2",
+                    "outline-variant": "#cfc5bc",
+                    "surface-variant": "#e7e2db",
+                    "surface-container-high": "#ede7e0",
+                    "secondary-fixed": "#e6e2db",
+                    "primary-fixed": "#ebe1d8",
+                    "surface-tint": "#645d57",
+                    "ink-text": "#241F1A",
+                    "tertiary": "#07080b"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "touch-target": "44px",
+                    "section-gap": "80px",
+                    "unit": "4px",
+                    "margin-mobile": "20px",
+                    "gutter": "24px",
+                    "margin-desktop": "64px"
+            },
+            "fontFamily": {
+                    "label-caps": ["Inter", "sans-serif"],
+                    "display-lg": ["Playfair Display", "serif"],
+                    "headline-md": ["Playfair Display", "serif"],
+                    "body-lg": ["Inter", "sans-serif"],
+                    "headline-sm": ["Playfair Display", "serif"],
+                    "display-lg-mobile": ["Playfair Display", "serif"],
+                    "body-md": ["Inter", "sans-serif"],
+                    "button-text": ["Inter", "sans-serif"]
+            },
+            "fontSize": {
+                    "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+                    "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                    "headline-md": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+                    "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                    "headline-sm": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                    "display-lg-mobile": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                    "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                    "button-text": ["14px", { "lineHeight": "20px", "fontWeight": "500" }]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.paper-bg');
+            color: theme('colors.ink-text');
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased min-h-screen relative flex flex-col">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full bg-background dark:bg-surface-container-lowest flex justify-between items-center h-touch-target px-margin-mobile z-50 border-b border-border-subtle shadow-none">
+<div class="cursor-pointer active:scale-95 duration-200 flex items-center justify-center w-touch-target h-touch-target">
+<span class="material-symbols-outlined text-primary dark:text-on-surface">menu</span>
+</div>
+<div class="flex-1 flex justify-center md:justify-start md:ml-4">
+<div class="font-display-lg text-display-lg-mobile md:text-display-lg tracking-tight text-primary dark:text-on-surface font-bold">
+                RULEC
+            </div>
+</div>
+<!-- Desktop Navigation Integration (Hidden on Mobile) -->
+<nav class="hidden md:flex items-center gap-8 mr-8">
+<a class="font-label-caps text-label-caps text-secondary dark:text-on-secondary-container hover:opacity-80 transition-opacity" href="#">Palette</a>
+<a class="font-label-caps text-label-caps text-secondary dark:text-on-secondary-container hover:opacity-80 transition-opacity" href="#">Mockups</a>
+<a class="font-label-caps text-label-caps text-primary dark:text-on-surface font-semibold relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-full after:h-[2px] after:bg-primary" href="#">Psychology</a>
+<a class="font-label-caps text-label-caps text-secondary dark:text-on-secondary-container hover:opacity-80 transition-opacity" href="#">Naming</a>
+</nav>
+<div class="cursor-pointer active:scale-95 duration-200 flex items-center justify-center w-touch-target h-touch-target">
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden border border-border-subtle">
+<img class="w-full h-full object-cover" data-alt="A minimalist, monochromatic portrait of a sophisticated designer in a bright, modern studio setting. The lighting is soft and even, highlighting sharp features and a clean aesthetic. The image is cropped tightly as a circular avatar, fitting perfectly into a luxury user interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQbE5Nt87ahWixgdstcDVSTVSln-PuPQFTUgxSmxaghha-tYp5HhXGTto7KtjGhN4zd-xJmwiV0knm23usvM8L92iAOxPGISGKqBTZ0mMXcgNOYHCOArvZu0TTOAVtFz9wIIi2lcvCsa9AycKk2uQoWunntdH0hgxLgsOO7iXPNQGgNQKvBueb6y7HVbBbMwemFKIO0f5Sq2hFpIg9sKJRTW4910VpaDu7-E0MrHl-0Zcl0vrsXwAlSuWisPJFyeTm5I59FDcvsqg"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 pt-[calc(44px+64px)] pb-[calc(64px+40px)] md:pb-section-gap px-margin-mobile md:px-margin-desktop max-w-[1200px] mx-auto w-full">
+<!-- Header Section -->
+<section class="mb-section-gap">
+<h1 class="font-display-lg text-display-lg-mobile md:text-display-lg text-ink-text mb-4">El Alma del Color</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Descubre la narrativa oculta detrás de cada tono. La psicología del color es la herramienta más silenciosa pero poderosa en la arquitectura de tu identidad de marca.</p>
+</section>
+<!-- Color Focus Card (Bento Layout) -->
+<section class="grid grid-cols-1 md:grid-cols-12 gap-gutter mb-section-gap items-stretch">
+<!-- Large Color Block -->
+<div class="col-span-1 md:col-span-5 h-[400px] md:h-[500px] rounded-xl overflow-hidden relative border border-border-subtle shadow-sm flex flex-col justify-end p-8" style="background-color: #2A4B3C;">
+<div class="relative z-10 text-paper-bg">
+<span class="font-label-caps text-label-caps opacity-80 mb-2 block tracking-widest">Color en Foco</span>
+<h2 class="font-headline-md text-headline-md font-bold leading-tight">Verde<br/>Bosque</h2>
+<div class="mt-8 pt-4 border-t border-white/20 flex justify-between items-center">
+<span class="font-button-text text-button-text opacity-90">HEX #2A4B3C</span>
+<span class="material-symbols-outlined opacity-90 cursor-pointer hover:opacity-100 transition-opacity">content_copy</span>
+</div>
+</div>
+</div>
+<!-- Editorial Info Panel -->
+<div class="col-span-1 md:col-span-7 flex flex-col justify-center py-8 md:pl-8">
+<h3 class="font-headline-md text-headline-md text-ink-text mb-6 leading-tight">Naturaleza, Equilibrio y Crecimiento.</h3>
+<div class="prose prose-p:font-body-md prose-p:text-body-md prose-p:text-on-surface-variant prose-p:leading-relaxed prose-p:mb-6 max-w-xl">
+<p>
+                        Este tono evoca la quietud inalterable de los bosques densos y la vitalidad silenciosa de la flora en crecimiento. En el contexto de marcas de lujo, bienestar o servicios financieros, el Verde Bosque comunica una estabilidad institucional, una conexión auténtica y enraizada con el entorno, y una promesa de crecimiento orgánico a largo plazo.
+                    </p>
+<p>
+                        No es un tono de urgencia ni de innovación disruptiva; es una afirmación serena de presencia, herencia y salud perdurable. Es el color de la confianza madura.
+                    </p>
+</div>
+<!-- Associated Emotions List (Tags) -->
+<div class="mt-8 pt-8 border-t border-border-subtle">
+<h4 class="font-label-caps text-label-caps text-secondary mb-4">Emociones Asociadas</h4>
+<div class="flex flex-wrap gap-3">
+<div class="px-4 py-2 bg-surface-container-low border border-border-subtle rounded-md text-ink-text font-button-text text-button-text hover:bg-surface-variant transition-colors cursor-default">Estabilidad</div>
+<div class="px-4 py-2 bg-surface-container-low border border-border-subtle rounded-md text-ink-text font-button-text text-button-text hover:bg-surface-variant transition-colors cursor-default">Renovación</div>
+<div class="px-4 py-2 bg-surface-container-low border border-border-subtle rounded-md text-ink-text font-button-text text-button-text hover:bg-surface-variant transition-colors cursor-default">Prosperidad</div>
+<div class="px-4 py-2 bg-surface-container-low border border-border-subtle rounded-md text-ink-text font-button-text text-button-text hover:bg-surface-variant transition-colors cursor-default">Calma</div>
+<div class="px-4 py-2 bg-surface-container-low border border-border-subtle rounded-md text-ink-text font-button-text text-button-text hover:bg-surface-variant transition-colors cursor-default">Herencia</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Inspiring Brands Grid -->
+<section class="mb-section-gap">
+<div class="flex justify-between items-end border-b border-border-subtle pb-4 mb-8">
+<h4 class="font-headline-sm text-headline-sm text-ink-text">Marcas Inspiradoras</h4>
+<a class="font-button-text text-button-text text-secondary hover:text-ink-text transition-colors flex items-center gap-1" href="#">
+                    Ver más <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Brand Case 1 -->
+<div class="group cursor-pointer flex flex-col">
+<div class="w-full aspect-[4/3] bg-surface-container-low border border-border-subtle rounded-lg mb-4 overflow-hidden relative">
+<img class="w-full h-full object-cover grayscale opacity-90 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700 ease-out transform group-hover:scale-105" data-alt="A minimalist, high-end editorial lifestyle photograph of a luxury organic skincare product placed on dark moss and slate. The lighting is soft and moody, emphasizing the deep forest green tones and the premium matte texture of the packaging. The overall aesthetic is clean, ultra-luxurious, and grounded in nature." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxFmWJlwNKL2YLpw-CQ6Z8sMNSr233tG9oBreKe77nI4tMz9eUHVZlQcv4mo-6FyZb-7y83rbhyZ9Wqewmgv6JPRVaWzicoO0lhfhlfOWuUrkaZDPSKIQIURUUvqHE7Qp4MD3o3vhp6Ezw6rvNnrFXkC085ByJpXZvYaqPW5djWeW-snDOaKOOZLUKPElPA9UpCI1nhdonTUDfZr7EQBaWdgbhoEBa0rWMA0XtiB-ULbjIku0Wbgxqf8u8tRqLDzPKf0bh8oW_aWI"/>
+</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant tracking-wider">Cosmética Botánica</div>
+<div class="font-headline-sm text-headline-sm text-ink-text mt-2 group-hover:text-primary transition-colors">Aesop</div>
+</div>
+<!-- Brand Case 2 -->
+<div class="group cursor-pointer flex flex-col mt-0 md:mt-8">
+<div class="w-full aspect-[4/3] bg-surface-container-low border border-border-subtle rounded-lg mb-4 overflow-hidden relative">
+<img class="w-full h-full object-cover grayscale opacity-90 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700 ease-out transform group-hover:scale-105" data-alt="A sharp, architectural photograph of a high-end wealth management firm's interior lobby. The scene features dark green marble walls, brushed brass accents, and minimalist modern furniture. The lighting is precise and dramatic, highlighting the textures and creating an atmosphere of institutional stability, heritage, and quiet luxury." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJb9RWK6keJ2QcMEy3XV3K5mE-HoO7cYm5-51Ew5dUBWLTlG4FCR3g86-NaUi74pYzqCZCw5bNswvRyiKo7LYtcIxu_Ol8PpE78aDXDKX0gU2Z9zI9G-HN9LN9XT6kpWP70rSqDlxHMKIM-mhBmtESWigTmOx-VxI1dXkvL9qqnanCyiwSmtyudXJh5CAkL7Lrs0sjsGY7XO0SBCg5HAqvUd8afMv-VUTZeUIfvB0MsSU1G83CQnc-lrPhpml0CVzCzZXs0JzgDjk"/>
+</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant tracking-wider">Gestión Patrimonial</div>
+<div class="font-headline-sm text-headline-sm text-ink-text mt-2 group-hover:text-primary transition-colors">Vanguard L.</div>
+</div>
+<!-- Brand Case 3 -->
+<div class="group cursor-pointer flex flex-col mt-0 md:mt-16">
+<div class="w-full aspect-[4/3] bg-surface-container-low border border-border-subtle rounded-lg mb-4 overflow-hidden relative">
+<img class="w-full h-full object-cover grayscale opacity-90 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700 ease-out transform group-hover:scale-105" data-alt="A serene, minimalist editorial shot of an artisanal matcha tea preparation setup on a textured beige paper background. The vibrant, deep green of the matcha powder contrasts elegantly with the wabi-sabi ceramic bowl and bamboo whisk. The lighting is bright and soft, evoking purity, tradition, and mindful consumption." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmSRGps862SsTMPVwhn0JVjMtDfpal0LxOnjAdxxaigHhghDGkzO_6D8_uAGEv1ARJtNGhTcpnLwF9zs0cjYbMCQ5ZnbEvi0j397NxQpzScnQTXldTUd-0SM9zdBCK28FgqcJW8pFJcf0Su2PJozjbrMSICtcMaljfqgsUwOpGUhLZ7Kyrn-TTNVX0YKFbRSF8TZL58oODglhlDVKudh-UqE8iCP9VhfO_m-WORaxdX43Z3M56LlGuaWFM3rBePwvJvIrD32cKalI"/>
+</div>
+<div class="font-label-caps text-label-caps text-on-surface-variant tracking-wider">Gastronomía Consciente</div>
+<div class="font-headline-sm text-headline-sm text-ink-text mt-2 group-hover:text-primary transition-colors">Kurasu</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-16 px-margin-mobile pb-safe bg-surface-container-low dark:bg-surface-container-lowest border-t border-border-subtle rounded-t-xl">
+<!-- Palette -->
+<button class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-container opacity-60 hover:text-primary dark:hover:text-on-surface transition-colors active:scale-90 transition-transform duration-150 w-16 h-full">
+<span class="material-symbols-outlined">palette</span>
+<span class="font-label-caps text-[10px] mt-1">Palette</span>
+</button>
+<!-- Mockups -->
+<button class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-container opacity-60 hover:text-primary dark:hover:text-on-surface transition-colors active:scale-90 transition-transform duration-150 w-16 h-full">
+<span class="material-symbols-outlined">layers</span>
+<span class="font-label-caps text-[10px] mt-1">Mockups</span>
+</button>
+<!-- Psychology (Active) -->
+<button class="flex flex-col items-center justify-center text-primary dark:text-on-surface bg-accent-warm/20 rounded-full py-1 px-4 active:scale-90 transition-transform duration-150 min-w-[80px]">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+<span class="font-label-caps text-[10px] mt-1">Psychology</span>
+</button>
+<!-- Naming -->
+<button class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-container opacity-60 hover:text-primary dark:hover:text-on-surface transition-colors active:scale-90 transition-transform duration-150 w-16 h-full">
+<span class="material-symbols-outlined">drive_file_rename_outline</span>
+<span class="font-label-caps text-[10px] mt-1">Naming</span>
+</button>
+</nav>
+</body></html>

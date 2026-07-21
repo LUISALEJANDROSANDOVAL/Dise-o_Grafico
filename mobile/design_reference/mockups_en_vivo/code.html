@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mockups en Vivo - RULEC</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Playfair+Display:wght@100..900&display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#fff8f1",
+                        "accent-warm": "#D9D2C5",
+                        "on-tertiary-fixed": "#1a1b1e",
+                        "tertiary-container": "#1f2023",
+                        "on-secondary-fixed-variant": "#484742",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "border-subtle": "rgba(36, 31, 26, 0.08)",
+                        "outline": "#7e766e",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#c7c6ca",
+                        "primary-container": "#241f1a",
+                        "inverse-surface": "#32302c",
+                        "surface-container": "#f3ede6",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed": "#1c1c18",
+                        "error-container": "#ffdad6",
+                        "on-primary-container": "#8e867f",
+                        "on-tertiary-container": "#87878b",
+                        "inverse-on-surface": "#f6f0e9",
+                        "tertiary-fixed": "#e3e2e6",
+                        "on-primary-fixed-variant": "#4c4640",
+                        "on-secondary-container": "#66645f",
+                        "secondary-fixed-dim": "#c9c6c0",
+                        "primary-fixed-dim": "#cfc5bd",
+                        "secondary": "#605e59",
+                        "on-tertiary-fixed-variant": "#46474a",
+                        "primary": "#0b0704",
+                        "on-surface-variant": "#4c463f",
+                        "on-error": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "secondary-container": "#e6e2db",
+                        "paper-bg": "#FAF6EF",
+                        "background": "#fff8f1",
+                        "on-primary-fixed": "#201b16",
+                        "surface-container-highest": "#e7e2db",
+                        "on-background": "#1d1b17",
+                        "inverse-primary": "#cfc5bd",
+                        "surface": "#fff8f1",
+                        "on-surface": "#1d1b17",
+                        "surface-container-low": "#f9f3eb",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#dfd9d2",
+                        "outline-variant": "#cfc5bc",
+                        "surface-variant": "#e7e2db",
+                        "surface-container-high": "#ede7e0",
+                        "secondary-fixed": "#e6e2db",
+                        "primary-fixed": "#ebe1d8",
+                        "surface-tint": "#645d57",
+                        "ink-text": "#241F1A",
+                        "tertiary": "#07080b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "touch-target": "44px",
+                        "section-gap": "80px",
+                        "unit": "4px",
+                        "margin-mobile": "20px",
+                        "gutter": "24px",
+                        "margin-desktop": "64px"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["Inter"],
+                        "display-lg": ["Playfair Display"],
+                        "headline-md": ["Playfair Display"],
+                        "body-lg": ["Inter"],
+                        "headline-sm": ["Playfair Display"],
+                        "display-lg-mobile": ["Playfair Display"],
+                        "body-md": ["Inter"],
+                        "button-text": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-sm": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg-mobile": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "button-text": ["14px", { "lineHeight": "20px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .paper-shadow {
+                box-shadow: 0 24px 48px -12px rgba(36, 31, 26, 0.04), 0 4px 12px -2px rgba(36, 31, 26, 0.02);
+            }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background min-h-screen text-on-surface antialiased flex flex-col selection:bg-accent-warm selection:text-ink-text">
+<!-- TopAppBar (Hidden on mobile per rules, visible on desktop) -->
+<header class="hidden md:flex bg-background border-b border-border-subtle flex justify-between items-center h-touch-target px-margin-desktop w-full z-50 fixed top-0">
+<div class="flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined text-primary">menu</span>
+<span class="font-headline-sm text-headline-sm tracking-tight text-primary">RULEC</span>
+</div>
+<div class="flex items-center gap-6">
+<nav class="flex gap-6">
+<a class="text-secondary hover:text-primary transition-colors font-button-text text-button-text" href="#">Palette</a>
+<a class="text-primary font-semibold font-button-text text-button-text" href="#">Mockups</a>
+<a class="text-secondary hover:text-primary transition-colors font-button-text text-button-text" href="#">Psychology</a>
+<a class="text-secondary hover:text-primary transition-colors font-button-text text-button-text" href="#">Naming</a>
+</nav>
+<div class="w-8 h-8 rounded-full bg-surface-container overflow-hidden border border-border-subtle cursor-pointer">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="Minimalist avatar placeholder, subtle geometric shapes, light mode, clean white background, abstract representation of a user profile in a high-end design system context." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBE9MF7KvE1O3ixG9ck2wbXCUvKnc1Q-xcXolKI_yUZasadZPf06DOi1rzf_B7988LFlMYVyYmiI31jKBUxLslEQ7Y0d2buCppYksEozL_qEOgMf3y3OgeK9zz20wHBh4e1cWSnQ9J-UhmmM6Maq25rmykQ7QEesoxOPJvVNn1vYcci2dRm4tUpM_rHdwbgUuq4eVfb6umGZR6B6UMWe8zUmwbVApG2Z3v_IOU-8cKzn1oVTz3rW_rbrR0Op3h6uP2gVZFhS-_kees"/>
+</div>
+</div>
+</header>
+<!-- Mobile Header (Simplified for structural balance) -->
+<header class="md:hidden flex justify-between items-center px-margin-mobile pt-8 pb-4">
+<span class="font-headline-sm text-headline-sm tracking-tight text-primary">RULEC</span>
+<div class="w-8 h-8 rounded-full bg-surface-container overflow-hidden border border-border-subtle">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="Minimalist avatar placeholder, subtle geometric shapes, light mode, clean white background, abstract representation of a user profile in a high-end design system context." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhKIKqi3oZJ8fkyxBvK80rl7vn8sDLK4IgEixl4asuCTc8L_hIYX9m3IHxovAf7rlXFX5Mxt-sVbsBBzS5Jo-dF4sGSGXpa7YGakPWJkUuC6tG9KL-OwgQC_X_i8IWslBzJ9C-1ka7egR925rGlZyTFhWsEX_W2vRGfFFK57iS6LAQUiCsiAUNovO4OZMlraVOv2zgfPaWq7P_JMbXLGUQBy5J0sYM4Kuu_WFf4DtQGphzIvdns_CAjuaLCpZs-jlHtN3-clwzJjk"/>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-8 md:pt-32 pb-32 px-margin-mobile md:px-margin-desktop max-w-[1200px] mx-auto w-full">
+<!-- Header Section -->
+<section class="mb-16 md:mb-section-gap text-center md:text-left">
+<h1 class="font-display-lg-mobile text-display-lg-mobile md:font-display-lg md:text-display-lg text-primary mb-4">
+                Visualización Real
+            </h1>
+<p class="font-body-md text-body-md text-secondary max-w-2xl md:mx-0 mx-auto">
+                Evaluación táctil de la paleta seleccionada sobre sustratos de papel y envases minimalistas.
+            </p>
+</section>
+<!-- Gallery / Bento Grid Area -->
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-section-gap items-center justify-items-center">
+<!-- Mockup 1: Business Card -->
+<div class="flex flex-col items-center gap-8 w-full">
+<!-- Card Container (The 'Air') -->
+<div class="w-full aspect-square md:aspect-[4/3] bg-surface-container-low rounded-xl flex items-center justify-center p-8 border border-border-subtle relative overflow-hidden group">
+<!-- Decorative background texture -->
+<div class="absolute inset-0 opacity-[0.03] mix-blend-multiply pointer-events-none" data-alt="Subtle, barely visible, ultra-high key white crumpled paper texture overlay, adding a minimal tactile feel to a pure white background, luxurious and clean, studio lighting." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBVkeXOdhFWW_sf0pcJffCUFjexEb97TvyskOCj2Wky7y4Kz8vBDXx5NfJ_kecyFDlWQunpDzYO6E85POu2mXCIxVMygwElJikkmuR2CGPPRLvkFJyGnB3PAs-kgZF-nHBeeZumkSGZhFIMdDL2oJUnWPswqUQK7WqTh2P_491xjbW3ZRcAjWrhSYXcHBrkGmoYHouvsBBP3c_zSfKTl9XLKb5XswdVW6uhCaVVFzzMxvdQrK9abRQtodaQeTeJbezGVzjmthyf8Qk')"></div>
+<!-- The Physical Card -->
+<div class="w-[280px] h-[160px] md:w-[360px] md:h-[210px] bg-surface-container-lowest rounded-sm border border-border-subtle paper-shadow flex flex-col justify-between p-6 md:p-8 relative z-10 transition-transform duration-500 group-hover:scale-[1.02]">
+<div class="flex justify-between items-start">
+<div class="w-8 h-8 rounded-full bg-ink-text flex items-center justify-center">
+<span class="material-symbols-outlined text-surface-container-lowest text-[16px]">change_history</span>
+</div>
+<span class="font-label-caps text-label-caps text-secondary uppercase tracking-widest">Estudio</span>
+</div>
+<div>
+<p class="font-headline-sm text-headline-sm text-ink-text leading-none mb-1">Aura Noir</p>
+<p class="font-body-md text-body-md text-secondary opacity-70">Dirección de Arte</p>
+</div>
+</div>
+</div>
+<!-- Contrast Alert Badge -->
+<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border-subtle bg-surface-container-lowest text-label-caps font-label-caps text-secondary shadow-sm">
+<span class="material-symbols-outlined text-[18px] text-surface-tint">check_circle</span>
+<span>Legibilidad: Alta</span>
+</div>
+</div>
+<!-- Mockup 2: Product Label -->
+<div class="flex flex-col items-center gap-8 w-full mt-8 lg:mt-0">
+<!-- Container -->
+<div class="w-full aspect-square md:aspect-[4/3] bg-surface-container-low rounded-xl flex items-center justify-center p-8 border border-border-subtle relative overflow-hidden group">
+<!-- The Label -->
+<div class="w-[140px] h-[260px] md:w-[180px] md:h-[320px] bg-accent-warm rounded-t-full rounded-b-md border border-border-subtle flex flex-col justify-between items-center pt-12 pb-8 px-6 paper-shadow relative z-10 transition-transform duration-500 group-hover:scale-[1.02]">
+<!-- Hole punch -->
+<div class="w-3 h-3 rounded-full bg-surface-container-low border border-border-subtle absolute top-6 shadow-inner"></div>
+<div class="text-center mt-6">
+<span class="font-label-caps text-label-caps text-ink-text opacity-60 uppercase tracking-widest block mb-4">Essence</span>
+<div class="w-full h-[1px] bg-ink-text opacity-10 mb-4"></div>
+<p class="font-headline-sm text-headline-sm text-ink-text">No. 04</p>
+</div>
+<div class="text-center w-full">
+<div class="w-full h-[1px] bg-ink-text opacity-10 mb-4"></div>
+<p class="font-body-md text-body-md text-ink-text opacity-70 text-[10px] md:text-[12px] leading-tight">Botánica<br/>Sintética</p>
+</div>
+</div>
+</div>
+<!-- Contrast Alert Badge -->
+<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-border-subtle bg-surface-container-lowest text-label-caps font-label-caps text-secondary shadow-sm">
+<span class="material-symbols-outlined text-[18px] text-surface-tint">contrast</span>
+<span>Balance Óptimo</span>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-16 px-margin-mobile pb-safe bg-surface-container-low border-t border-border-subtle rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-secondary opacity-60 hover:text-primary transition-colors active:scale-90 duration-150 w-16" href="#">
+<span class="material-symbols-outlined mb-1">palette</span>
+<span class="font-label-caps text-[10px] leading-tight font-semibold tracking-widest uppercase">Palette</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary bg-accent-warm/20 rounded-full py-1 px-4 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1">layers</span>
+<span class="font-label-caps text-[10px] leading-tight font-semibold tracking-widest uppercase">Mockups</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary opacity-60 hover:text-primary transition-colors active:scale-90 duration-150 w-16" href="#">
+<span class="material-symbols-outlined mb-1">menu_book</span>
+<span class="font-label-caps text-[10px] leading-tight font-semibold tracking-widest uppercase">Psychology</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary opacity-60 hover:text-primary transition-colors active:scale-90 duration-150 w-16" href="#">
+<span class="material-symbols-outlined mb-1">drive_file_rename_outline</span>
+<span class="font-label-caps text-[10px] leading-tight font-semibold tracking-widest uppercase">Naming</span>
+</a>
+</nav>
+</body></html>

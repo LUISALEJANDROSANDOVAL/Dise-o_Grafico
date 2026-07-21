@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Creación de Paleta | RULEC</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Playfair+Display:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-bright": "#fff8f1",
+                    "accent-warm": "#D9D2C5",
+                    "on-tertiary-fixed": "#1a1b1e",
+                    "tertiary-container": "#1f2023",
+                    "on-secondary-fixed-variant": "#484742",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "border-subtle": "rgba(36, 31, 26, 0.08)",
+                    "outline": "#7e766e",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-fixed-dim": "#c7c6ca",
+                    "primary-container": "#241f1a",
+                    "inverse-surface": "#32302c",
+                    "surface-container": "#f3ede6",
+                    "error": "#ba1a1a",
+                    "on-secondary-fixed": "#1c1c18",
+                    "error-container": "#ffdad6",
+                    "on-primary-container": "#8e867f",
+                    "on-tertiary-container": "#87878b",
+                    "inverse-on-surface": "#f6f0e9",
+                    "tertiary-fixed": "#e3e2e6",
+                    "on-primary-fixed-variant": "#4c4640",
+                    "on-secondary-container": "#66645f",
+                    "secondary-fixed-dim": "#c9c6c0",
+                    "primary-fixed-dim": "#cfc5bd",
+                    "secondary": "#605e59",
+                    "on-tertiary-fixed-variant": "#46474a",
+                    "primary": "#0b0704",
+                    "on-surface-variant": "#4c463f",
+                    "on-error": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "secondary-container": "#e6e2db",
+                    "paper-bg": "#FAF6EF",
+                    "background": "#fff8f1",
+                    "on-primary-fixed": "#201b16",
+                    "surface-container-highest": "#e7e2db",
+                    "on-background": "#1d1b17",
+                    "inverse-primary": "#cfc5bd",
+                    "surface": "#fff8f1",
+                    "on-surface": "#1d1b17",
+                    "surface-container-low": "#f9f3eb",
+                    "on-error-container": "#93000a",
+                    "surface-dim": "#dfd9d2",
+                    "outline-variant": "#cfc5bc",
+                    "surface-variant": "#e7e2db",
+                    "surface-container-high": "#ede7e0",
+                    "secondary-fixed": "#e6e2db",
+                    "primary-fixed": "#ebe1d8",
+                    "surface-tint": "#645d57",
+                    "ink-text": "#241F1A",
+                    "tertiary": "#07080b"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "touch-target": "44px",
+                    "section-gap": "80px",
+                    "unit": "4px",
+                    "margin-mobile": "20px",
+                    "gutter": "24px",
+                    "margin-desktop": "64px"
+            },
+            "fontFamily": {
+                    "label-caps": ["Inter"],
+                    "display-lg": ["Playfair Display"],
+                    "headline-md": ["Playfair Display"],
+                    "body-lg": ["Inter"],
+                    "headline-sm": ["Playfair Display"],
+                    "display-lg-mobile": ["Playfair Display"],
+                    "body-md": ["Inter"],
+                    "button-text": ["Inter"]
+            },
+            "fontSize": {
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.08em", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-sm": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "display-lg-mobile": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "button-text": ["14px", {"lineHeight": "20px", "fontWeight": "500"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .color-wheel-bg {
+            background: conic-gradient(from 90deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080, #ff0000);
+            mask-image: radial-gradient(circle, transparent 20%, black 21%);
+            -webkit-mask-image: radial-gradient(circle, transparent 20%, black 21%);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-paper-bg text-ink-text min-h-screen flex flex-col font-body-md text-body-md antialiased">
+<!-- TopAppBar -->
+<header class="bg-background dark:bg-surface-container-lowest fixed top-0 w-full border-b border-border-subtle flex justify-between items-center h-touch-target px-margin-mobile z-50">
+<div class="flex items-center text-primary dark:text-on-surface cursor-pointer active:scale-95 duration-200 hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</div>
+<div class="font-display-lg text-display-lg-mobile tracking-tight text-primary dark:text-on-surface">
+            RULEC
+        </div>
+<div class="flex items-center text-primary dark:text-on-surface cursor-pointer active:scale-95 duration-200 hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-grow pt-[calc(44px+32px)] pb-32 px-margin-mobile md:px-margin-desktop max-w-[1200px] mx-auto w-full flex flex-col items-center">
+<!-- Header -->
+<section class="w-full text-center mb-12">
+<h1 class="font-display-lg text-display-lg-mobile md:text-display-lg text-ink-text mb-4">Paleta de Color</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto">Selecciona un matiz principal para generar una armonía cromática coherente para tu identidad de marca.</p>
+</section>
+<!-- Interactive Color Wheel -->
+<section class="relative w-full max-w-[320px] aspect-square flex items-center justify-center mb-section-gap">
+<!-- Tactile Base -->
+<div class="absolute inset-0 rounded-full border border-border-subtle shadow-[0_0_24px_rgba(36,31,26,0.04)] bg-surface"></div>
+<!-- Wheel -->
+<div class="relative w-[90%] h-[90%] rounded-full color-wheel-bg opacity-90 transition-transform duration-500 ease-out" id="color-wheel-surface">
+<!-- Selector -->
+<div class="absolute w-[44px] h-[44px] rounded-full border border-ink-text bg-paper-bg shadow-sm flex items-center justify-center transform -translate-x-1/2 -translate-y-1/2 cursor-pointer active:scale-90 transition-transform" id="color-selector" style="top: 25%; left: 85%;">
+<div class="w-3 h-3 rounded-full bg-[#ff8000]"></div>
+</div>
+</div>
+<!-- Center Cutout (Minimalist donut effect) -->
+<div class="absolute w-[40%] h-[40%] rounded-full bg-paper-bg border border-border-subtle shadow-[inset_0_4px_12px_rgba(36,31,26,0.02)] flex items-center justify-center z-10 pointer-events-none">
+<span class="font-label-caps text-label-caps text-on-surface-variant opacity-60">Base</span>
+</div>
+</section>
+<!-- Harmony Chips -->
+<section class="w-full mb-12 flex justify-center">
+<div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2 px-2 snap-x snap-mandatory">
+<button class="snap-center shrink-0 px-6 h-touch-target rounded font-label-caps text-label-caps bg-ink-text text-paper-bg hover:opacity-90 active:scale-95 transition-all">
+                    Complementario
+                </button>
+<button class="snap-center shrink-0 px-6 h-touch-target rounded font-label-caps text-label-caps bg-transparent border border-border-subtle text-ink-text hover:bg-surface-variant transition-colors active:scale-95">
+                    Análogo
+                </button>
+<button class="snap-center shrink-0 px-6 h-touch-target rounded font-label-caps text-label-caps bg-transparent border border-border-subtle text-ink-text hover:bg-surface-variant transition-colors active:scale-95">
+                    Tríada
+                </button>
+<button class="snap-center shrink-0 px-6 h-touch-target rounded font-label-caps text-label-caps bg-transparent border border-border-subtle text-ink-text hover:bg-surface-variant transition-colors active:scale-95">
+                    Monocromo
+                </button>
+</div>
+</section>
+<!-- Swatches Output -->
+<section class="w-full max-w-4xl grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+<!-- Swatch 1 -->
+<div class="flex flex-col group cursor-pointer active:scale-[0.98] transition-transform">
+<div class="w-full h-32 md:h-48 rounded border border-border-subtle bg-[#FF8000] mb-3 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.05)]"></div>
+<div class="flex justify-between items-baseline px-1">
+<span class="font-label-caps text-label-caps text-ink-text group-hover:text-surface-tint transition-colors">#FF8000</span>
+<span class="font-body-md text-[13px] text-on-surface-variant">Matiz Principal</span>
+</div>
+</div>
+<!-- Swatch 2 -->
+<div class="flex flex-col group cursor-pointer active:scale-[0.98] transition-transform">
+<div class="w-full h-32 md:h-48 rounded border border-border-subtle bg-[#0080FF] mb-3 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.05)]"></div>
+<div class="flex justify-between items-baseline px-1">
+<span class="font-label-caps text-label-caps text-ink-text group-hover:text-surface-tint transition-colors">#0080FF</span>
+<span class="font-body-md text-[13px] text-on-surface-variant">Contraste Directo</span>
+</div>
+</div>
+<!-- Swatch 3 -->
+<div class="flex flex-col group cursor-pointer active:scale-[0.98] transition-transform">
+<div class="w-full h-32 md:h-48 rounded border border-border-subtle bg-[#FAF6EF] mb-3 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.05)]"></div>
+<div class="flex justify-between items-baseline px-1">
+<span class="font-label-caps text-label-caps text-ink-text group-hover:text-surface-tint transition-colors">#FAF6EF</span>
+<span class="font-body-md text-[13px] text-on-surface-variant">Fondo (Papel)</span>
+</div>
+</div>
+<!-- Swatch 4 -->
+<div class="flex flex-col group cursor-pointer active:scale-[0.98] transition-transform">
+<div class="w-full h-32 md:h-48 rounded border border-border-subtle bg-[#241F1A] mb-3 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.05)]"></div>
+<div class="flex justify-between items-baseline px-1">
+<span class="font-label-caps text-label-caps text-ink-text group-hover:text-surface-tint transition-colors">#241F1A</span>
+<span class="font-body-md text-[13px] text-on-surface-variant">Acento (Tinta)</span>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only per Layout rules, but code structure reflects mobile-first) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-16 px-margin-mobile pb-safe bg-surface-container-low dark:bg-surface-container-lowest border-t border-border-subtle rounded-t-xl">
+<!-- Active Tab: Palette -->
+<button class="flex flex-col items-center justify-center text-primary dark:text-on-surface bg-accent-warm/20 rounded-full py-1 px-4 hover:text-primary dark:hover:text-on-surface transition-colors active:scale-90 duration-150">
+<span class="material-symbols-outlined mb-1" data-icon="palette" style="font-variation-settings: 'FILL' 1;">palette</span>
+<span class="font-label-caps text-[10px]">Palette</span>
+</button>
+<!-- Inactive Tab: Mockups -->
+<button class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-container opacity-60 hover:text-primary dark:hover:text-on-surface transition-colors active:scale-90 duration-150">
+<span class="material-symbols-outlined mb-1" data-icon="layers">layers</span>
+<span class="font-label-caps text-[10px]">Mockups</span>
+</button>
+<!-- Inactive Tab: Psychology -->
+<button class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-container opacity-60 hover:text-primary dark:hover:text-on-surface transition-colors active:scale-90 duration-150">
+<span class="material-symbols-outlined mb-1" data-icon="menu_book">menu_book</span>
+<span class="font-label-caps text-[10px]">Psychology</span>
+</button>
+<!-- Inactive Tab: Naming -->
+<button class="flex flex-col items-center justify-center text-secondary dark:text-on-secondary-container opacity-60 hover:text-primary dark:hover:text-on-surface transition-colors active:scale-90 duration-150">
+<span class="material-symbols-outlined mb-1" data-icon="drive_file_rename_outline">drive_file_rename_outline</span>
+<span class="font-label-caps text-[10px]">Naming</span>
+</button>
+</nav>
+<script>
+        // Simple micro-interaction for the color wheel selector
+        const wheel = document.getElementById('color-wheel-surface');
+        const selector = document.getElementById('color-selector');
+
+        wheel.addEventListener('click', (e) => {
+            const rect = wheel.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            // Convert to percentages for styling
+            const xPercent = (x / rect.width) * 100;
+            const yPercent = (y / rect.height) * 100;
+
+            selector.style.left = `${xPercent}%`;
+            selector.style.top = `${yPercent}%`;
+        });
+    </script>
+</body></html>
