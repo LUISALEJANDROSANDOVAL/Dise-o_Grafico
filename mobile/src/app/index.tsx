@@ -6,6 +6,7 @@ import QRCode from 'react-native-qrcode-svg';
 import Svg, { Path, G } from 'react-native-svg';
 import chroma from 'chroma-js';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withSequence, withTiming } from 'react-native-reanimated';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { generateHarmonies, convertColorFormats, HarmonyType, SwatchData, ColorFormats } from '../lib/colorEngine';
 import { savePalette } from '../lib/services/paletteService';
 import { initAnonymousSession } from '../lib/services/authService';
@@ -229,6 +230,22 @@ export default function PaletteScreen() {
   const swatches: SwatchData[] = useMemo(() => {
     return generateHarmonies(baseColorHex, activeHarmony);
   }, [baseColorHex, activeHarmony]);
+
+  // Persistir paleta activa localmente para sincronizar entre pantallas
+  useEffect(() => {
+    const persistActivePalette = async () => {
+      try {
+        await AsyncStorage.setItem('active_palette', JSON.stringify({
+          baseColor: baseColorHex,
+          harmony: activeHarmony,
+          swatches: swatches,
+        }));
+      } catch (err) {
+        console.error('Error al guardar paleta activa en AsyncStorage:', err);
+      }
+    };
+    persistActivePalette();
+  }, [swatches, baseColorHex, activeHarmony]);
 
   // Guardar paleta en la base de datos Supabase
   const handleSavePalette = async () => {

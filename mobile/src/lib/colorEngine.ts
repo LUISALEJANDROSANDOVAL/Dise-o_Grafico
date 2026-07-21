@@ -89,3 +89,38 @@ export function calculateContrastRatio(textHex: string, bgHex: string): { ratio:
   const isAccessible = ratio >= 4.5;
   return { ratio, isAccessible };
 }
+
+/**
+ * Simula daltonismo aplicando matrices de reducción de color
+ */
+export function simulateDaltonism(hex: string, type: 'normal' | 'protanopia' | 'deuteranopia'): string {
+  if (type === 'normal') return hex;
+  
+  try {
+    const color = chroma(hex);
+    const [r, g, b] = color.rgb();
+    
+    let rSim = r;
+    let gSim = g;
+    let bSim = b;
+    
+    if (type === 'protanopia') {
+      rSim = 0.567 * r + 0.433 * g;
+      gSim = 0.558 * r + 0.442 * g;
+      bSim = 0.242 * g + 0.758 * b;
+    } else if (type === 'deuteranopia') {
+      rSim = 0.625 * r + 0.375 * g;
+      gSim = 0.7 * r + 0.3 * g;
+      bSim = 0.3 * g + 0.7 * b;
+    }
+    
+    // Clamp values between 0 and 255
+    rSim = Math.max(0, Math.min(255, Math.round(rSim)));
+    gSim = Math.max(0, Math.min(255, Math.round(gSim)));
+    bSim = Math.max(0, Math.min(255, Math.round(bSim)));
+    
+    return chroma(rSim, gSim, bSim).hex().toUpperCase();
+  } catch {
+    return hex;
+  }
+}

@@ -31,7 +31,7 @@ const ExpoStorageAdapter = {
 };
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://sstkjxhlpjkeapenojxx.supabase.co';
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNzdGtqeGhscGprZWFwZW5vanh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDAwMDAwMDAsImV4cCI6MjAwMDAwMDAwMH0.placeholder';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
