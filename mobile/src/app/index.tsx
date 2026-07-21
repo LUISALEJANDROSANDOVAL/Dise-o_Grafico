@@ -10,6 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { generateHarmonies, convertColorFormats, HarmonyType, SwatchData, ColorFormats } from '../lib/colorEngine';
 import { savePalette } from '../lib/services/paletteService';
 import { initAnonymousSession } from '../lib/services/authService';
+import { colorStore, useGlobalColor } from '../lib/colorStore';
 
 const HARMONY_CHIPS: { type: HarmonyType; label: string }[] = [
   { type: 'complementary', label: 'Complementario' },
@@ -77,7 +78,8 @@ function VectorColorWheel({ size = WHEEL_SIZE }: { size?: number }) {
 
 export default function PaletteScreen() {
   const [selectorPos, setSelectorPos] = useState({ x: 75, y: 25 });
-  const [baseColorHex, setBaseColorHex] = useState('#FF8000');
+  const baseColorHex = useGlobalColor();
+  const setBaseColorHex = colorStore.setColor;
   const [currentAngleDeg, setCurrentAngleDeg] = useState(30);
   const [hexInput, setHexInput] = useState('FF8000');
   const [activeHarmony, setActiveHarmony] = useState<HarmonyType>('complementary');
