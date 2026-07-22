@@ -5,16 +5,11 @@ import { motion } from "framer-motion"
 import { Palette, Store, Wand2, Eye, ShieldCheck, ArrowRight, BookOpen } from "lucide-react"
 import { InteractiveParticles } from "@/components/interactive-particles"
 import { RulecHeader } from "@/components/rulec-header"
-import { useState, useEffect } from "react"
+import { useTheme } from "@/hooks/useTheme"
 
 export default function LandingPage() {
-  const [theme, setTheme] = useState<"light" | "dark">("light")
+  const [theme, setTheme] = useTheme()
 
-  useEffect(() => {
-    const root = document.documentElement
-    root.classList.toggle("dark", theme === "dark")
-    root.classList.toggle("light", theme === "light")
-  }, [theme])
   return (
     <div className="relative flex min-h-dvh flex-col bg-slate-50 text-slate-950 dark:bg-[#0a0a0a] dark:text-slate-50 overflow-hidden font-sans">
       
