@@ -1,8 +1,13 @@
 import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useGlobalColor } from '../lib/colorStore';
+import { getPsychologyForColor } from '../lib/data/colorPsychology';
 
 export default function PsychologyScreen() {
+  const baseColorHex = useGlobalColor();
+  const psychology = getPsychologyForColor(baseColorHex);
+
   return (
     <SafeAreaView className="flex-1 bg-background">
       {/* Header */}
@@ -32,14 +37,14 @@ export default function PsychologyScreen() {
           {/* Large Color Block */}
           <View 
             className="h-[400px] rounded-xl overflow-hidden border border-border-subtle justify-end p-8 mb-8"
-            style={{ backgroundColor: '#2A4B3C' }}
+            style={{ backgroundColor: baseColorHex }}
           >
             <View className="relative z-10">
               <Text className="font-label-caps text-[12px] font-bold text-paper-bg opacity-80 mb-2 uppercase tracking-widest">Color en Foco</Text>
-              <Text className="font-headline-md text-[32px] font-bold text-paper-bg leading-tight">Verde{"\n"}Bosque</Text>
+              <Text className="font-headline-md text-[32px] font-bold text-paper-bg leading-tight">{psychology.name}</Text>
               
               <View className="mt-8 pt-4 border-t border-white/20 flex-row justify-between items-center">
-                <Text className="font-button-text text-[14px] text-paper-bg opacity-90 font-medium">HEX #2A4B3C</Text>
+                <Text className="font-button-text text-[14px] text-paper-bg opacity-90 font-medium">HEX {baseColorHex}</Text>
                 <TouchableOpacity>
                   <Ionicons name="copy-outline" size={20} color="#FAF6EF" />
                 </TouchableOpacity>
@@ -50,28 +55,22 @@ export default function PsychologyScreen() {
           {/* Editorial Info Panel */}
           <View>
             <Text className="font-headline-md text-[24px] font-bold text-ink-text mb-6 leading-tight">
-              Naturaleza, Equilibrio y Crecimiento.
+              {psychology.headline}
             </Text>
             
-            {/* Párrafo 1 */}
-            <Text className="font-body-md text-[16px] text-on-surface-variant mb-4 leading-relaxed">
-              Este tono evoca la quietud inalterable de los bosques densos y la vitalidad silenciosa de la flora en crecimiento. En el contexto de marcas de lujo, bienestar o servicios financieros, el Verde Bosque comunica una estabilidad institucional, una conexión auténtica y enraizada con el entorno, y una promesa de crecimiento orgánico a largo plazo.
-            </Text>
-            
-            {/* Párrafo 2 (Agregado para completar la psicología de límites del color) */}
-            <Text className="font-body-md text-[16px] text-on-surface-variant mb-4 leading-relaxed">
-              No es un tono de urgencia ni de innovación disruptiva; es una afirmación serena de presencia, herencia y salud perdurable. Es el color de la confianza madura.
-            </Text>
+            {psychology.paragraphs.map((paragraph, idx) => (
+              <Text key={idx} className="font-body-md text-[16px] text-on-surface-variant mb-4 leading-relaxed">
+                {paragraph}
+              </Text>
+            ))}
             
             {/* Associated Emotions List (Tags) */}
             <View className="mt-8 pt-8 border-t border-border-subtle">
               <Text className="font-label-caps text-[12px] font-bold text-secondary mb-4 uppercase">Emociones Asociadas</Text>
               <View className="flex-row flex-wrap gap-3">
-                <EmotionTag label="Estabilidad" />
-                <EmotionTag label="Renovación" />
-                <EmotionTag label="Prosperidad" />
-                <EmotionTag label="Calma" />
-                <EmotionTag label="Herencia" />
+                {psychology.emotions.map((emotion, idx) => (
+                  <EmotionTag key={idx} label={emotion} />
+                ))}
               </View>
             </View>
           </View>
@@ -88,22 +87,14 @@ export default function PsychologyScreen() {
           </View>
 
           <View className="gap-8">
-            <BrandCase 
-              title="Aesop"
-              category="Cosmética Botánica"
-              imageUri="https://lh3.googleusercontent.com/aida-public/AB6AXuBxFmWJlwNKL2YLpw-CQ6Z8sMNSr233tG9oBreKe77nI4tMz9eUHVZlQcv4mo-6FyZb-7y83rbhyZ9Wqewmgv6JPRVaWzicoO0lhfhlfOWuUrkaZDPSKIQIURUUvqHE7Qp4MD3o3vhp6Ezw6rvNnrFXkC085ByJpXZvYaqPW5djWeW-snDOaKOOZLUKPElPA9UpCI1nhdonTUDfZr7EQBaWdgbhoEBa0rWMA0XtiB-ULbjIku0Wbgxqf8u8tRqLDzPKf0bh8oW_aWI"
-            />
-            <BrandCase 
-              title="Vanguard L."
-              category="Gestión Patrimonial"
-              imageUri="https://lh3.googleusercontent.com/aida-public/AB6AXuAJb9RWK6keJ2QcMEy3XV3K5mE-HoO7cYm5-51Ew5dUBWLTlG4FCR3g86-NaUi74pYzqCZCw5bNswvRyiKo7LYtcIxu_Ol8PpE78aDXDKX0gU2Z9zI9G-HN9LN9XT6kpWP70rSqDlxHMKIM-mhBmtESWigTmOx-VxI1dXkvL9qqnanCyiwSmtyudXJh5CAkL7Lrs0sjsGY7XO0SBCg5HAqvUd8afMv-VUTZeUIfvB0MsSU1G83CQnc-lrPhpml0CVzCzZXs0JzgDjk"
-            />
-            {/* Caso 3 (Kurasu - Agregado para completar la tríada de sectores) */}
-            <BrandCase 
-              title="Kurasu"
-              category="Gastronomía Consciente"
-              imageUri="https://lh3.googleusercontent.com/aida-public/AB6AXuBmSRGps862SsTMPVwhn0JVjMtDfpal0LxOnjAdxxaigHhghDGkzO_6D8_uAGEv1ARJtNGhTcpnLwF9zs0cjYbMCQ5ZnbEvi0j397NxQpzScnQTXldTUd-0SM9zdBCK28FgqcJW8pFJcf0Su2PJozjbrMSICtcMaljfqgsUwOpGUhLZ7Kyrn-TTNVX0YKFbRSF8TZL58oODglhlDVKudh-UqE8iCP9VhfO_m-WORaxdX43Z3M56LlGuaWFM3rBePwvJvIrD32cKalI"
-            />
+            {psychology.brands.map((brand, idx) => (
+              <BrandCase 
+                key={idx}
+                title={brand.title}
+                category={brand.category}
+                imageUri={brand.imageUri}
+              />
+            ))}
           </View>
         </View>
 
