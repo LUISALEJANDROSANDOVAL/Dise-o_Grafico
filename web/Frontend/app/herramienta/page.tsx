@@ -45,7 +45,7 @@ function HerramientaContent() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
     })
-  }, [supabase.auth])
+  }, [])
 
   const generated = useMemo(() => generatePalette(base, scheme), [base, scheme])
   // Editable copy — lets Designer profile tweak individual swatches.
