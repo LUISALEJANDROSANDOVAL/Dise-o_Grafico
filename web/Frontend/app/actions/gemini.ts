@@ -2,22 +2,20 @@
 
 // ─────────────────────────────────────────────
 // Motor de IA usando OpenRouter
-// Modelos gratuitos disponibles (cambia aquí si quieres probar otro):
-//   "meta-llama/llama-3.1-8b-instruct:free"
-//   "mistralai/mistral-7b-instruct:free"
-//   "deepseek/deepseek-r1:free"
-//   "qwen/qwen-2.5-7b-instruct:free"
+// Lista verificada de modelos gratuitos (consultada en tiempo real).
+// Si el primero falla, prueba el siguiente automáticamente.
 // ─────────────────────────────────────────────
-const MODEL = "meta-llama/llama-3.1-8b-instruct:free"
+const FREE_MODELS = [
+  "openai/gpt-oss-20b:free",
+  "google/gemma-4-31b-it:free",
+  "google/gemma-4-26b-a4b-it:free",
+  "nvidia/nemotron-3-super-120b-a12b:free",
+  "nvidia/nemotron-3-nano-30b-a3b:free",
+  "nvidia/nemotron-nano-9b-v2:free",
+]
 const API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-async function callAI(prompt: string): Promise<string> {
-  const apiKey = process.env.OPENROUTER_API_KEY
-
-  if (!apiKey || apiKey.includes("PEGA-TU-KEY")) {
-    throw new Error("OPENROUTER_API_KEY no configurada. Ve a openrouter.ai y pega tu clave en el .env")
-  }
-
+async function callModel(apiKey: string, model: string, prompt: string): Promise<string> {
   const res = await fetch(API_URL, {
     method: "POST",
     headers: {
@@ -27,7 +25,7 @@ async function callAI(prompt: string): Promise<string> {
       "X-Title": "Cromatic - Naming Tool",
     },
     body: JSON.stringify({
-      model: MODEL,
+      model,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.8,
     }),
@@ -42,6 +40,34 @@ async function callAI(prompt: string): Promise<string> {
   const data = await res.json() as any
   return data.choices?.[0]?.message?.content ?? ""
 }
+
+async function callAI(prompt: string): Promise<string> {
+  const apiKey = process.env.OPENROUTER_API_KEY
+
+  if (!apiKey || apiKey.includes("PEGA-TU-KEY")) {
+    throw new Error("OPENROUTER_API_KEY no configurada. Ve a openrouter.ai y pega tu clave en el .env")
+  }
+
+  for (const model of FREE_MODELS) {
+    try {
+      console.log(`[IA] Intentando con modelo: ${model}`)
+      const result = await callModel(apiKey, model, prompt)
+      console.log(`[IA] Éxito con: ${model}`)
+      return result
+    } catch (err: any) {
+      const isUnavailable = err?.message?.includes("unavailable for free") || err?.message?.includes("No endpoints found")
+      if (isUnavailable) {
+        console.warn(`[IA] Modelo no disponible: ${model}. Probando siguiente...`)
+        continue
+      }
+      // Si el error es diferente (ej: 429 cuota), lanzar directo
+      throw err
+    }
+  }
+
+  throw new Error("Ningún modelo gratuito está disponible ahora mismo. Intenta más tarde.")
+}
+
 
 export async function generateNameIdeas(focus: string): Promise<string[]> {
   const prompt = `Eres un experto en branding y creación de nombres de empresas (Naming).
