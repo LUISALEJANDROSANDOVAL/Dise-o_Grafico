@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useRef } from "react"
+import { useRef, useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { ImageIcon, Pipette, BrainCircuit } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -32,22 +32,115 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
   const wheelRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
+  const baseRef = useRef(base)
+  useEffect(() => {
+    baseRef.current = base
+  }, [base])
+
+  const [isDragging, setIsDragging] = useState(false)
+
+  const lastAngleRef = useRef<number | null>(null)
+  const lastTimeRef = useRef<number | null>(null)
+  const velocityRef = useRef<number>(0)
+  const animationFrameRef = useRef<number | null>(null)
+
   const baseHex = hslToHex(base)
   const psycho = getColorPsychology(base.h)
 
+  function stopInertia() {
+    if (animationFrameRef.current !== null) {
+      cancelAnimationFrame(animationFrameRef.current)
+      animationFrameRef.current = null
+    }
+    velocityRef.current = 0
+  }
+
   function pickFromWheel(e: React.PointerEvent<HTMLDivElement>) {
     const el = wheelRef.current
-    if (!el) return
+    if (!el) return null
     const rect = el.getBoundingClientRect()
     const cx = rect.left + rect.width / 2
     const cy = rect.top + rect.height / 2
     const dx = e.clientX - cx
     const dy = e.clientY - cy
-    let angle = (Math.atan2(dy, dx) * 180) / Math.PI + 90
+    let angle = (Math.atan2(dy, dx) * (180 / Math.PI) + 90) % 360
     if (angle < 0) angle += 360
     const dist = Math.min(1, Math.sqrt(dx * dx + dy * dy) / (rect.width / 2))
-    onBaseChange({ h: Math.round(angle), s: Math.round(35 + dist * 60), l: base.l })
+    onBaseChange({ h: Math.round(angle), s: Math.round(35 + dist * 60), l: baseRef.current.l })
+    return angle
   }
+
+  function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    stopInertia()
+    setIsDragging(true)
+    e.currentTarget.setPointerCapture(e.pointerId)
+    const angle = pickFromWheel(e)
+    if (angle !== null) {
+      lastAngleRef.current = angle
+      lastTimeRef.current = performance.now()
+    }
+  }
+
+  function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      const angle = pickFromWheel(e)
+      if (angle !== null) {
+        const now = performance.now()
+        if (lastAngleRef.current !== null && lastTimeRef.current !== null) {
+          const dt = now - lastTimeRef.current
+          if (dt > 0) {
+            let diff = angle - lastAngleRef.current
+            if (diff > 180) diff -= 360
+            if (diff < -180) diff += 360
+            velocityRef.current = diff / dt
+          }
+        }
+        lastAngleRef.current = angle
+        lastTimeRef.current = now
+      }
+    }
+  }
+
+  function handlePointerUp(e: React.PointerEvent<HTMLDivElement>) {
+    e.currentTarget.releasePointerCapture(e.pointerId)
+    setIsDragging(false)
+
+    if (Math.abs(velocityRef.current) > 0.05) {
+      let lastFrameTime = performance.now()
+      const animateInertia = (nowTime: number) => {
+        const dt = nowTime - lastFrameTime
+        lastFrameTime = nowTime
+
+        if (Math.abs(velocityRef.current) < 0.01) {
+          stopInertia()
+          return
+        }
+
+        velocityRef.current *= Math.pow(0.95, dt / 16)
+        const deltaAngle = velocityRef.current * dt
+        let nextH = (baseRef.current.h + deltaAngle) % 360
+        if (nextH < 0) nextH += 360
+
+        onBaseChange({
+          ...baseRef.current,
+          h: Math.round(nextH)
+        })
+
+        animationFrameRef.current = requestAnimationFrame(animateInertia)
+      }
+      animationFrameRef.current = requestAnimationFrame(animateInertia)
+    } else {
+      stopInertia()
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current)
+      }
+    }
+  }, [])
 
   // marker position on the ring
   const angleRad = ((base.h - 90) * Math.PI) / 180
@@ -100,14 +193,18 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
       <div className="flex justify-center py-2">
         <motion.div
           ref={wheelRef}
-          onPointerDown={pickFromWheel}
-          whileHover={{ scale: 1.03, boxShadow: "0 12px 30px -8px rgba(0,0,0,0.35)" }}
-          whileTap={{ scale: 0.99 }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          whileHover={isDragging ? { scale: 1.01 } : { scale: 1.03, boxShadow: "0 12px 30px -8px rgba(0,0,0,0.35)" }}
+          whileTap={isDragging ? { scale: 1.01 } : { scale: 0.99 }}
+          animate={{ scale: isDragging ? 1.01 : 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 22 }}
-          className="relative aspect-square w-56 max-w-full cursor-crosshair touch-none rounded-full sm:w-64"
+          className="relative aspect-square w-56 max-w-full touch-none rounded-full sm:w-64"
           style={{
             background:
-              "conic-gradient(from 90deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)",
+              "conic-gradient(from 0deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)",
+            cursor: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Ccircle cx='12' cy='12' r='7' stroke='white' stroke-width='3' /%3E%3Ccircle cx='12' cy='12' r='7' stroke='black' stroke-width='1.5' /%3E%3C/svg%3E\") 12 12, crosshair",
           }}
           role="slider"
           aria-label="Círculo cromático: selecciona el tono base"

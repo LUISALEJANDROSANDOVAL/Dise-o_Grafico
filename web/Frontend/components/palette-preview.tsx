@@ -13,6 +13,7 @@ import {
   simulate,
   rgbString,
   cmykString,
+  hslToHex,
 } from "@/lib/color"
 import type { Profile } from "@/components/rulec-header"
 
@@ -21,13 +22,14 @@ type Props = {
   colorblind: ColorblindMode
   profile: Profile
   onSwatchChange: (index: number, hsl: HSL) => void
+  base: HSL
 }
 
-export function PalettePreview({ palette, colorblind, profile, onSwatchChange }: Props) {
+export function PalettePreview({ palette, colorblind, profile, onSwatchChange, base }: Props) {
   const display = palette.map((s) => simulate(s.hex, colorblind))
 
   // Roles derived from the palette
-  const brand = display[2]
+  const brand = simulate(hslToHex(base), colorblind)
   const accent = display[3]
   const dark = display[4]
   const light = display[0]
@@ -43,8 +45,6 @@ export function PalettePreview({ palette, colorblind, profile, onSwatchChange }:
         visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
       }}
     >
-      <Swatches palette={palette} display={display} profile={profile} onSwatchChange={onSwatchChange} />
-
       <AnimatePresence mode="wait">
         <Accessibility key={brand} brand={brand} profile={profile} />
       </AnimatePresence>
@@ -58,13 +58,15 @@ export function PalettePreview({ palette, colorblind, profile, onSwatchChange }:
           <MobileApp brand={brand} accent={accent} light={light} dark={dark} />
         </div>
       </motion.div>
+
+      <Swatches palette={palette} display={display} profile={profile} onSwatchChange={onSwatchChange} />
     </motion.section>
   )
 }
 
 const sectionVariant = {
   hidden: { opacity: 0, y: 12 },
-  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 26 } },
+  visible: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 300, damping: 26 } },
 }
 
 function Swatches({

@@ -1,12 +1,14 @@
 export type HSL = { h: number; s: number; l: number }
 export type Swatch = { h: number; s: number; l: number; hex: string }
-export type Scheme = "mono" | "analogous" | "complementary" | "triad"
+export type Scheme = "mono" | "analogous" | "complementary" | "triad" | "split" | "tetradic"
 
 export const SCHEMES: { id: Scheme; entrepreneur: string; designer: string }[] = [
   { id: "mono", entrepreneur: "Un solo color", designer: "Monocromático" },
   { id: "analogous", entrepreneur: "Colores vecinos", designer: "Análogos" },
   { id: "complementary", entrepreneur: "Alto contraste", designer: "Complementarios" },
+  { id: "split", entrepreneur: "Contraste suave", designer: "Comp. Divididos" },
   { id: "triad", entrepreneur: "Tres tonos", designer: "Tríada" },
+  { id: "tetradic", entrepreneur: "Cuatro tonos", designer: "Tetrádica" },
 ]
 
 function clamp(n: number, min = 0, max = 100) {
@@ -107,11 +109,11 @@ export function generatePalette(base: HSL, scheme: Scheme): Swatch[] {
       ]
     case "analogous":
       return [
-        make(h - 40, s, 55),
-        make(h - 20, s, 50),
+        make(h - 30, s, 55),
+        make(h - 15, s, 50),
         make(h, s, 48),
-        make(h + 20, s, 50),
-        make(h + 40, s, 55),
+        make(h + 15, s, 50),
+        make(h + 30, s, 55),
       ]
     case "complementary":
       return [
@@ -121,6 +123,14 @@ export function generatePalette(base: HSL, scheme: Scheme): Swatch[] {
         make(h + 180, s, 68),
         make(h + 180, s, 45),
       ]
+    case "split":
+      return [
+        make(h, s, 50),
+        make(h + 150, s, 55),
+        make(h + 210, s, 55),
+        make(h, Math.max(10, s - 30), 85),
+        make(h, s, 22),
+      ]
     case "triad":
       return [
         make(h, s, 50),
@@ -128,6 +138,14 @@ export function generatePalette(base: HSL, scheme: Scheme): Swatch[] {
         make(h + 240, s, 50),
         make(h, Math.max(10, s - 40), 88),
         make(h, s, 22),
+      ]
+    case "tetradic":
+      return [
+        make(h, s, 50),
+        make(h + 60, s, 52),
+        make(h + 180, s, 50),
+        make(h + 240, s, 52),
+        make(h, Math.max(10, s - 30), 22),
       ]
   }
 }

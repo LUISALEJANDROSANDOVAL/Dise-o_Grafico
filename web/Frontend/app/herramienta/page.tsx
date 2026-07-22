@@ -107,9 +107,9 @@ function HerramientaContent() {
         onThemeToggle={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
       />
 
-      <main className="mx-auto grid w-full max-w-[100rem] flex-1 gap-8 px-4 py-6 sm:px-6 sm:py-8 lg:grid-cols-[24rem_1fr] lg:gap-12 lg:px-8 xl:grid-cols-[26rem_1fr]">
+      <main className="mx-auto grid w-full max-w-[100rem] flex-1 gap-8 px-4 py-6 sm:px-6 sm:py-8 grid-cols-1 lg:grid-cols-3 lg:gap-12 lg:px-8">
         {/* Left column — fixed work area */}
-        <aside className="lg:sticky lg:top-20 lg:self-start">
+        <aside className="lg:col-span-1 lg:sticky lg:top-20 lg:self-start">
           <div className="mb-6">
             <h1 className="text-balance text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">
               Construye la paleta de tu marca.
@@ -130,12 +130,13 @@ function HerramientaContent() {
         </aside>
 
         {/* Right column — scrollable results area */}
-        <section className="min-w-0">
+        <section className="min-w-0 lg:col-span-2">
           <PalettePreview
             palette={palette}
             colorblind={colorblind}
             profile={profile}
             onSwatchChange={handleSwatchChange}
+            base={base}
           />
         </section>
       </main>
