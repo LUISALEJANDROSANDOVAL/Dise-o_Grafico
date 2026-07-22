@@ -1,24 +1,24 @@
 "use server"
 
 // ─────────────────────────────────────────────
-// Configuración de modelos OpenRouter (gratuitos)
-// Cambia el modelo aquí si uno falla:
-// "google/gemini-2.0-flash-exp:free"
-// "meta-llama/llama-3.1-8b-instruct:free"
-// "mistralai/mistral-7b-instruct:free"
-// "deepseek/deepseek-r1:free"
+// Motor de IA usando OpenRouter
+// Modelos gratuitos disponibles (cambia aquí si quieres probar otro):
+//   "meta-llama/llama-3.1-8b-instruct:free"
+//   "mistralai/mistral-7b-instruct:free"
+//   "deepseek/deepseek-r1:free"
+//   "qwen/qwen-2.5-7b-instruct:free"
 // ─────────────────────────────────────────────
-const OPENROUTER_MODEL = "google/gemini-2.0-flash-exp:free"
-const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+const MODEL = "meta-llama/llama-3.1-8b-instruct:free"
+const API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 async function callAI(prompt: string): Promise<string> {
   const apiKey = process.env.OPENROUTER_API_KEY
 
   if (!apiKey || apiKey.includes("PEGA-TU-KEY")) {
-    throw new Error("OPENROUTER_API_KEY no está configurada. Ve a openrouter.ai, crea una cuenta gratis y pega tu clave en el .env")
+    throw new Error("OPENROUTER_API_KEY no configurada. Ve a openrouter.ai y pega tu clave en el .env")
   }
 
-  const res = await fetch(OPENROUTER_URL, {
+  const res = await fetch(API_URL, {
     method: "POST",
     headers: {
       "Authorization": `Bearer ${apiKey}`,
@@ -27,7 +27,7 @@ async function callAI(prompt: string): Promise<string> {
       "X-Title": "Cromatic - Naming Tool",
     },
     body: JSON.stringify({
-      model: OPENROUTER_MODEL,
+      model: MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.8,
     }),
@@ -54,18 +54,14 @@ Ejemplo: ["Nombre1", "Nombre2", "Nombre3", "Nombre4", "Nombre5"]`
 
   try {
     const text = await callAI(prompt)
-    const cleaned = text.trim().replace(/```json/g, "").replace(/```/g, "")
-    const ideas = JSON.parse(cleaned)
-    return ideas as string[]
+    const cleaned = text.trim().replace(/```json/g, "").replace(/```/g, "").trim()
+    const match = cleaned.match(/\[.*\]/s)
+    if (!match) throw new Error("Respuesta inesperada del modelo")
+    return JSON.parse(match[0]) as string[]
   } catch (error: any) {
-    console.error("Error generating names:", error?.message)
-
-    if (error?.status === 429) {
-      return ["⏳ Límite momentáneo. Espera unos segundos e intenta de nuevo."]
-    }
-    if (error?.message?.includes("OPENROUTER_API_KEY")) {
-      return ["⚙️ Configura tu OPENROUTER_API_KEY en el archivo .env para activar la IA."]
-    }
+    console.error("Error generando nombres:", error?.message)
+    if (error?.status === 429) return ["⏳ Límite momentáneo. Espera unos segundos e intenta de nuevo."]
+    if (error?.message?.includes("OPENROUTER_API_KEY")) return ["⚙️ Configura tu OPENROUTER_API_KEY en el archivo .env"]
     return [`❌ Error: ${error.message || "Problema de conexión con la IA"}`]
   }
 }
@@ -75,46 +71,33 @@ export async function getFontAdviceAI(
   fontName: string,
   fontStyle: string
 ): Promise<{ isGood: boolean; advice: string }> {
-  const prompt = `Eres un Director de Arte experto en diseño de marcas, tipografía y psicología del color.
-Un cliente está creando la identidad visual para su empresa, la cual describe de la siguiente manera:
+  const prompt = `Eres un Director de Arte experto en diseño de marcas y tipografía.
+Un cliente está creando la identidad visual para su empresa:
 "${focus}"
 
-Para su logotipo y textos principales ha elegido la tipografía "${fontName}" (que pertenece a la familia ${fontStyle}).
+Ha elegido la tipografía "${fontName}" (familia: ${fontStyle}).
 
-Tu tarea es evaluar si esa elección tipográfica transmite las emociones correctas para el enfoque de su empresa.
-Responde ÚNICAMENTE con un objeto JSON válido, sin formato markdown, con dos propiedades:
-1. "isGood": booleano (true si la fuente encaja bien, false si no).
-2. "advice": string (consejo de 2-3 párrafos cortos explicando por qué funciona o por qué no).
-
-Ejemplo:
+Evalúa si esa tipografía transmite las emociones correctas para este negocio.
+Responde ÚNICAMENTE con un objeto JSON válido, sin markdown:
 {
-  "isGood": true,
-  "advice": "¡Excelente elección! La fuente..."
+  "isGood": true o false,
+  "advice": "consejo de 2-3 párrafos cortos"
 }`
 
   try {
     const text = await callAI(prompt)
-    const cleaned = text.trim().replace(/```json/g, "").replace(/```/g, "")
-    const adviceData = JSON.parse(cleaned)
-    return adviceData as { isGood: boolean; advice: string }
+    const cleaned = text.trim().replace(/```json/g, "").replace(/```/g, "").trim()
+    const match = cleaned.match(/\{[\s\S]*\}/s)
+    if (!match) throw new Error("Respuesta inesperada del modelo")
+    return JSON.parse(match[0]) as { isGood: boolean; advice: string }
   } catch (error: any) {
-    console.error("Error getting font advice:", error?.message)
-
+    console.error("Error en asesor tipográfico:", error?.message)
     if (error?.status === 429) {
-      return {
-        isGood: false,
-        advice: "⏳ El asesor está ocupado ahora mismo. Espera unos segundos e intenta de nuevo.",
-      }
+      return { isGood: false, advice: "⏳ El asesor está ocupado. Espera unos segundos e intenta de nuevo." }
     }
     if (error?.message?.includes("OPENROUTER_API_KEY")) {
-      return {
-        isGood: true,
-        advice: "⚙️ Configura tu OPENROUTER_API_KEY en el archivo .env para activar el Asesor Tipográfico con IA.",
-      }
+      return { isGood: true, advice: "⚙️ Configura tu OPENROUTER_API_KEY en el archivo .env para activar el asesor." }
     }
-    return {
-      isGood: true,
-      advice: `Hubo un error técnico: ${error.message || "Falla de conexión"}. Si te gusta la fuente visualmente, ¡adelante!`,
-    }
+    return { isGood: true, advice: `Error técnico: ${error.message || "Falla de conexión"}. Si te gusta la fuente, ¡adelante!` }
   }
 }
