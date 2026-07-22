@@ -38,3 +38,6 @@ Este documento describe las funcionalidades específicas que el sistema RULEC de
 
 ## 7. Módulo Complementario (Estrategia de Marca)
 - **RF-23:** El sistema debe incluir una pestaña o guía educativa donde los usuarios (principalmente microempresarios) puedan aprender cómo elegir un nombre adecuado para sus empresas.
+- **RF-24:** El sistema debe integrar una herramienta de generación de nombres (Naming) potenciada por Inteligencia Artificial, basada en la descripción del negocio.
+- **RF-25:** El sistema debe proporcionar un catálogo interactivo de tipografías (Google Fonts) con categorías, vista previa y búsqueda en tiempo real.
+- **RF-26:** El sistema debe incluir un "Asesor Tipográfico" con IA para evaluar si la fuente elegida transmite la percepción correcta según la temática del negocio.

@@ -17,6 +17,9 @@ He revisado el progreso del proyecto (CROMATIC) en Next.js y lo he comparado con
 - **RF-15:** Alternancia entre modo claro y oscuro en todas las pantallas.
 - **RF-16, RF-17:** Módulo Contextual de "Psicología del Color" integrado dinámicamente en el motor de color para emprendedores.
 - **RF-23:** Pestaña educativa con la guía rápida de "Cómo elegir un nombre", recientemente rediseñada con interfaz Glassmorphism premium.
+- **RF-24:** Herramienta de autogeneración de Naming con Inteligencia Artificial integrada.
+- **RF-25:** Catálogo en tiempo real de Google Fonts con filtrado, búsqueda y carga dinámica de casi 50 fuentes.
+- **RF-26:** Asesor Tipográfico con IA que evalúa la coherencia entre el rubro de la empresa y la fuente seleccionada.
 
 ## Lo que falta por implementar ❌
 1. **RF-09:** Textos explicativos autogenerados dinámicamente para cada esquema generado (explicar por qué esos colores funcionan juntos).
