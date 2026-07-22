@@ -1,39 +1,49 @@
 "use server"
 
-import { GoogleGenAI } from "@google/genai"
+// ─────────────────────────────────────────────
+// Configuración de modelos OpenRouter (gratuitos)
+// Cambia el modelo aquí si uno falla:
+// "google/gemini-2.0-flash-exp:free"
+// "meta-llama/llama-3.1-8b-instruct:free"
+// "mistralai/mistral-7b-instruct:free"
+// "deepseek/deepseek-r1:free"
+// ─────────────────────────────────────────────
+const OPENROUTER_MODEL = "google/gemini-2.0-flash-exp:free"
+const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-// Modelo con mayor cuota gratuita
-const MODEL = "gemini-2.0-flash-lite"
+async function callAI(prompt: string): Promise<string> {
+  const apiKey = process.env.OPENROUTER_API_KEY
 
-// Reintento automático con espera exponencial
-async function withRetry<T>(fn: () => Promise<T>, retries = 3, delayMs = 1500): Promise<T> {
-  for (let attempt = 1; attempt <= retries; attempt++) {
-    try {
-      return await fn()
-    } catch (error: any) {
-      const is429 = error?.status === 429 || error?.message?.includes("429") || error?.message?.includes("RESOURCE_EXHAUSTED")
-      const isLast = attempt === retries
-      if (is429 && !isLast) {
-        console.warn(`[Gemini] Cuota alcanzada. Reintento ${attempt}/${retries} en ${delayMs}ms...`)
-        await new Promise((r) => setTimeout(r, delayMs * attempt))
-      } else {
-        throw error
-      }
-    }
+  if (!apiKey || apiKey.includes("PEGA-TU-KEY")) {
+    throw new Error("OPENROUTER_API_KEY no está configurada. Ve a openrouter.ai, crea una cuenta gratis y pega tu clave en el .env")
   }
-  throw new Error("No se pudo completar la solicitud después de varios intentos.")
-}
 
-function getClient() {
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY no está configurada en las variables de entorno.")
+  const res = await fetch(OPENROUTER_URL, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": "https://cromatic.app",
+      "X-Title": "Cromatic - Naming Tool",
+    },
+    body: JSON.stringify({
+      model: OPENROUTER_MODEL,
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.8,
+    }),
+  })
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    const msg = (err as any)?.error?.message || res.statusText
+    throw Object.assign(new Error(msg), { status: res.status })
   }
-  return new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
+
+  const data = await res.json() as any
+  return data.choices?.[0]?.message?.content ?? ""
 }
 
 export async function generateNameIdeas(focus: string): Promise<string[]> {
-  const ai = getClient()
-
   const prompt = `Eres un experto en branding y creación de nombres de empresas (Naming).
 Un cliente te ha dado la siguiente descripción de su empresa o proyecto:
 "${focus}"
@@ -43,17 +53,18 @@ Responde ÚNICAMENTE con un array de strings en formato JSON, sin markdown, sin 
 Ejemplo: ["Nombre1", "Nombre2", "Nombre3", "Nombre4", "Nombre5"]`
 
   try {
-    const response = await withRetry(() =>
-      ai.models.generateContent({ model: MODEL, contents: prompt })
-    )
-    const text = response.text?.trim().replace(/```json/g, "").replace(/```/g, "") ?? ""
-    const ideas = JSON.parse(text)
+    const text = await callAI(prompt)
+    const cleaned = text.trim().replace(/```json/g, "").replace(/```/g, "")
+    const ideas = JSON.parse(cleaned)
     return ideas as string[]
   } catch (error: any) {
     console.error("Error generating names:", error?.message)
-    const is429 = error?.status === 429 || error?.message?.includes("429") || error?.message?.includes("RESOURCE_EXHAUSTED")
-    if (is429) {
-      return ["⏳ Límite de peticiones alcanzado. Espera unos segundos e intenta de nuevo."]
+
+    if (error?.status === 429) {
+      return ["⏳ Límite momentáneo. Espera unos segundos e intenta de nuevo."]
+    }
+    if (error?.message?.includes("OPENROUTER_API_KEY")) {
+      return ["⚙️ Configura tu OPENROUTER_API_KEY en el archivo .env para activar la IA."]
     }
     return [`❌ Error: ${error.message || "Problema de conexión con la IA"}`]
   }
@@ -64,8 +75,6 @@ export async function getFontAdviceAI(
   fontName: string,
   fontStyle: string
 ): Promise<{ isGood: boolean; advice: string }> {
-  const ai = getClient()
-
   const prompt = `Eres un Director de Arte experto en diseño de marcas, tipografía y psicología del color.
 Un cliente está creando la identidad visual para su empresa, la cual describe de la siguiente manera:
 "${focus}"
@@ -84,19 +93,23 @@ Ejemplo:
 }`
 
   try {
-    const response = await withRetry(() =>
-      ai.models.generateContent({ model: MODEL, contents: prompt })
-    )
-    const text = response.text?.trim().replace(/```json/g, "").replace(/```/g, "") ?? ""
-    const adviceData = JSON.parse(text)
+    const text = await callAI(prompt)
+    const cleaned = text.trim().replace(/```json/g, "").replace(/```/g, "")
+    const adviceData = JSON.parse(cleaned)
     return adviceData as { isGood: boolean; advice: string }
   } catch (error: any) {
     console.error("Error getting font advice:", error?.message)
-    const is429 = error?.status === 429 || error?.message?.includes("429") || error?.message?.includes("RESOURCE_EXHAUSTED")
-    if (is429) {
+
+    if (error?.status === 429) {
       return {
         isGood: false,
-        advice: "⏳ El asesor está ocupado ahora mismo. Espera unos segundos e intenta de nuevo — el servicio se recupera automáticamente.",
+        advice: "⏳ El asesor está ocupado ahora mismo. Espera unos segundos e intenta de nuevo.",
+      }
+    }
+    if (error?.message?.includes("OPENROUTER_API_KEY")) {
+      return {
+        isGood: true,
+        advice: "⚙️ Configura tu OPENROUTER_API_KEY en el archivo .env para activar el Asesor Tipográfico con IA.",
       }
     }
     return {
