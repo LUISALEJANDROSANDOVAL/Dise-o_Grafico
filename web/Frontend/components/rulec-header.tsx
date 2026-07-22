@@ -59,6 +59,8 @@ export function RulecHeader({ profile = "entrepreneur", onProfileChange = () => 
           <div className="flex items-center gap-2">
             <Link href="/" className="text-xl font-bold tracking-tight text-foreground">CROMATIC</Link>
             <span className="hidden rounded-full bg-slate-200/50 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-slate-600 dark:bg-white/10 dark:text-slate-300 sm:inline">
+              v1.0
+            </span>
           </div>
         </div>
 
