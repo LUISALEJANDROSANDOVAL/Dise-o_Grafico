@@ -8,7 +8,7 @@ export async function generateNameIdeas(focus: string) {
   }
 
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-  const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" })
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
   const prompt = `Eres un experto en branding y creación de nombres de empresas (Naming).
 Un cliente te ha dado la siguiente descripción de su empresa o proyecto:
@@ -39,7 +39,7 @@ export async function getFontAdviceAI(focus: string, fontName: string, fontStyle
   }
 
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-  const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" })
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
   const prompt = `Eres un Director de Arte experto en diseño de marcas, tipografía y psicología del color.
 Un cliente está creando la identidad visual para su empresa, la cual describe de la siguiente manera:
