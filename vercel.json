@@ -1,0 +1,9 @@
+{
+  "buildCommand": "cd web/Frontend && pnpm run build",
+  "outputDirectory": "web/Frontend/.next",
+  "installCommand": "cd web/Frontend && pnpm install",
+  "framework": "nextjs",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}
