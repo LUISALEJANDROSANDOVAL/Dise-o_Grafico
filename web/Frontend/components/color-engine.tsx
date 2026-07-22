@@ -1,9 +1,9 @@
 "use client"
 
 import type React from "react"
-import { useRef } from "react"
+import { useRef, useState } from "react"
 import { motion } from "framer-motion"
-import { ImageIcon, Pipette, BrainCircuit } from "lucide-react"
+import { ImageIcon, Pipette, BrainCircuit, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { type HSL, type Scheme, SCHEMES, hslToHex, hexToHsl } from "@/lib/color"
@@ -18,14 +18,54 @@ type Props = {
 }
 
 function getColorPsychology(h: number) {
-  if (h >= 345 || h < 15) return { name: "Rojo", meaning: "Energía, Pasión, Acción", desc: "Excelente para marcas de comida, deportes o entretenimiento. Crea urgencia y llama la atención rápido." }
-  if (h >= 15 && h < 45) return { name: "Naranja", meaning: "Creatividad, Juventud, Aventura", desc: "Ideal para marcas accesibles, divertidas o dirigidas a un público joven. Transmite calidez y amabilidad." }
-  if (h >= 45 && h < 75) return { name: "Amarillo", meaning: "Alegría, Optimismo, Claridad", desc: "El primer color que procesa el ojo humano. Úsalo para destacar promociones, pero con moderación." }
-  if (h >= 75 && h < 160) return { name: "Verde", meaning: "Naturaleza, Crecimiento, Salud", desc: "El color de la armonía y la tranquilidad. Perfecto para marcas ecológicas, financieras o de bienestar." }
-  if (h >= 160 && h < 260) return { name: "Azul", meaning: "Confianza, Seguridad, Lógica", desc: "El color más usado corporativamente. Transmite fiabilidad y calma. Ideal para tecnología y finanzas." }
-  if (h >= 260 && h < 315) return { name: "Morado", meaning: "Lujo, Sabiduría, Imaginación", desc: "Asociado a lo premium y espiritual. Bueno para marcas de lujo, creatividad o productos innovadores." }
-  if (h >= 315 && h < 345) return { name: "Rosa", meaning: "Dulzura, Empatía, Cuidado", desc: "Suave y compasivo. Frecuentemente usado en belleza, cuidado personal y marcas que buscan cercanía." }
-  return { name: "Neutro", meaning: "Balance", desc: "" }
+  if (h >= 345 || h < 15) return { 
+    name: "Rojo", 
+    meaning: "Energía, Pasión, Acción", 
+    desc: "Excelente para marcas de comida, deportes o entretenimiento. Crea urgencia y llama la atención rápido.",
+    fullDesc: "El rojo es un color intenso y emocional que estimula el apetito, incrementa el ritmo cardíaco y fomenta la acción impulsiva. En marketing, es la herramienta perfecta para ofertas de tiempo limitado o llamadas a la acción (CTA) porque transmite urgencia. Sin embargo, su uso excesivo puede resultar abrumador o interpretarse como agresivo o de peligro. Es ideal para industrias donde el movimiento y la emoción son clave." 
+  }
+  if (h >= 15 && h < 45) return { 
+    name: "Naranja", 
+    meaning: "Creatividad, Juventud, Aventura", 
+    desc: "Ideal para marcas accesibles, divertidas o dirigidas a un público joven. Transmite calidez y amabilidad.",
+    fullDesc: "El naranja combina la energía del rojo con la felicidad del amarillo. Es un color que invita a la interacción, proyecta entusiasmo y sugiere asequibilidad y valor. Es muy común en empresas de tecnología orientadas al consumidor, marcas de entretenimiento, y sectores creativos. Psicológicamente, anima a la sociabilidad y reduce la sensación de riesgo." 
+  }
+  if (h >= 45 && h < 75) return { 
+    name: "Amarillo", 
+    meaning: "Alegría, Optimismo, Claridad", 
+    desc: "El primer color que procesa el ojo humano. Úsalo para destacar promociones, pero con moderación.",
+    fullDesc: "El amarillo es el color de la luz solar, asociado directamente con la alegría, el intelecto y la energía. Atrapa la atención inmediatamente, por lo que es útil en señalización o para destacar elementos clave. No obstante, en grandes cantidades puede causar fatiga visual o ansiedad. En marcas, transmite optimismo, claridad y juventud, siendo popular en la industria del transporte y alimentos." 
+  }
+  if (h >= 75 && h < 160) return { 
+    name: "Verde", 
+    meaning: "Naturaleza, Crecimiento, Salud", 
+    desc: "El color de la armonía y la tranquilidad. Perfecto para marcas ecológicas, financieras o de bienestar.",
+    fullDesc: "El verde está profundamente ligado a la naturaleza y al dinero. Simboliza crecimiento, frescura, fertilidad y seguridad. Tiene un fuerte poder curativo a nivel psicológico y es el color más relajante para el ojo humano. Las marcas ecológicas o enfocadas en la salud lo utilizan para denotar naturalidad y bienestar, mientras que las corporaciones financieras lo asocian con estabilidad y prosperidad económica." 
+  }
+  if (h >= 160 && h < 260) return { 
+    name: "Azul", 
+    meaning: "Confianza, Seguridad, Lógica", 
+    desc: "El color más usado corporativamente. Transmite fiabilidad y calma. Ideal para tecnología y finanzas.",
+    fullDesc: "El azul transmite estabilidad, profesionalidad y confianza. Reduce el ritmo cardíaco y promueve la calma. Es el color favorito tanto para hombres como mujeres a nivel mundial. Es la elección dominante para bancos, aseguradoras, tecnología médica y redes sociales, porque sugiere seguridad, orden y lógica. En contraparte, rara vez se usa para alimentos porque suprime el apetito." 
+  }
+  if (h >= 260 && h < 315) return { 
+    name: "Morado", 
+    meaning: "Lujo, Sabiduría, Imaginación", 
+    desc: "Asociado a lo premium y espiritual. Bueno para marcas de lujo, creatividad o productos innovadores.",
+    fullDesc: "El morado combina la estabilidad del azul con la energía del rojo. Históricamente asociado con la realeza, transmite poder, nobleza, lujo y ambición. También está fuertemente vinculado a la creatividad, el misterio y la magia. En el diseño de marcas, los tonos más oscuros sugieren opulencia, mientras que los más claros (como la lavanda) evocan nostalgia, romance y delicadeza." 
+  }
+  if (h >= 315 && h < 345) return { 
+    name: "Rosa", 
+    meaning: "Dulzura, Empatía, Cuidado", 
+    desc: "Suave y compasivo. Frecuentemente usado en belleza, cuidado personal y marcas que buscan cercanía.",
+    fullDesc: "El rosa representa la compasión, la crianza y el amor. Relacionado tradicionalmente con lo femenino, transmite una sensación de calma y reduce sentimientos de ira y agresión. En el branding, los tonos pálidos proyectan inocencia y cuidado (ideal para productos infantiles o de belleza), mientras que los rosas intensos o magenta expresan rebeldía, energía moderna y diversión sin la agresividad del rojo." 
+  }
+  return { 
+    name: "Neutro", 
+    meaning: "Balance", 
+    desc: "Un color que proporciona estructura y equilibrio.",
+    fullDesc: "Los colores neutros (como los grises) son conservadores, formales y sofisticados. Pueden ser el fondo perfecto para hacer que otros colores destaquen, aportando una sensación de madurez, solidez y calma. Demasiado gris puede sentirse aburrido o deprimente, por lo que suele usarse en conjunto con tonos más vibrantes." 
+  }
 }
 
 export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profile }: Props) {
@@ -33,7 +73,17 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
   const fileRef = useRef<HTMLInputElement>(null)
 
   const baseHex = hslToHex(base)
-  const psycho = getColorPsychology(base.h)
+  const primaryPsycho = getColorPsychology(base.h)
+  
+  let secondaryHue = base.h
+  if (scheme === "complementary") secondaryHue = (base.h + 180) % 360
+  else if (scheme === "triad") secondaryHue = (base.h + 120) % 360
+  else if (scheme === "analogous") secondaryHue = (base.h + 30) % 360
+  
+  const secondaryPsycho = getColorPsychology(secondaryHue)
+  const secondaryHex = hslToHex({ h: secondaryHue, s: base.s, l: base.l })
+
+  const [selectedPsycho, setSelectedPsycho] = useState<ReturnType<typeof getColorPsychology> & { hex: string, isPrimary: boolean } | null>(null)
 
   function pickFromWheel(e: React.PointerEvent<HTMLDivElement>) {
     const el = wheelRef.current
@@ -197,21 +247,87 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
       
       {/* Psychology Context Module */}
       {profile === "entrepreneur" && (
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          key={psycho.name}
-          className="mt-2 flex flex-col gap-2 rounded-xl border border-blue-100 bg-blue-50/50 p-4 dark:border-blue-900/30 dark:bg-blue-950/20"
+        <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {/* Primario */}
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            key={`prim-${primaryPsycho.name}`}
+            onClick={() => setSelectedPsycho({ ...primaryPsycho, hex: baseHex, isPrimary: true })}
+            className="flex cursor-pointer flex-col gap-2 rounded-xl border border-blue-100 bg-blue-50/50 p-4 transition-colors hover:border-blue-300 hover:bg-blue-100/50 dark:border-blue-900/30 dark:bg-blue-950/20 dark:hover:bg-blue-900/40"
+          >
+            <div className="flex items-center gap-2">
+              <div className="h-4 w-4 rounded-full border border-black/10 shadow-sm" style={{ backgroundColor: baseHex }} />
+              <span className="font-semibold text-sm tracking-tight text-blue-900 dark:text-blue-300">Principal: {primaryPsycho.name}</span>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">{primaryPsycho.meaning}</p>
+              <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400 line-clamp-2">{primaryPsycho.desc}</p>
+            </div>
+          </motion.div>
+
+          {/* Secundario */}
+          {scheme !== "mono" && primaryPsycho.name !== secondaryPsycho.name && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              key={`sec-${secondaryPsycho.name}`}
+              onClick={() => setSelectedPsycho({ ...secondaryPsycho, hex: secondaryHex, isPrimary: false })}
+              className="flex cursor-pointer flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50/50 p-4 transition-colors hover:border-slate-300 hover:bg-slate-100/50 dark:border-slate-800 dark:bg-slate-900/20 dark:hover:bg-slate-800/40"
+            >
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 rounded-full border border-black/10 shadow-sm" style={{ backgroundColor: secondaryHex }} />
+                <span className="font-semibold text-sm tracking-tight text-slate-900 dark:text-slate-300">Secundario: {secondaryPsycho.name}</span>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">{secondaryPsycho.meaning}</p>
+                <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400 line-clamp-2">{secondaryPsycho.desc}</p>
+              </div>
+            </motion.div>
+          )}
+        </div>
+      )}
+
+      {/* Psychology Modal */}
+      {selectedPsycho && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+          onClick={() => setSelectedPsycho(null)}
         >
-          <div className="flex items-center gap-2">
-            <BrainCircuit className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            <span className="font-semibold text-sm tracking-tight text-blue-900 dark:text-blue-300">Psicología del {psycho.name}</span>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">{psycho.meaning}</p>
-            <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">{psycho.desc}</p>
-          </div>
-        </motion.div>
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-slate-950 dark:border dark:border-slate-800"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="h-24 w-full sm:h-32" style={{ backgroundColor: selectedPsycho.hex }} />
+            <button 
+              onClick={() => setSelectedPsycho(null)}
+              className="absolute right-3 top-3 rounded-full bg-black/20 p-1.5 text-white backdrop-blur-md transition-colors hover:bg-black/40"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <div className="p-6">
+              <div className="mb-4">
+                <span className="mb-2 inline-block rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                  Color {selectedPsycho.isPrimary ? "Principal" : "Secundario"}
+                </span>
+                <h3 className="text-2xl font-bold tracking-tight">Psicología del {selectedPsycho.name}</h3>
+              </div>
+              <p className="mb-4 text-base font-semibold text-blue-600 dark:text-blue-400">
+                {selectedPsycho.meaning}
+              </p>
+              <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                {selectedPsycho.fullDesc}
+              </p>
+              <div className="mt-6 flex justify-end">
+                <Button onClick={() => setSelectedPsycho(null)}>
+                  Entendido
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       )}
     </section>
   )

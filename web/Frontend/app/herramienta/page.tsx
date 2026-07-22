@@ -9,6 +9,7 @@ import { ToolBar } from "@/components/tool-bar"
 import { type HSL, type Scheme, type ColorblindMode, type Swatch, generatePalette, hslToHex, hexToHsl } from "@/lib/color"
 import { savePalette } from "@/app/actions"
 import { createClient } from "@/utils/supabase/client"
+import { useTheme } from "@/hooks/useTheme"
 
 function HerramientaContent() {
   const searchParams = useSearchParams()
@@ -17,7 +18,7 @@ function HerramientaContent() {
   const schemeParam = searchParams.get("scheme")
   const initialProfile = (searchParams.get("profile") as Profile) || "entrepreneur"
 
-  const [theme, setTheme] = useState<"light" | "dark">("light")
+  const [theme, setTheme] = useTheme()
   const [profile, setProfile] = useState<Profile>(initialProfile)
   
   const initialBase = useMemo(() => {
@@ -62,11 +63,7 @@ function HerramientaContent() {
   }
 
   // Apply theme class to <html>
-  useEffect(() => {
-    const root = document.documentElement
-    root.classList.toggle("dark", theme === "dark")
-    root.classList.toggle("light", theme === "light")
-  }, [theme])
+
 
   function handleExport() {
     window.print()
