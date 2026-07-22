@@ -1,97 +1,120 @@
 import { View, Text, TextInput, ScrollView, TouchableOpacity, Animated } from 'react-native';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-type IndustryStyle = 'editorial' | 'tech' | 'gastronomy' | 'minimalist';
+type BrandVibe = 'luxury' | 'tech' | 'trust' | 'energy';
 
-interface StyleOption {
-  id: IndustryStyle;
+interface VibeOption {
+  id: BrandVibe;
   label: string;
   fontClass: string;
   description: string;
   icon: keyof typeof Ionicons.glyphMap;
+  prefixes: string[];
+  suffixes: string[];
+  color: string;
 }
 
-const STYLE_OPTIONS: StyleOption[] = [
+const VIBE_OPTIONS: VibeOption[] = [
   {
-    id: 'editorial',
-    label: '🌿 Cosmética & Lujo',
-    fontClass: 'font-display-lg',
-    description: 'Serif sofisticada de alto contraste, perfecta para bienes de lujo y moda.',
-    icon: 'sparkles-outline',
+    id: 'luxury',
+    label: 'Elegancia & Lujo',
+    fontClass: 'font-display-lg', // Serif
+    description: 'Serif sofisticada de alto contraste, transmite exclusividad y herencia.',
+    icon: 'diamond-outline',
+    color: '#0b0704',
+    prefixes: ['Maison', 'Atelier', 'Villa', 'Aura'],
+    suffixes: ['& Co.', 'Studio', 'Noir', 'Essence'],
   },
   {
     id: 'tech',
-    label: '⚡ Tech & Digital',
-    fontClass: 'font-body-lg',
-    description: 'Sans-Serif geométrica y ultra-limpia para Startups y herramientas SaaS.',
+    label: 'Innovación & Tech',
+    fontClass: 'font-body-lg', // Sans-Serif clean
+    description: 'Sans-Serif geométrica y minimalista, proyecta futuro y precisión.',
+    icon: 'hardware-chip-outline',
+    color: '#0055FF',
+    prefixes: ['Neo', 'Syn', 'Omni', 'Nova'],
+    suffixes: ['ify', 'io', 'Tech', 'Labs'],
+  },
+  {
+    id: 'trust',
+    label: 'Cercanía & Confianza',
+    fontClass: 'font-headline-md', // Serif cálida
+    description: 'Serif de autor con carácter cálido, ideal para servicios y hospitalidad.',
+    icon: 'heart-half-outline',
+    color: '#2A4B3C',
+    prefixes: ['Casa', 'Tierra', 'Puro', 'Alma'],
+    suffixes: ['Care', 'Roots', 'Vida', 'Well'],
+  },
+  {
+    id: 'energy',
+    label: 'Energía & Juventud',
+    fontClass: 'font-label-caps', // Modular
+    description: 'Tipografía modular y audaz, captura la atención al instante.',
     icon: 'flash-outline',
+    color: '#FF4500',
+    prefixes: ['Go', 'Zap', 'Max', 'Vibe'],
+    suffixes: ['Up', 'Now', 'X', 'Pop'],
   },
-  {
-    id: 'gastronomy',
-    label: '☕ Gastronomía',
-    fontClass: 'font-headline-md',
-    description: 'Serif de autor con carácter cálido para café, repostería y cocina boutique.',
-    icon: 'cafe-outline',
-  },
-  {
-    id: 'minimalist',
-    label: '🎯 Estudio Creativo',
-    fontClass: 'font-label-caps',
-    description: 'Tipografía neutra y modular para estudios de arquitectura y diseño.',
-    icon: 'prism-outline',
-  },
-];
-
-const INSPIRATION_SUGGESTIONS = [
-  'Aura', 'Noir', 'Essence', 'Studio', 'Kura', 'Vanguard', 'Botanica', 'Zenith', 'Verde', 'Minimal'
 ];
 
 export default function NamingScreen() {
   const [brandName, setBrandName] = useState('');
-  const [selectedStyle, setSelectedStyle] = useState<IndustryStyle>('editorial');
+  const [selectedVibe, setSelectedVibe] = useState<BrandVibe>('luxury');
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  const currentOption = useMemo(() => {
-    return STYLE_OPTIONS.find((opt) => opt.id === selectedStyle) || STYLE_OPTIONS[0];
-  }, [selectedStyle]);
+  const currentVibe = useMemo(() => {
+    return VIBE_OPTIONS.find((opt) => opt.id === selectedVibe) || VIBE_OPTIONS[0];
+  }, [selectedVibe]);
 
-  // Algoritmo de Evaluación de Naming en Tiempo Real (Health Check)
-  const namingMetrics = useMemo(() => {
-    const cleanName = brandName.trim();
-    if (!cleanName) {
-      return { score: 0, lengthText: 'Esperando nombre...', scoreColor: 'text-secondary', badgeBg: 'bg-surface-container' };
+  // Animación de aparición suave al escribir el nombre
+  useEffect(() => {
+    if (brandName.trim().length > 1) {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [brandName, fadeAnim]);
+
+  // Análisis Semántico Simulado (Premium)
+  const semanticAnalysis = useMemo(() => {
+    const cleanName = brandName.trim().toUpperCase();
+    if (cleanName.length < 2) return null;
+
+    let strength = 'Media';
+    let memorability = 'Media';
+    let phonetic = 'Fluida';
+
+    // Análisis de Fuerza (Letras fuertes)
+    if (/[KXZVQ]/.test(cleanName)) {
+      strength = 'Alta (Contundente)';
     }
 
-    const len = cleanName.length;
-    let lengthScore = 100;
-    let lengthText = 'Brevedad perfecta (< 8 letras)';
-
-    if (len > 12) {
-      lengthScore = 40;
-      lengthText = 'Demasiado largo (> 12 letras)';
-    } else if (len >= 8) {
-      lengthScore = 75;
-      lengthText = 'Longitud moderada (8-12 letras)';
+    // Análisis de Memorabilidad (Longitud)
+    if (cleanName.length <= 5) {
+      memorability = 'Muy Alta (Corto y directo)';
+    } else if (cleanName.length > 9) {
+      memorability = 'Baja (Difícil de recordar rápido)';
     }
 
-    // Evaluación de fonética básica (vocal al final favorece la fluidez en español)
-    const endsWithVowel = /[aeiouáéíóúAEIOUÁÉÍÓÚ]$/.test(cleanName);
-    const phoneticsScore = endsWithVowel ? 95 : 80;
-
-    const totalScore = Math.round((lengthScore * 0.6) + (phoneticsScore * 0.4));
-
-    let scoreColor = 'text-[#2A4B3C]';
-    let badgeBg = 'bg-[#2A4B3C]/10';
-    if (totalScore < 60) {
-      scoreColor = 'text-error';
-      badgeBg = 'bg-error-container';
-    } else if (totalScore < 80) {
-      scoreColor = 'text-[#FF8000]';
-      badgeBg = 'bg-[#FF8000]/10';
+    // Análisis Fonético (Vocales/Consonantes repetidas)
+    const endsWithVowel = /[AEIOU]$/.test(cleanName);
+    if (endsWithVowel) {
+      phonetic = 'Melódica (Fácil pronunciación global)';
+    } else {
+      phonetic = 'Asertiva (Terminación sólida)';
     }
 
-    return { score: totalScore, lengthText, scoreColor, badgeBg };
+    return { strength, memorability, phonetic };
   }, [brandName]);
 
   return (
@@ -110,168 +133,173 @@ export default function NamingScreen() {
       </View>
 
       <ScrollView className="flex-1 px-margin-mobile pt-8 pb-32">
-        {/* Title Section */}
         <View className="mb-8">
-          <Text className="font-headline-md text-[32px] text-primary mb-2">Arte del Naming</Text>
+          <Text className="font-headline-md text-[32px] text-primary mb-2">Laboratorio Premium</Text>
           <Text className="font-body-lg text-[18px] text-secondary">
-            Un gran nombre es el cimiento de una marca perdurable. Explora los principios y evalúa tu identidad en tiempo real.
+            Construye la identidad verbal de tu marca a través de estrategia y neurociencia aplicada.
           </Text>
         </View>
 
-        {/* Educational Cards */}
-        <View className="gap-4 mb-section-gap">
-          <EducationalCard 
-            icon="reorder-two-outline"
-            title="Brevedad" 
-            description="Menos es más. Los nombres cortos son más fáciles de recordar, pronunciar y encajan mejor en entornos digitales limitados." 
-          />
-          <EducationalCard 
-            icon="volume-medium-outline"
-            title="Fonética" 
-            description="¿Cómo suena en voz alta? Busca cadencia y fluidez. Evita combinaciones de letras disonantes o difíciles de deletrear." 
-          />
-          <EducationalCard 
-            icon="finger-print"
-            title="Identidad" 
-            description="El nombre debe evocar la esencia, no solo describir la función. Busca una conexión emocional que resuene con tu público." 
-          />
-        </View>
-
-        {/* ESTUDIO E INTERACTIVIDAD DE NAMING (EL PRODUCTO REAL) */}
-        <View className="mb-8">
-          <Text className="font-headline-sm text-[24px] text-primary mb-2">Laboratorio de Naming</Text>
-          <Text className="font-body-md text-[14px] text-secondary mb-6">
-            Escribe un nombre, selecciona la industria de tu negocio y evalúa su impacto visual y auditivo.
+        {/* PASO 1: EL PROPÓSITO (LA VIBRA) */}
+        <View className="mb-10">
+          <Text className="font-label-caps text-[12px] text-secondary mb-4 uppercase tracking-widest">
+            Fase 1: ¿Qué debe transmitir tu marca?
           </Text>
-
-          {/* Selector de Industria / Estilo Tipográfico */}
-          <Text className="font-label-caps text-[12px] text-secondary mb-3 uppercase">1. Selecciona el Rubro de la Marca</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="w-full mb-6">
-            <View className="flex-row gap-3 px-1">
-              {STYLE_OPTIONS.map((opt) => {
-                const isSelected = opt.id === selectedStyle;
-                return (
-                  <TouchableOpacity
-                    key={opt.id}
-                    activeOpacity={0.8}
-                    onPress={() => setSelectedStyle(opt.id)}
-                    className={`px-5 py-3 rounded-lg border flex-row items-center gap-2 ${
-                      isSelected 
-                        ? 'bg-ink-text border-ink-text' 
-                        : 'bg-surface-container-lowest border-border-subtle'
-                    }`}
-                  >
-                    <Ionicons 
-                      name={opt.icon} 
-                      size={18} 
-                      color={isSelected ? '#FAF6EF' : '#605e59'} 
-                    />
+          <View className="flex-col gap-3">
+            {VIBE_OPTIONS.map((opt) => {
+              const isSelected = opt.id === selectedVibe;
+              return (
+                <TouchableOpacity
+                  key={opt.id}
+                  activeOpacity={0.8}
+                  onPress={() => setSelectedVibe(opt.id)}
+                  className={`p-4 rounded-xl border flex-row items-center justify-between ${
+                    isSelected 
+                      ? 'bg-ink-text border-ink-text shadow-sm' 
+                      : 'bg-surface-container-lowest border-border-subtle'
+                  }`}
+                >
+                  <View className="flex-row items-center gap-4">
+                    <View 
+                      className={`w-10 h-10 rounded-full items-center justify-center ${isSelected ? '' : 'bg-surface-container'}`}
+                      style={isSelected ? { backgroundColor: 'rgba(249, 243, 235, 0.2)' } : undefined}
+                    >
+                      <Ionicons 
+                        name={opt.icon} 
+                        size={20} 
+                        color={isSelected ? '#FAF6EF' : '#605e59'} 
+                      />
+                    </View>
                     <Text 
-                      className={`font-label-caps text-[12px] ${
+                      className={`font-headline-sm text-[16px] ${
                         isSelected ? 'text-paper-bg' : 'text-primary'
                       }`}
                     >
                       {opt.label}
                     </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </ScrollView>
-
-          {/* Canvas de Visualización e Input */}
-          <View className="bg-surface-container-low rounded-xl border border-border-subtle p-6 items-center justify-center min-h-[280px] mb-6">
-            {/* Preview Area */}
-            <View className="w-full min-h-[110px] items-center justify-center border-b border-border-subtle pb-6 mb-6">
-              <Text 
-                className={`${currentOption.fontClass} text-[38px] text-primary text-center ${!brandName ? 'opacity-30' : 'opacity-100'}`}
-                numberOfLines={2}
-                adjustsFontSizeToFit
-              >
-                {brandName || "Tu Visión Aquí"}
-              </Text>
-            </View>
-
-            {/* Input Area */}
-            <View className="w-full relative pt-6">
-              <Text className="font-label-caps text-[10px] text-secondary uppercase tracking-widest absolute top-0 left-0">
-                Prueba tu nombre aquí
-              </Text>
-              <TextInput
-                className="w-full h-touch-target border-b-2 border-border-subtle text-center font-body-md text-[18px] text-primary"
-                placeholder="Escribe el nombre de tu marca..."
-                placeholderTextColor="rgba(135, 135, 139, 0.5)"
-                value={brandName}
-                onChangeText={setBrandName}
-                autoCapitalize="words"
-                autoCorrect={false}
-                underlineColorAndroid="transparent" 
-              />
-            </View>
-          </View>
-
-
-          {/* Diagnóstico en Tiempo Real (Naming Score) */}
-          {brandName.trim().length > 0 && (
-            <View className="bg-surface-container-lowest rounded-xl border border-border-subtle p-5 mb-8">
-              <View className="flex-row justify-between items-center mb-4 border-b border-border-subtle pb-3">
-                <Text className="font-headline-sm text-[18px] text-primary">Diagnóstico de Naming</Text>
-                <View className={`px-3 py-1 rounded-full ${namingMetrics.badgeBg}`}>
-                  <Text className={`font-label-caps text-[12px] ${namingMetrics.scoreColor}`}>
-                    Score: {namingMetrics.score} / 100
-                  </Text>
-                </View>
-              </View>
-
-              <View className="gap-3">
-                <View className="flex-row items-center gap-2">
-                  <Ionicons name="checkmark-circle-outline" size={18} color="#2A4B3C" />
-                  <Text className="font-body-md text-[14px] text-secondary flex-1">
-                    {namingMetrics.lengthText}
-                  </Text>
-                </View>
-                <View className="flex-row items-center gap-2">
-                  <Ionicons name="text-outline" size={18} color="#2A4B3C" />
-                  <Text className="font-body-md text-[14px] text-secondary flex-1">
-                    Tipografía recomendada: <Text className="text-primary font-medium">{currentOption.description}</Text>
-                  </Text>
-                </View>
-              </View>
-            </View>
-          )}
-
-          {/* Generador de Inspiración (Chips de sugerencias) */}
-          <Text className="font-label-caps text-[12px] text-secondary mb-3 uppercase">2. ¿Necesitas inspiración? Toca un prefijo:</Text>
-          <View className="flex-row flex-wrap gap-2 mb-8">
-            {INSPIRATION_SUGGESTIONS.map((word) => (
-              <TouchableOpacity
-                key={word}
-                activeOpacity={0.7}
-                onPress={() => setBrandName(word)}
-                className="px-3 py-1.5 bg-surface-container-low border border-border-subtle rounded-md"
-              >
-                <Text className="font-button-text text-[13px] text-ink-text">+ {word}</Text>
-              </TouchableOpacity>
-            ))}
+                  </View>
+                  {isSelected && <Ionicons name="checkmark" size={20} color="#FAF6EF" />}
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
 
-        <View className="h-20" />
+        {/* PASO 2: EL LABORATORIO (INPUT) */}
+        <View className="mb-10">
+          <Text className="font-label-caps text-[12px] text-secondary mb-4 uppercase tracking-widest">
+            Fase 2: Analizador Semántico
+          </Text>
+          <View className="bg-surface-container-lowest rounded-xl border border-border-subtle p-6 items-center justify-center mb-6 shadow-sm">
+            <TextInput
+              className="w-full h-[60px] text-center font-display-lg text-[32px] text-primary"
+              placeholder="Ingresa tu idea..."
+              placeholderTextColor="rgba(135, 135, 139, 0.4)"
+              value={brandName}
+              onChangeText={setBrandName}
+              autoCapitalize="words"
+              autoCorrect={false}
+              underlineColorAndroid="transparent" 
+            />
+            <View className="w-16 h-[2px] bg-border-subtle mt-2 rounded-full" />
+          </View>
+
+          {/* DESBLOQUEADOR (INSPIRACIÓN) */}
+          {brandName.trim().length === 0 && (
+            <Animated.View style={{ opacity: 1 }} className="mt-2">
+              <Text className="font-label-caps text-[10px] text-secondary mb-3 uppercase tracking-wider text-center">
+                Sugerencias para {currentVibe.label}:
+              </Text>
+              <View className="flex-row flex-wrap justify-center gap-2">
+                {currentVibe.prefixes.map(p => (
+                  <TouchableOpacity key={p} onPress={() => setBrandName(p)} className="px-3 py-1.5 bg-surface-container border border-border-subtle rounded-md">
+                    <Text className="font-body-md text-[13px] text-secondary">{p}...</Text>
+                  </TouchableOpacity>
+                ))}
+                {currentVibe.suffixes.map(s => (
+                  <TouchableOpacity key={s} onPress={() => setBrandName(s)} className="px-3 py-1.5 bg-surface-container border border-border-subtle rounded-md">
+                    <Text className="font-body-md text-[13px] text-secondary">...{s}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </Animated.View>
+          )}
+        </View>
+
+        {/* PASO 3: LA MAGIA (RESULTADOS) */}
+        {semanticAnalysis && (
+          <Animated.View style={{ opacity: fadeAnim }} className="mb-10">
+            <Text className="font-label-caps text-[12px] text-secondary mb-4 uppercase tracking-widest">
+              Fase 3: Diagnóstico y Match Visual
+            </Text>
+            
+            {/* MATCH VISUAL (PREVIEW) */}
+            <View className="bg-primary rounded-2xl p-8 items-center justify-center min-h-[220px] mb-4 shadow-lg overflow-hidden relative">
+              {/* Decorative elements */}
+              <View className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-bl-full" />
+              <View className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-tr-full" />
+              
+              <Text className="font-label-caps text-[10px] text-white/50 uppercase tracking-widest absolute top-6">
+                Identidad Recomendada
+              </Text>
+              
+              <Text 
+                className={`${currentVibe.fontClass} text-[48px] text-white text-center leading-tight`}
+                numberOfLines={2}
+                adjustsFontSizeToFit
+              >
+                {brandName}
+              </Text>
+            </View>
+
+            {/* ANÁLISIS SEMÁNTICO */}
+            <View className="bg-surface-container-lowest rounded-xl border border-border-subtle p-6 gap-4 shadow-sm">
+              <View className="flex-row items-start gap-3 border-b border-border-subtle pb-4">
+                <View className="w-8 h-8 rounded-full bg-surface-container items-center justify-center mt-1">
+                  <Ionicons name="bar-chart-outline" size={16} color="#0b0704" />
+                </View>
+                <View className="flex-1">
+                  <Text className="font-label-caps text-[11px] text-secondary uppercase tracking-wider mb-1">Impacto de Fuerza</Text>
+                  <Text className="font-body-lg text-[15px] text-primary">{semanticAnalysis.strength}</Text>
+                </View>
+              </View>
+
+              <View className="flex-row items-start gap-3 border-b border-border-subtle pb-4">
+                <View className="w-8 h-8 rounded-full bg-surface-container items-center justify-center mt-1">
+                  <Ionicons name="bulb-outline" size={16} color="#0b0704" />
+                </View>
+                <View className="flex-1">
+                  <Text className="font-label-caps text-[11px] text-secondary uppercase tracking-wider mb-1">Memorabilidad</Text>
+                  <Text className="font-body-lg text-[15px] text-primary">{semanticAnalysis.memorability}</Text>
+                </View>
+              </View>
+
+              <View className="flex-row items-start gap-3 border-b border-border-subtle pb-4">
+                <View className="w-8 h-8 rounded-full bg-surface-container items-center justify-center mt-1">
+                  <Ionicons name="mic-outline" size={16} color="#0b0704" />
+                </View>
+                <View className="flex-1">
+                  <Text className="font-label-caps text-[11px] text-secondary uppercase tracking-wider mb-1">Estructura Fonética</Text>
+                  <Text className="font-body-lg text-[15px] text-primary">{semanticAnalysis.phonetic}</Text>
+                </View>
+              </View>
+
+              <View className="flex-row items-start gap-3 pt-2">
+                <View className="w-8 h-8 rounded-full bg-surface-container items-center justify-center mt-1">
+                  <Ionicons name="text-outline" size={16} color="#0b0704" />
+                </View>
+                <View className="flex-1">
+                  <Text className="font-label-caps text-[11px] text-secondary uppercase tracking-wider mb-1">Match Tipográfico</Text>
+                  <Text className="font-body-lg text-[15px] text-primary leading-relaxed">{currentVibe.description}</Text>
+                </View>
+              </View>
+            </View>
+
+          </Animated.View>
+        )}
+
+        <View className="h-10" />
       </ScrollView>
     </SafeAreaView>
-  );
-}
-
-function EducationalCard({ icon, title, description }: { icon: any, title: string, description: string }) {
-  return (
-    <TouchableOpacity activeOpacity={0.7} className="border border-border-subtle bg-surface-container-lowest rounded-xl p-6 flex-col gap-4">
-      <View className="w-12 h-12 rounded-full bg-surface-container items-center justify-center">
-        <Ionicons name={icon} size={24} color="#0b0704" />
-      </View>
-      <View>
-        <Text className="font-headline-sm text-[24px] text-primary mb-2">{title}</Text>
-        <Text className="font-body-md text-[16px] text-secondary">{description}</Text>
-      </View>
-    </TouchableOpacity>
   );
 }

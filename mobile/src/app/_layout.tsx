@@ -66,7 +66,10 @@ export default function AppLayout() {
         options={{
           title: 'Palette',
           tabBarIcon: ({ color, focused }) => (
-            <View className={`items-center justify-center p-1 px-4 rounded-full ${focused ? 'bg-accent-warm/20' : 'bg-transparent'}`}>
+            <View 
+              className={`items-center justify-center p-1 px-4 rounded-full ${focused ? '' : 'bg-transparent'}`}
+              style={focused ? { backgroundColor: 'rgba(217, 210, 197, 0.2)' } : undefined}
+            >
               <Ionicons name="color-palette" size={24} color={color} />
             </View>
           ),
