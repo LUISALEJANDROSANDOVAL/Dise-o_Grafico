@@ -154,7 +154,6 @@ export default function MockupsScreen() {
               {cardContrast.isAccessible ? 'Legibilidad: Alta' : 'Alerta: Contraste Bajo'} ({cardContrast.ratio}:1)
             </Text>
           </View>
-          </View>
         </View>
 
         {/* Mockup 2: Product Label */}
@@ -175,7 +174,6 @@ export default function MockupsScreen() {
                 <Text style={{ color: inkColor }} className="font-label-caps text-[10px] font-bold uppercase tracking-widest mb-2">Essence</Text>
                 <View style={{ backgroundColor: inkColor }} className="w-full h-[1px] opacity-20 mb-2" />
                 <Text style={{ color: inkColor }} className="font-headline-sm text-[18px] font-bold">No. 04</Text>
-              </View>
               </View>
               
               <View style={{ backgroundColor: paperBg, borderColor: inkColor }} className="items-center w-full mt-auto p-2 rounded border">
@@ -201,7 +199,6 @@ export default function MockupsScreen() {
             >
               {labelContrast.isAccessible ? 'Legibilidad: Alta' : 'Alerta: Contraste Bajo'} ({labelContrast.ratio}:1)
             </Text>
-          </View>
           </View>
         </View>
 
