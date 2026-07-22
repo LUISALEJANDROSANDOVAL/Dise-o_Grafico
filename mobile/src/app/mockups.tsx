@@ -19,7 +19,7 @@ const DEFAULT_PALETTE = {
 
 export default function MockupsScreen() {
   const [activePalette, setActivePalette] = useState(DEFAULT_PALETTE);
-  const [daltonismType, setDaltonismType] = useState<'normal' | 'protanopia' | 'deuteranopia'>('normal');
+  const [daltonismType, setDaltonismType] = useState<'normal' | 'protanopia' | 'deuteranopia' | 'tritanopia' | 'achromatopsia'>('normal');
 
   // Cargar paleta activa desde AsyncStorage al entrar en foco
   useFocusEffect(
@@ -83,30 +83,36 @@ export default function MockupsScreen() {
         </View>
 
         {/* Selector de Daltonismo */}
-        <View className="mb-8 bg-surface-container-low p-1.5 rounded-xl border border-border-subtle">
-          <Text className="font-label-caps text-[10px] text-secondary font-bold uppercase tracking-wider mb-1.5 text-center">
+        <View className="mb-8">
+          <Text className="font-label-caps text-[10px] text-secondary font-bold uppercase tracking-wider mb-2 text-center">
             Simulador de Visión / Daltonismo (RF-13)
           </Text>
-          <View className="flex-row gap-1">
-            {(['normal', 'protanopia', 'deuteranopia'] as const).map((type) => (
-              <TouchableOpacity
-                key={type}
-                onPress={() => setDaltonismType(type)}
-                style={daltonismType === type ? { backgroundColor: '#ffffff' } : null}
-                className={`flex-1 py-2 px-2 rounded-lg items-center justify-center ${
-                  daltonismType === type ? 'shadow-sm border border-border-subtle' : ''
-                }`}
-              >
-                <Text
-                  className={`font-label-caps text-[10px] font-bold uppercase tracking-wider ${
-                    daltonismType === type ? 'text-primary' : 'text-secondary'
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="w-full">
+            <View className="flex-row gap-2 px-1 bg-surface-container-low p-1.5 rounded-xl border border-border-subtle">
+              {(['normal', 'protanopia', 'deuteranopia', 'tritanopia', 'achromatopsia'] as const).map((type) => (
+                <TouchableOpacity
+                  key={type}
+                  onPress={() => setDaltonismType(type)}
+                  style={daltonismType === type ? { backgroundColor: '#ffffff' } : null}
+                  className={`py-2 px-4 rounded-lg items-center justify-center ${
+                    daltonismType === type ? 'shadow-sm border border-border-subtle' : ''
                   }`}
                 >
-                  {type === 'normal' ? 'Normal' : type === 'protanopia' ? 'Protanopía' : 'Deuteranopía'}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+                  <Text
+                    className={`font-label-caps text-[10px] font-bold uppercase tracking-wider ${
+                      daltonismType === type ? 'text-primary' : 'text-secondary'
+                    }`}
+                  >
+                    {type === 'normal' ? 'Normal' 
+                      : type === 'protanopia' ? 'Protanopía' 
+                      : type === 'deuteranopia' ? 'Deuteranopía'
+                      : type === 'tritanopia' ? 'Tritanopía'
+                      : 'Acromatopsia'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
         </View>
 
         {/* Mockup 1: Business Card */}

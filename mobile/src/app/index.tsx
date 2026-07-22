@@ -16,6 +16,9 @@ const HARMONY_CHIPS: { type: HarmonyType; label: string }[] = [
   { type: 'complementary', label: 'Complementario' },
   { type: 'analogous', label: 'Análogo' },
   { type: 'triad', label: 'Tríada' },
+  { type: 'split-complementary', label: 'Comp. Dividido' },
+  { type: 'square', label: 'Cuadrado' },
+  { type: 'tetradic', label: 'Tetrádico' },
   { type: 'monochrome', label: 'Monocromo' },
 ];
 
@@ -88,7 +91,7 @@ export default function PaletteScreen() {
   const [isSaving, setIsSaving] = useState(false);
   const [savedPaletteId, setSavedPaletteId] = useState<string | null>(null);
   const [showQrModal, setShowQrModal] = useState(false);
-  const [selectedTechSwatch, setSelectedTechSwatch] = useState<SwatchData | null>(null);
+  const [selectedTechSwatchIndex, setSelectedTechSwatchIndex] = useState<number | null>(null);
   const [techFormats, setTechFormats] = useState<ColorFormats | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -228,9 +231,11 @@ export default function PaletteScreen() {
     } catch {}
   };
 
-  // Generación reactiva de los 4 swatches usando el motor de color (RF-07)
-  const swatches: SwatchData[] = useMemo(() => {
-    return generateHarmonies(baseColorHex, activeHarmony);
+  // Generación reactiva de swatches pasados a estado para permitir edición manual (RF-07)
+  const [swatches, setSwatches] = useState<SwatchData[]>(() => generateHarmonies(baseColorHex, activeHarmony));
+
+  useEffect(() => {
+    setSwatches(generateHarmonies(baseColorHex, activeHarmony));
   }, [baseColorHex, activeHarmony]);
 
   // Persistir paleta activa localmente para sincronizar entre pantallas
@@ -266,9 +271,9 @@ export default function PaletteScreen() {
   };
 
   // Abrir Ficha Técnica Completa (RF-10)
-  const handleOpenTechSpecs = (swatch: SwatchData) => {
-    setSelectedTechSwatch(swatch);
-    setTechFormats(convertColorFormats(swatch.hex));
+  const handleOpenTechSpecs = (index: number) => {
+    setSelectedTechSwatchIndex(index);
+    setTechFormats(convertColorFormats(swatches[index].hex));
   };
 
   const shareUrl = savedPaletteId 
@@ -476,7 +481,7 @@ export default function PaletteScreen() {
           {swatches.map((item, index) => (
             <TouchableOpacity 
               key={index} 
-              onPress={() => handleOpenTechSpecs(item)}
+              onPress={() => handleOpenTechSpecs(index)}
               className="w-[48%] active:scale-[0.98]"
             >
               <View 
@@ -529,64 +534,124 @@ export default function PaletteScreen() {
 
       {/* Modal Ficha Técnica Completa (RF-10: HEX, RGB, HSL, CMYK) */}
       <Modal
-        visible={!!selectedTechSwatch}
+        visible={selectedTechSwatchIndex !== null}
         transparent
         animationType="slide"
-        onRequestClose={() => setSelectedTechSwatch(null)}
+        onRequestClose={() => setSelectedTechSwatchIndex(null)}
       >
         <View className="flex-1 bg-black/60 justify-end">
           <View className="w-full bg-paper-bg rounded-t-3xl p-6 border-t border-border-subtle shadow-2xl">
-            <View className="flex-row justify-between items-center w-full mb-4 pb-2 border-b border-border-subtle">
-              <View className="flex-row items-center gap-3">
-                <View className="w-8 h-8 rounded-full border border-border-subtle" style={{ backgroundColor: selectedTechSwatch?.hex || '#000' }} />
-                <View>
-                  <Text className="font-headline-sm text-[18px] text-ink-text">{selectedTechSwatch?.label}</Text>
-                  <Text className="font-label-caps text-[12px] text-secondary uppercase">{selectedTechSwatch?.hex}</Text>
-                </View>
-              </View>
-              <TouchableOpacity onPress={() => setSelectedTechSwatch(null)}>
-                <Ionicons name="close" size={24} color="#0b0704" />
-              </TouchableOpacity>
-            </View>
-
-            <Text className="font-label-caps text-[10px] text-secondary uppercase tracking-widest mb-3">
-              Ficha Técnica para Imprenta y Desarrollo
-            </Text>
-
-            {techFormats && (
-              <View className="w-full bg-surface-container-low border border-border-subtle rounded-xl p-4 mb-6 gap-3">
-                <View className="flex-row justify-between items-center border-b border-border-subtle/50 pb-2">
-                  <Text className="font-body-md text-[13px] text-secondary">Código HEX</Text>
-                  <Text className="font-button-text text-[14px] text-ink-text font-bold">{techFormats.hex}</Text>
+            {selectedTechSwatchIndex !== null && (
+              <>
+                <View className="flex-row justify-between items-center w-full mb-4 pb-2 border-b border-border-subtle">
+                  <View className="flex-row items-center gap-3">
+                    <View className="w-8 h-8 rounded-full border border-border-subtle" style={{ backgroundColor: swatches[selectedTechSwatchIndex]?.hex || '#000' }} />
+                    <View>
+                      <Text className="font-headline-sm text-[18px] text-ink-text">{swatches[selectedTechSwatchIndex]?.label}</Text>
+                      <Text className="font-label-caps text-[12px] text-secondary uppercase">{swatches[selectedTechSwatchIndex]?.hex}</Text>
+                    </View>
+                  </View>
+                  <TouchableOpacity onPress={() => setSelectedTechSwatchIndex(null)}>
+                    <Ionicons name="close" size={24} color="#0b0704" />
+                  </TouchableOpacity>
                 </View>
 
-                <View className="flex-row justify-between items-center border-b border-border-subtle/50 pb-2">
-                  <Text className="font-body-md text-[13px] text-secondary">Pantalla (RGB)</Text>
-                  <Text className="font-button-text text-[14px] text-ink-text font-bold">{techFormats.rgb}</Text>
+                <Text className="font-label-caps text-[10px] text-secondary uppercase tracking-widest mb-3">
+                  Ajuste Manual de Diseñador
+                </Text>
+                
+                {/* Sliders HSL */}
+                <View className="w-full bg-surface-container-lowest border border-border-subtle rounded-xl p-4 mb-6">
+                  {(['h', 's', 'l'] as const).map((channel) => {
+                    const currentHsl = chroma(swatches[selectedTechSwatchIndex].hex).hsl();
+                    const val = channel === 'h' ? (currentHsl[0] || 0) : channel === 's' ? (currentHsl[1] || 0) * 100 : (currentHsl[2] || 0) * 100;
+                    const max = channel === 'h' ? 360 : 100;
+                    
+                    return (
+                      <View key={channel} className="flex-row items-center gap-3 mb-3">
+                        <Text className="font-label-caps text-[12px] text-secondary uppercase w-4">{channel}</Text>
+                        {/* Simulación visual del slider nativo (usamos botones rápidos por simplicidad o un touch horizontal básico) */}
+                        <View className="flex-1 flex-row items-center justify-between bg-surface rounded-full p-1 border border-border-subtle">
+                          <TouchableOpacity 
+                            onPress={() => {
+                              const newHsl = [...currentHsl];
+                              const idx = channel === 'h' ? 0 : channel === 's' ? 1 : 2;
+                              newHsl[idx] = Math.max(0, channel === 'h' ? val - 15 : (val - 5) / 100);
+                              const newHex = chroma.hsl(newHsl[0] || 0, newHsl[1] || 0, newHsl[2] || 0).hex().toUpperCase();
+                              
+                              const newSwatches = [...swatches];
+                              newSwatches[selectedTechSwatchIndex].hex = newHex;
+                              newSwatches[selectedTechSwatchIndex].rgb = `rgb(${chroma(newHex).rgb().join(', ')})`;
+                              setSwatches(newSwatches);
+                              setTechFormats(convertColorFormats(newHex));
+                            }}
+                            className="w-8 h-8 rounded-full bg-paper-bg items-center justify-center shadow-sm"
+                          >
+                            <Ionicons name="remove" size={16} color="#241F1A" />
+                          </TouchableOpacity>
+                          
+                          <Text className="font-button-text text-[12px] text-ink-text">{Math.round(val)}</Text>
+                          
+                          <TouchableOpacity 
+                            onPress={() => {
+                              const newHsl = [...currentHsl];
+                              const idx = channel === 'h' ? 0 : channel === 's' ? 1 : 2;
+                              newHsl[idx] = Math.min(channel === 'h' ? 360 : 1, channel === 'h' ? val + 15 : (val + 5) / 100);
+                              const newHex = chroma.hsl(newHsl[0] || 0, newHsl[1] || 0, newHsl[2] || 0).hex().toUpperCase();
+                              
+                              const newSwatches = [...swatches];
+                              newSwatches[selectedTechSwatchIndex].hex = newHex;
+                              newSwatches[selectedTechSwatchIndex].rgb = `rgb(${chroma(newHex).rgb().join(', ')})`;
+                              setSwatches(newSwatches);
+                              setTechFormats(convertColorFormats(newHex));
+                            }}
+                            className="w-8 h-8 rounded-full bg-paper-bg items-center justify-center shadow-sm"
+                          >
+                            <Ionicons name="add" size={16} color="#241F1A" />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    );
+                  })}
                 </View>
 
-                <View className="flex-row justify-between items-center border-b border-border-subtle/50 pb-2">
-                  <Text className="font-body-md text-[13px] text-secondary">Tono / Saturación (HSL)</Text>
-                  <Text className="font-button-text text-[14px] text-ink-text font-bold">{techFormats.hsl}</Text>
-                </View>
+                <Text className="font-label-caps text-[10px] text-secondary uppercase tracking-widest mb-3">
+                  Ficha Técnica para Imprenta y Desarrollo
+                </Text>
 
-                <View className="flex-row justify-between items-center">
-                  <Text className="font-body-md text-[13px] text-secondary">Imprenta (CMYK)</Text>
-                  <Text className="font-button-text text-[14px] text-ink-text font-bold">{techFormats.cmyk}</Text>
-                </View>
-              </View>
+                {techFormats && (
+                  <View className="w-full bg-surface-container-low border border-border-subtle rounded-xl p-4 mb-6 gap-3">
+                    <View className="flex-row justify-between items-center border-b border-border-subtle/50 pb-2">
+                      <Text className="font-body-md text-[13px] text-secondary">Código HEX</Text>
+                      <Text className="font-button-text text-[14px] text-ink-text font-bold">{techFormats.hex}</Text>
+                    </View>
+                    <View className="flex-row justify-between items-center border-b border-border-subtle/50 pb-2">
+                      <Text className="font-body-md text-[13px] text-secondary">Pantalla (RGB)</Text>
+                      <Text className="font-button-text text-[14px] text-ink-text font-bold">{techFormats.rgb}</Text>
+                    </View>
+                    <View className="flex-row justify-between items-center border-b border-border-subtle/50 pb-2">
+                      <Text className="font-body-md text-[13px] text-secondary">Tono / Saturación (HSL)</Text>
+                      <Text className="font-button-text text-[14px] text-ink-text font-bold">{techFormats.hsl}</Text>
+                    </View>
+                    <View className="flex-row justify-between items-center">
+                      <Text className="font-body-md text-[13px] text-secondary">Imprenta (CMYK)</Text>
+                      <Text className="font-button-text text-[14px] text-ink-text font-bold">{techFormats.cmyk}</Text>
+                    </View>
+                  </View>
+                )}
+
+                <TouchableOpacity 
+                  onPress={() => {
+                    triggerToast(`Copiado ${swatches[selectedTechSwatchIndex].hex} al portapapeles`);
+                    setSelectedTechSwatchIndex(null);
+                  }}
+                  className="w-full h-touch-target bg-primary rounded-lg items-center justify-center flex-row gap-2"
+                >
+                  <Ionicons name="copy-outline" size={18} color="#FAF6EF" />
+                  <Text className="font-button-text text-[14px] text-paper-bg font-medium">Copiar Código HEX</Text>
+                </TouchableOpacity>
+              </>
             )}
-
-            <TouchableOpacity 
-              onPress={() => {
-                triggerToast(`Copiado ${selectedTechSwatch?.hex} al portapapeles`);
-                setSelectedTechSwatch(null);
-              }}
-              className="w-full h-touch-target bg-primary rounded-lg items-center justify-center flex-row gap-2"
-            >
-              <Ionicons name="copy-outline" size={18} color="#FAF6EF" />
-              <Text className="font-button-text text-[14px] text-paper-bg font-medium">Copiar Código HEX</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </Modal>

@@ -5,6 +5,20 @@ import { useEffect } from 'react';
 import { useFonts } from 'expo-font';
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import { PlayfairDisplay_600SemiBold, PlayfairDisplay_700Bold } from '@expo-google-fonts/playfair-display';
+// Fuentes del catálogo de Naming
+import { Cinzel_400Regular, Cinzel_700Bold } from '@expo-google-fonts/cinzel';
+import { Lora_400Regular, Lora_700Bold } from '@expo-google-fonts/lora';
+import { Oswald_400Regular, Oswald_700Bold } from '@expo-google-fonts/oswald';
+import { Pacifico_400Regular } from '@expo-google-fonts/pacifico';
+import { DancingScript_400Regular, DancingScript_700Bold } from '@expo-google-fonts/dancing-script';
+import { SpaceMono_400Regular } from '@expo-google-fonts/space-mono';
+import { Montserrat_400Regular, Montserrat_700Bold } from '@expo-google-fonts/montserrat';
+import { Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
+import { Raleway_400Regular, Raleway_700Bold } from '@expo-google-fonts/raleway';
+import { BebasNeue_400Regular } from '@expo-google-fonts/bebas-neue';
+import { SourceCodePro_400Regular } from '@expo-google-fonts/source-code-pro';
+import { CormorantGaramond_400Regular, CormorantGaramond_700Bold } from '@expo-google-fonts/cormorant-garamond';
+import { DMSans_400Regular, DMSans_700Bold } from '@expo-google-fonts/dm-sans';
 import * as SplashScreen from 'expo-splash-screen';
 import '../global.css';
 
@@ -13,12 +27,40 @@ SplashScreen.preventAutoHideAsync();
 
 export default function AppLayout() {
   const [loaded, error] = useFonts({
+    // Fuentes base de la app
     'Inter': Inter_400Regular,
     'Inter-Medium': Inter_500Medium,
     'Inter-SemiBold': Inter_600SemiBold,
     'Inter-Bold': Inter_700Bold,
     'PlayfairDisplay-SemiBold': PlayfairDisplay_600SemiBold,
     'PlayfairDisplay-Bold': PlayfairDisplay_700Bold,
+    // Catálogo de Naming — Serif
+    'Cinzel': Cinzel_400Regular,
+    'Cinzel-Bold': Cinzel_700Bold,
+    'Lora': Lora_400Regular,
+    'Lora-Bold': Lora_700Bold,
+    'CormorantGaramond': CormorantGaramond_400Regular,
+    'CormorantGaramond-Bold': CormorantGaramond_700Bold,
+    // Catálogo de Naming — Sans-Serif
+    'Montserrat': Montserrat_400Regular,
+    'Montserrat-Bold': Montserrat_700Bold,
+    'Poppins': Poppins_400Regular,
+    'Poppins-Bold': Poppins_700Bold,
+    'Raleway': Raleway_400Regular,
+    'Raleway-Bold': Raleway_700Bold,
+    'DMSans': DMSans_400Regular,
+    'DMSans-Bold': DMSans_700Bold,
+    // Catálogo de Naming — Display
+    'Oswald': Oswald_400Regular,
+    'Oswald-Bold': Oswald_700Bold,
+    'BebasNeue': BebasNeue_400Regular,
+    // Catálogo de Naming — Script
+    'Pacifico': Pacifico_400Regular,
+    'DancingScript': DancingScript_400Regular,
+    'DancingScript-Bold': DancingScript_700Bold,
+    // Catálogo de Naming — Monospace
+    'SpaceMono': SpaceMono_400Regular,
+    'SourceCodePro': SourceCodePro_400Regular,
   });
 
   useEffect(() => {

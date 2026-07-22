@@ -1,6 +1,6 @@
 import chroma from 'chroma-js';
 
-export type HarmonyType = 'complementary' | 'analogous' | 'triad' | 'monochrome';
+export type HarmonyType = 'complementary' | 'analogous' | 'triad' | 'split-complementary' | 'square' | 'tetradic' | 'monochrome';
 
 export interface SwatchData {
   hex: string;
@@ -24,36 +24,52 @@ export function generateHarmonies(baseHex: string, harmonyType: HarmonyType = 'c
   let mainRgb = `rgb(${color.rgb().join(', ')})`;
 
   let accentHex = '#0080FF';
+  let secondaryHex = '#FF0080'; // New swatch for complex harmonies
   let paperBgHex = '#FAF6EF';
   let inkTextHex = '#241F1A';
 
   switch (harmonyType) {
     case 'complementary':
-      // Contraste directo a 180 grados
       accentHex = color.set('hsl.h', '+180').hex().toUpperCase();
+      secondaryHex = color.set('hsl.h', '+180').brighten(1).hex().toUpperCase();
       break;
     case 'analogous':
-      // Tono contiguo a 30 grados
       accentHex = color.set('hsl.h', '+30').hex().toUpperCase();
+      secondaryHex = color.set('hsl.h', '-30').hex().toUpperCase();
       break;
     case 'triad':
-      // Tono en tríada a 120 grados
       accentHex = color.set('hsl.h', '+120').hex().toUpperCase();
+      secondaryHex = color.set('hsl.h', '+240').hex().toUpperCase();
+      break;
+    case 'split-complementary':
+      accentHex = color.set('hsl.h', '+150').hex().toUpperCase();
+      secondaryHex = color.set('hsl.h', '+210').hex().toUpperCase();
+      break;
+    case 'square':
+      accentHex = color.set('hsl.h', '+90').hex().toUpperCase();
+      secondaryHex = color.set('hsl.h', '+180').hex().toUpperCase();
+      break;
+    case 'tetradic':
+      accentHex = color.set('hsl.h', '+60').hex().toUpperCase();
+      secondaryHex = color.set('hsl.h', '+180').hex().toUpperCase();
       break;
     case 'monochrome':
-      // Variación de luminosidad
       accentHex = color.brighten(1.2).hex().toUpperCase();
+      secondaryHex = color.darken(1.2).hex().toUpperCase();
       break;
   }
 
   const accentColor = chroma(accentHex);
   const accentRgb = `rgb(${accentColor.rgb().join(', ')})`;
+  const secondaryColor = chroma(secondaryHex);
+  const secondaryRgb = `rgb(${secondaryColor.rgb().join(', ')})`;
 
   return [
     { hex: mainHex, label: 'Matiz Principal', rgb: mainRgb },
-    { hex: accentHex, label: 'Contraste Directo', rgb: accentRgb },
+    { hex: accentHex, label: 'Acento Primario', rgb: accentRgb },
+    { hex: secondaryHex, label: 'Acento Secundario', rgb: secondaryRgb },
     { hex: paperBgHex, label: 'Fondo (Papel)', rgb: 'rgb(250, 246, 239)' },
-    { hex: inkTextHex, label: 'Acento (Tinta)', rgb: 'rgb(36, 31, 26)' },
+    { hex: inkTextHex, label: 'Texto (Tinta)', rgb: 'rgb(36, 31, 26)' },
   ];
 }
 
@@ -93,7 +109,7 @@ export function calculateContrastRatio(textHex: string, bgHex: string): { ratio:
 /**
  * Simula daltonismo aplicando matrices de reducción de color
  */
-export function simulateDaltonism(hex: string, type: 'normal' | 'protanopia' | 'deuteranopia'): string {
+export function simulateDaltonism(hex: string, type: 'normal' | 'protanopia' | 'deuteranopia' | 'tritanopia' | 'achromatopsia'): string {
   if (type === 'normal') return hex;
   
   try {
@@ -112,6 +128,15 @@ export function simulateDaltonism(hex: string, type: 'normal' | 'protanopia' | '
       rSim = 0.625 * r + 0.375 * g;
       gSim = 0.7 * r + 0.3 * g;
       bSim = 0.3 * g + 0.7 * b;
+    } else if (type === 'tritanopia') {
+      rSim = 0.95 * r + 0.05 * g;
+      gSim = 0.433 * r + 0.567 * g;
+      bSim = 0.475 * r + 0.525 * g;
+    } else if (type === 'achromatopsia') {
+      const l = 0.299 * r + 0.587 * g + 0.114 * b;
+      rSim = l;
+      gSim = l;
+      bSim = l;
     }
     
     // Clamp values between 0 and 255
