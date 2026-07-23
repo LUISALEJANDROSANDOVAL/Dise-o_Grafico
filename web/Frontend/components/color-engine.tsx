@@ -192,10 +192,15 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
   }, [])
 
   // marker position on the ring
-  const angleRad = ((base.h - 90) * Math.PI) / 180
+  const visualAngle = base.h
+  const angleRad = ((visualAngle - 90) * Math.PI) / 180
   const radiusPct = 50 * (0.35 + (base.s / 100) * 0.6)
-  const markerX = 50 + radiusPct * Math.cos(angleRad)
-  const markerY = 50 + radiusPct * Math.sin(angleRad)
+
+  const rawX = 50 + radiusPct * Math.cos(angleRad)
+  const rawY = 50 + radiusPct * Math.sin(angleRad)
+
+  const markerX = Number(rawX.toFixed(4))
+  const markerY = Number(rawY.toFixed(4))
 
   async function handleImage(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -252,7 +257,7 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
           className="relative aspect-square w-56 max-w-full touch-none rounded-full sm:w-64"
           style={{
             background:
-              "conic-gradient(from 0deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)",
+              "conic-gradient(from 0deg, #ff0000 0deg, #ffff00 60deg, #00ff00 120deg, #00ffff 180deg, #0000ff 240deg, #ff00ff 300deg, #ff0000 360deg)",
             cursor: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Ccircle cx='12' cy='12' r='7' stroke='white' stroke-width='3' /%3E%3Ccircle cx='12' cy='12' r='7' stroke='black' stroke-width='1.5' /%3E%3C/svg%3E\") 12 12, crosshair",
           }}
           role="slider"
