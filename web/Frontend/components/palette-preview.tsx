@@ -50,7 +50,7 @@ export function PalettePreview({ palette, colorblind, profile, onSwatchChange, b
       </AnimatePresence>
 
       <motion.div variants={sectionVariant}>
-        <h3 className="mb-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+        <h3 className="mb-3 font-mono text-xs uppercase tracking-widest text-muted-foreground no-print">
           Mockups en tiempo real
         </h3>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -95,38 +95,44 @@ function Swatches({
         <h3 className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Paleta generada</h3>
         <span className="font-mono text-xs text-muted-foreground">{palette.length} tonos</span>
       </div>
-      <div className={cn("grid gap-2", isDesigner ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-5")}>
+      <div 
+        className={cn("grid gap-2", isDesigner ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-5")}
+        style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" } as React.CSSProperties}
+      >
         {palette.map((s, i) => (
           <motion.div
             key={i}
             layout
             className="flex flex-col overflow-hidden rounded-lg border border-border bg-card"
+            style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" } as React.CSSProperties}
           >
-            <button
+            <div
+              role="button"
               onClick={() => copy(s.hex)}
-              className="group relative block h-16 w-full text-left sm:h-24"
+              className="group relative block h-16 w-full cursor-pointer text-left sm:h-24"
+              style={{ backgroundColor: display[i], WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" } as React.CSSProperties}
               aria-label={`Copiar ${s.hex}`}
             >
               {/* Animated color layer — cross-fades when the scheme changes */}
               <AnimatePresence mode="popLayout">
                 <motion.span
                   key={display[i]}
-                  className="absolute inset-0 block"
-                  style={{ backgroundColor: display[i] }}
+                  className="absolute inset-0 block print:hidden"
+                  style={{ backgroundColor: display[i], WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" } as React.CSSProperties}
                   initial={{ opacity: 0, scale: 1.04 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.35, ease: "easeOut" }}
                 />
               </AnimatePresence>
-              <span className="absolute right-1 top-1 z-10 rounded bg-background/85 p-1 opacity-0 transition-opacity group-hover:opacity-100">
+              <span className="absolute right-1 top-1 z-10 rounded bg-background/85 p-1 opacity-0 transition-opacity group-hover:opacity-100 print:hidden">
                 {copied === s.hex ? (
                   <Check className="size-3 text-foreground" />
                 ) : (
                   <Copy className="size-3 text-foreground" />
                 )}
               </span>
-            </button>
+            </div>
 
             <div className="flex flex-col gap-1 px-1.5 py-1.5">
               <span className="font-mono text-[10px] text-foreground sm:text-xs">{s.hex}</span>

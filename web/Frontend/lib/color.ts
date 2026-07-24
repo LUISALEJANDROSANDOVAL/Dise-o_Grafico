@@ -6,7 +6,7 @@ export const SCHEMES: { id: Scheme; entrepreneur: string; designer: string }[] =
   { id: "mono", entrepreneur: "Un solo color", designer: "Monocromático" },
   { id: "analogous", entrepreneur: "Colores vecinos", designer: "Análogos" },
   { id: "complementary", entrepreneur: "Alto contraste", designer: "Complementarios" },
-  { id: "split", entrepreneur: "Contraste suave", designer: "Comp. Divididos" },
+  { id: "split", entrepreneur: "Contraste suave", designer: "Complementarios extendidos" },
   { id: "triad", entrepreneur: "Tres tonos", designer: "Tríada" },
   { id: "tetradic", entrepreneur: "Cuatro tonos", designer: "Tetrádica" },
 ]

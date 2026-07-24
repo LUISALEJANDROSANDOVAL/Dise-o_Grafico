@@ -180,7 +180,7 @@
   button,
   input,
   .no-print,
-  [role="slider"],
+  [role="slider"]:not(.print-visible-wheel),
   [role="radiogroup"] {
     display: none !important;
   }
@@ -188,12 +188,46 @@
   /* Formato de página y márgenes */
   @page {
     size: A4 portrait;
-    margin: 1.5cm;
+    margin: 1cm;
   }
 
   body {
     background: #ffffff !important;
     color: #000000 !important;
+  }
+
+  /* Reducir tamaño de la rueda cromática para evitar salto de página */
+  .print-visible-wheel {
+    max-width: 180px !important;
+    max-height: 180px !important;
+    width: 180px !important;
+    height: 180px !important;
+  }
+
+  /* Comprimir espacios en impresión */
+  .grid {
+    gap: 0.75rem !important;
+  }
+  
+  .gap-6, .gap-8, .gap-4 {
+    gap: 0.5rem !important;
+  }
+
+  .mb-6, .mb-8, .mb-3 {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .mt-2, .mt-6 {
+    margin-top: 0.25rem !important;
+  }
+
+  .py-2, .py-3, .py-4 {
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+  }
+
+  .p-4 {
+    padding: 0.5rem !important;
   }
 
   /* Asegurar que las tarjetas de color y la rueda se impriman adecuadamente */

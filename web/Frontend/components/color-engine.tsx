@@ -254,12 +254,14 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
           whileTap={isDragging ? { scale: 1.01 } : { scale: 0.99 }}
           animate={{ scale: isDragging ? 1.01 : 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 22 }}
-          className="relative aspect-square w-56 max-w-full touch-none rounded-full sm:w-64"
+          className="relative aspect-square w-56 max-w-full touch-none rounded-full sm:w-64 print-visible-wheel"
           style={{
             background:
               "conic-gradient(from 0deg, #ff0000 0deg, #ffff00 60deg, #00ff00 120deg, #00ffff 180deg, #0000ff 240deg, #ff00ff 300deg, #ff0000 360deg)",
             cursor: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Ccircle cx='12' cy='12' r='7' stroke='white' stroke-width='3' /%3E%3Ccircle cx='12' cy='12' r='7' stroke='black' stroke-width='1.5' /%3E%3C/svg%3E\") 12 12, crosshair",
-          }}
+            WebkitPrintColorAdjust: "exact",
+            printColorAdjust: "exact",
+          } as any}
           role="slider"
           aria-label="Círculo cromático: selecciona el tono base"
           aria-valuenow={base.h}
@@ -267,26 +269,27 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
           aria-valuemax={360}
         >
           {/* inner hole */}
-          <div className="absolute inset-[22%] flex items-center justify-center rounded-full bg-background">
+          <div className="absolute inset-[22%] flex items-center justify-center rounded-full bg-background" style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" } as any}>
             <div
               className="size-12 rounded-full border border-border shadow-sm"
-              style={{ backgroundColor: baseHex }}
+              style={{ backgroundColor: baseHex, WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }}
               aria-hidden
             />
           </div>
           {/* marker */}
           <div
             className="pointer-events-none absolute size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-background shadow-md ring-1 ring-foreground/20"
-            style={{ left: `${markerX}%`, top: `${markerY}%`, backgroundColor: baseHex }}
+            style={{ left: `${markerX}%`, top: `${markerY}%`, backgroundColor: baseHex, WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }}
             aria-hidden
           />
         </motion.div>
       </div>
 
       {/* Lightness slider */}
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="lightness" className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          Luminosidad
+      <div className="flex flex-col gap-1.5 no-print">
+        <label htmlFor="lightness" className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground flex justify-between items-center w-full">
+          <span>Luminosidad</span>
+          <span className="hidden print:inline font-mono text-[10px] text-muted-foreground uppercase">Nivel de brillo: {base.l}%</span>
         </label>
         <input
           id="lightness"
@@ -295,7 +298,16 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
           max={80}
           value={base.l}
           onChange={(e) => onBaseChange({ ...base, l: Number(e.target.value) })}
-          className="h-2 w-full cursor-pointer appearance-none rounded-full bg-muted accent-foreground"
+          className="h-2 w-full cursor-pointer appearance-none rounded-full bg-muted accent-foreground print:hidden"
+        />
+        {/* Static lightness gradient bar for print */}
+        <div 
+          className="hidden print:block h-2 w-full rounded-full"
+          style={{
+            background: `linear-gradient(to right, ${hslToHex({ h: base.h, s: base.s, l: 20 })}, ${hslToHex({ h: base.h, s: base.s, l: 50 })}, ${hslToHex({ h: base.h, s: base.s, l: 80 })})`,
+            WebkitPrintColorAdjust: "exact",
+            printColorAdjust: "exact",
+          }}
         />
       </div>
 
@@ -334,10 +346,10 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
               aria-checked={scheme === s.id}
               onClick={() => onSchemeChange(s.id)}
               className={cn(
-                "rounded-lg border px-3 py-2.5 text-left text-sm font-medium transition-colors",
-                scheme === s.id
-                  ? "border-foreground bg-foreground text-background"
-                  : "border-border bg-card text-foreground hover:bg-muted",
+                 "rounded-lg border px-3 py-2.5 text-left text-sm font-medium transition-colors",
+                 scheme === s.id
+                   ? "border-foreground bg-foreground text-background"
+                   : "border-border bg-card text-foreground hover:bg-muted",
               )}
             >
               {profile === "entrepreneur" ? s.entrepreneur : s.designer}
@@ -358,7 +370,7 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
             className="flex cursor-pointer flex-col gap-2 rounded-xl border border-blue-100 bg-blue-50/50 p-4 transition-colors hover:border-blue-300 hover:bg-blue-100/50 dark:border-blue-900/30 dark:bg-blue-950/20 dark:hover:bg-blue-900/40"
           >
             <div className="flex items-center gap-2">
-              <div className="h-4 w-4 rounded-full border border-black/10 shadow-sm" style={{ backgroundColor: baseHex }} />
+              <div className="h-4 w-4 rounded-full border border-black/10 shadow-sm" style={{ backgroundColor: baseHex, WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }} />
               <span className="font-semibold text-sm tracking-tight text-blue-900 dark:text-blue-300">Principal: {primaryPsycho.name}</span>
             </div>
             <div>
@@ -377,7 +389,7 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
               className="flex cursor-pointer flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50/50 p-4 transition-colors hover:border-slate-300 hover:bg-slate-100/50 dark:border-slate-800 dark:bg-slate-900/20 dark:hover:bg-slate-800/40"
             >
               <div className="flex items-center gap-2">
-                <div className="h-4 w-4 rounded-full border border-black/10 shadow-sm" style={{ backgroundColor: secondaryHex }} />
+                <div className="h-4 w-4 rounded-full border border-black/10 shadow-sm" style={{ backgroundColor: secondaryHex, WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }} />
                 <span className="font-semibold text-sm tracking-tight text-slate-900 dark:text-slate-300">Secundario: {secondaryPsycho.name}</span>
               </div>
               <div>
