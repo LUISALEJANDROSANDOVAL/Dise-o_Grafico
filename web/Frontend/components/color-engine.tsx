@@ -15,9 +15,10 @@ type Props = {
   scheme: Scheme
   onSchemeChange: (s: Scheme) => void
   profile: Profile
+  onShowAnalysis?: () => void
 }
 
-function getColorPsychology(h: number) {
+export function getColorPsychology(h: number) {
   if (h >= 345 || h < 15) return { 
     name: "Rojo", 
     meaning: "Energía, Pasión, Acción", 
@@ -68,7 +69,7 @@ function getColorPsychology(h: number) {
   }
 }
 
-export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profile }: Props) {
+export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profile, onShowAnalysis }: Props) {
   const wheelRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
@@ -82,8 +83,6 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
   
   const secondaryPsycho = getColorPsychology(secondaryHue)
   const secondaryHex = hslToHex({ h: secondaryHue, s: base.s, l: base.l })
-
-  const [selectedPsycho, setSelectedPsycho] = useState<ReturnType<typeof getColorPsychology> & { hex: string, isPrimary: boolean } | null>(null)
 
   function pickFromWheel(e: React.PointerEvent<HTMLDivElement>) {
     const el = wheelRef.current
@@ -244,89 +243,18 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
           ))}
         </div>
       </div>
-      
+        
       {/* Psychology Context Module */}
       {profile === "entrepreneur" && (
-        <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {/* Primario */}
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            key={`prim-${primaryPsycho.name}`}
-            onClick={() => setSelectedPsycho({ ...primaryPsycho, hex: baseHex, isPrimary: true })}
-            className="flex cursor-pointer flex-col gap-2 rounded-xl border border-blue-100 bg-blue-50/50 p-4 transition-colors hover:border-blue-300 hover:bg-blue-100/50 dark:border-blue-900/30 dark:bg-blue-950/20 dark:hover:bg-blue-900/40"
+        <div className="mt-2 flex flex-col gap-3">
+          <Button
+            variant="outline"
+            className="w-full gap-2 border-indigo-200 bg-indigo-50/30 py-6 text-indigo-700 hover:bg-indigo-50 hover:text-indigo-800 dark:border-indigo-900/50 dark:bg-indigo-950/10 dark:text-indigo-300 dark:hover:bg-indigo-900/30 dark:hover:text-indigo-200"
+            onClick={onShowAnalysis}
           >
-            <div className="flex items-center gap-2">
-              <div className="h-4 w-4 rounded-full border border-black/10 shadow-sm" style={{ backgroundColor: baseHex }} />
-              <span className="font-semibold text-sm tracking-tight text-blue-900 dark:text-blue-300">Principal: {primaryPsycho.name}</span>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">{primaryPsycho.meaning}</p>
-              <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400 line-clamp-2">{primaryPsycho.desc}</p>
-            </div>
-          </motion.div>
-
-          {/* Secundario */}
-          {scheme !== "mono" && primaryPsycho.name !== secondaryPsycho.name && (
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              key={`sec-${secondaryPsycho.name}`}
-              onClick={() => setSelectedPsycho({ ...secondaryPsycho, hex: secondaryHex, isPrimary: false })}
-              className="flex cursor-pointer flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50/50 p-4 transition-colors hover:border-slate-300 hover:bg-slate-100/50 dark:border-slate-800 dark:bg-slate-900/20 dark:hover:bg-slate-800/40"
-            >
-              <div className="flex items-center gap-2">
-                <div className="h-4 w-4 rounded-full border border-black/10 shadow-sm" style={{ backgroundColor: secondaryHex }} />
-                <span className="font-semibold text-sm tracking-tight text-slate-900 dark:text-slate-300">Secundario: {secondaryPsycho.name}</span>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-800 dark:text-slate-200 mb-1">{secondaryPsycho.meaning}</p>
-                <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400 line-clamp-2">{secondaryPsycho.desc}</p>
-              </div>
-            </motion.div>
-          )}
-        </div>
-      )}
-
-      {/* Psychology Modal */}
-      {selectedPsycho && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
-          onClick={() => setSelectedPsycho(null)}
-        >
-          <motion.div 
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-slate-950 dark:border dark:border-slate-800"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="h-24 w-full sm:h-32" style={{ backgroundColor: selectedPsycho.hex }} />
-            <button 
-              onClick={() => setSelectedPsycho(null)}
-              className="absolute right-3 top-3 rounded-full bg-black/20 p-1.5 text-white backdrop-blur-md transition-colors hover:bg-black/40"
-            >
-              <X className="h-5 w-5" />
-            </button>
-            <div className="p-6">
-              <div className="mb-4">
-                <span className="mb-2 inline-block rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                  Color {selectedPsycho.isPrimary ? "Principal" : "Secundario"}
-                </span>
-                <h3 className="text-2xl font-bold tracking-tight">Psicología del {selectedPsycho.name}</h3>
-              </div>
-              <p className="mb-4 text-base font-semibold text-blue-600 dark:text-blue-400">
-                {selectedPsycho.meaning}
-              </p>
-              <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                {selectedPsycho.fullDesc}
-              </p>
-              <div className="mt-6 flex justify-end">
-                <Button onClick={() => setSelectedPsycho(null)}>
-                  Entendido
-                </Button>
-              </div>
-            </div>
-          </motion.div>
+            <BrainCircuit className="h-5 w-5" />
+            <span className="font-semibold">Ver análisis psicológico completo</span>
+          </Button>
         </div>
       )}
     </section>

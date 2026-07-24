@@ -15,19 +15,19 @@ He revisado el progreso del proyecto (CROMATIC) en Next.js y lo he comparado con
 - **RF-12:** Alertas de legibilidad y contraste WCAG implementadas (`Accessibility`).
 - **RF-13:** Filtros de simulación de daltonismo.
 - **RF-15:** Alternancia entre modo claro y oscuro en todas las pantallas.
-- **RF-16, RF-17:** Módulo Contextual de "Psicología del Color" integrado dinámicamente en el motor de color para emprendedores.
+- **RF-09:** Textos explicativos autogenerados dinámicamente ("Sinergia") añadidos al informe psicológico detallado.
+- **RF-16, RF-17:** Módulo Contextual de "Psicología del Color" integrado dinámicamente con un botón de análisis profundo.
+- **RF-20:** Compartir la paleta generada mediante un enlace único (ej. `cromatic.com/p/abc123`) implementado con rutas dinámicas de Next.js.
 - **RF-23:** Pestaña educativa con la guía rápida de "Cómo elegir un nombre", recientemente rediseñada con interfaz Glassmorphism premium.
 - **RF-24:** Herramienta de autogeneración de Naming con Inteligencia Artificial integrada.
 - **RF-25:** Catálogo en tiempo real de Google Fonts con filtrado, búsqueda y carga dinámica de casi 50 fuentes.
 - **RF-26:** Asesor Tipográfico con IA que evalúa la coherencia entre el rubro de la empresa y la fuente seleccionada.
 
 ## Lo que falta por implementar ❌
-1. **RF-09:** Textos explicativos autogenerados dinámicamente para cada esquema generado (explicar por qué esos colores funcionan juntos).
-2. **RF-14:** Test de "Temperatura/Personalidad" para evaluar si la paleta elegida se percibe cálida/fría o seria/divertida.
-3. **RF-18:** Cuestionario rápido guiado ("Modo Guiado") para sugerir colores según el rubro o negocio del usuario sin que tenga que usar el círculo cromático manual.
-4. **RF-20:** Compartir la paleta generada mediante un enlace único (ej. `cromatic.com/p/abc123`) o código QR.
-5. **RF-21:** Exportar PDF real como "kit básico de marca" (actualmente el botón Exportar llama a `window.print()` en lugar de generar un archivo PDF estructurado).
-6. **RF-22:** Exportar paleta en formatos técnicos (archivos `.ase` para Illustrator/Photoshop o `.css` / Tailwind vars) para el diseñador.
+1. **RF-14:** Test de "Temperatura/Personalidad" para evaluar si la paleta elegida se percibe cálida/fría o seria/divertida.
+2. **RF-18:** Cuestionario rápido guiado ("Modo Guiado") para sugerir colores según el rubro o negocio del usuario sin que tenga que usar el círculo cromático manual.
+3. **RF-21:** Exportar PDF real como "kit básico de marca" (actualmente el botón Exportar llama a `window.print()` en lugar de generar un archivo PDF estructurado).
+4. **RF-22:** Exportar paleta en formatos técnicos (archivos `.ase` para Illustrator/Photoshop o `.css` / Tailwind vars) para el diseñador.
 7. **PWA (Progressive Web App):** Soporte para instalar CROMATIC como aplicación de escritorio o móvil (Service Workers, manifest.json).
 8. **SEO y Metadatos Dinámicos:** Mejorar etiquetas OpenGraph para que la app se vea atractiva al compartirse en redes sociales.
 

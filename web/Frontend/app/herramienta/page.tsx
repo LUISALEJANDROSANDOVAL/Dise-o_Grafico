@@ -1,10 +1,11 @@
 "use client"
 
-import { useEffect, useMemo, useState, Suspense, useTransition } from "react"
+import { useEffect, useMemo, useState, Suspense, useTransition, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 import { RulecHeader, type Profile } from "@/components/rulec-header"
 import { ColorEngine } from "@/components/color-engine"
 import { PalettePreview } from "@/components/palette-preview"
+import { PsychologyReport } from "@/components/psychology-report"
 import { ToolBar } from "@/components/tool-bar"
 import { type HSL, type Scheme, type ColorblindMode, type Swatch, generatePalette, hslToHex, hexToHsl } from "@/lib/color"
 import { savePalette } from "@/app/actions"
@@ -16,6 +17,7 @@ function HerramientaContent() {
   const idParam = searchParams.get("id")
   const colorParam = searchParams.get("color")
   const schemeParam = searchParams.get("scheme")
+  const pParam = searchParams.get("p")
   const initialProfile = (searchParams.get("profile") as Profile) || "entrepreneur"
 
   const [theme, setTheme] = useTheme()
@@ -40,6 +42,7 @@ function HerramientaContent() {
   const supabase = createClient()
   const [session, setSession] = useState<any>(null)
   const [isPending, startTransition] = useTransition()
+  const [showFullAnalysis, setShowFullAnalysis] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -48,13 +51,35 @@ function HerramientaContent() {
   }, [])
 
   const generated = useMemo(() => generatePalette(base, scheme), [base, scheme])
-  // Editable copy — lets Designer profile tweak individual swatches.
-  const [palette, setPalette] = useState<Swatch[]>(generated)
 
-  // Reset manual edits whenever the base color or scheme changes.
+  // Parse shared palette from URL
+  const initialSharedPalette = useMemo(() => {
+    if (!pParam) return null
+    try {
+      const hexes = pParam.split("-").map(h => `#${h}`)
+      return hexes.map(hex => ({ ...hexToHsl(hex), hex }))
+    } catch {
+      return null
+    }
+  }, [pParam])
+
+  // Editable copy — lets Designer profile tweak individual swatches.
+  const [palette, setPalette] = useState<Swatch[]>(initialSharedPalette || generated)
+  const isFirstRender = useRef(true)
+
+  // Reset manual edits whenever the base color or scheme changes, except on first load with shared link.
   useEffect(() => {
+    if (isFirstRender.current && initialSharedPalette) {
+      isFirstRender.current = false
+      // Set the base color to the main color of the shared palette so the wheel matches somewhat
+      if (initialSharedPalette.length > 0) {
+        setBase(hexToHsl(initialSharedPalette[0].hex))
+      }
+      return
+    }
     setPalette(generated)
-  }, [generated])
+    isFirstRender.current = false
+  }, [generated, initialSharedPalette])
 
   function handleSwatchChange(index: number, hsl: HSL) {
     setPalette((prev) =>
@@ -123,17 +148,26 @@ function HerramientaContent() {
             scheme={scheme}
             onSchemeChange={setScheme}
             profile={profile}
+            onShowAnalysis={() => setShowFullAnalysis(true)}
           />
         </aside>
 
         {/* Right column — scrollable results area */}
         <section className="min-w-0">
-          <PalettePreview
-            palette={palette}
-            colorblind={colorblind}
-            profile={profile}
-            onSwatchChange={handleSwatchChange}
-          />
+          {showFullAnalysis ? (
+            <PsychologyReport
+              base={base}
+              scheme={scheme}
+              onClose={() => setShowFullAnalysis(false)}
+            />
+          ) : (
+            <PalettePreview
+              palette={palette}
+              colorblind={colorblind}
+              profile={profile}
+              onSwatchChange={handleSwatchChange}
+            />
+          )}
         </section>
       </main>
 
