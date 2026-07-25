@@ -1,7 +1,6 @@
 "use client"
 
-import type React from "react"
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { ImageIcon, Pipette, BrainCircuit, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -72,6 +71,18 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
   const wheelRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
+  const baseRef = useRef(base)
+  useEffect(() => {
+    baseRef.current = base
+  }, [base])
+
+  const [isDragging, setIsDragging] = useState(false)
+
+  const lastAngleRef = useRef<number | null>(null)
+  const lastTimeRef = useRef<number | null>(null)
+  const velocityRef = useRef<number>(0)
+  const animationFrameRef = useRef<number | null>(null)
+
   const baseHex = hslToHex(base)
   const primaryPsycho = getColorPsychology(base.h)
   
@@ -85,25 +96,111 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
 
   const [selectedPsycho, setSelectedPsycho] = useState<ReturnType<typeof getColorPsychology> & { hex: string, isPrimary: boolean } | null>(null)
 
+  function stopInertia() {
+    if (animationFrameRef.current !== null) {
+      cancelAnimationFrame(animationFrameRef.current)
+      animationFrameRef.current = null
+    }
+    velocityRef.current = 0
+  }
+
   function pickFromWheel(e: React.PointerEvent<HTMLDivElement>) {
     const el = wheelRef.current
-    if (!el) return
+    if (!el) return null
     const rect = el.getBoundingClientRect()
     const cx = rect.left + rect.width / 2
     const cy = rect.top + rect.height / 2
     const dx = e.clientX - cx
     const dy = e.clientY - cy
-    let angle = (Math.atan2(dy, dx) * 180) / Math.PI + 90
+    let angle = (Math.atan2(dy, dx) * (180 / Math.PI) + 90) % 360
     if (angle < 0) angle += 360
     const dist = Math.min(1, Math.sqrt(dx * dx + dy * dy) / (rect.width / 2))
-    onBaseChange({ h: Math.round(angle), s: Math.round(35 + dist * 60), l: base.l })
+    onBaseChange({ h: Math.round(angle), s: Math.round(35 + dist * 60), l: baseRef.current.l })
+    return angle
   }
 
+  function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    stopInertia()
+    setIsDragging(true)
+    e.currentTarget.setPointerCapture(e.pointerId)
+    const angle = pickFromWheel(e)
+    if (angle !== null) {
+      lastAngleRef.current = angle
+      lastTimeRef.current = performance.now()
+    }
+  }
+
+  function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      const angle = pickFromWheel(e)
+      if (angle !== null) {
+        const now = performance.now()
+        if (lastAngleRef.current !== null && lastTimeRef.current !== null) {
+          const dt = now - lastTimeRef.current
+          if (dt > 0) {
+            let diff = angle - lastAngleRef.current
+            if (diff > 180) diff -= 360
+            if (diff < -180) diff += 360
+            velocityRef.current = diff / dt
+          }
+        }
+        lastAngleRef.current = angle
+        lastTimeRef.current = now
+      }
+    }
+  }
+
+  function handlePointerUp(e: React.PointerEvent<HTMLDivElement>) {
+    e.currentTarget.releasePointerCapture(e.pointerId)
+    setIsDragging(false)
+
+    if (Math.abs(velocityRef.current) > 0.05) {
+      let lastFrameTime = performance.now()
+      const animateInertia = (nowTime: number) => {
+        const dt = nowTime - lastFrameTime
+        lastFrameTime = nowTime
+
+        if (Math.abs(velocityRef.current) < 0.01) {
+          stopInertia()
+          return
+        }
+
+        velocityRef.current *= Math.pow(0.95, dt / 16)
+        const deltaAngle = velocityRef.current * dt
+        let nextH = (baseRef.current.h + deltaAngle) % 360
+        if (nextH < 0) nextH += 360
+
+        onBaseChange({
+          ...baseRef.current,
+          h: Math.round(nextH)
+        })
+
+        animationFrameRef.current = requestAnimationFrame(animateInertia)
+      }
+      animationFrameRef.current = requestAnimationFrame(animateInertia)
+    } else {
+      stopInertia()
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current)
+      }
+    }
+  }, [])
+
   // marker position on the ring
-  const angleRad = ((base.h - 90) * Math.PI) / 180
+  const visualAngle = base.h
+  const angleRad = ((visualAngle - 90) * Math.PI) / 180
   const radiusPct = 50 * (0.35 + (base.s / 100) * 0.6)
-  const markerX = 50 + radiusPct * Math.cos(angleRad)
-  const markerY = 50 + radiusPct * Math.sin(angleRad)
+
+  const rawX = 50 + radiusPct * Math.cos(angleRad)
+  const rawY = 50 + radiusPct * Math.sin(angleRad)
+
+  const markerX = Number(rawX.toFixed(4))
+  const markerY = Number(rawY.toFixed(4))
 
   async function handleImage(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -150,15 +247,21 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
       <div className="flex justify-center py-2">
         <motion.div
           ref={wheelRef}
-          onPointerDown={pickFromWheel}
-          whileHover={{ scale: 1.03, boxShadow: "0 12px 30px -8px rgba(0,0,0,0.35)" }}
-          whileTap={{ scale: 0.99 }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          whileHover={isDragging ? { scale: 1.01 } : { scale: 1.03, boxShadow: "0 12px 30px -8px rgba(0,0,0,0.35)" }}
+          whileTap={isDragging ? { scale: 1.01 } : { scale: 0.99 }}
+          animate={{ scale: isDragging ? 1.01 : 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 22 }}
-          className="relative aspect-square w-56 max-w-full cursor-crosshair touch-none rounded-full sm:w-64"
+          className="relative aspect-square w-56 max-w-full touch-none rounded-full sm:w-64 print-visible-wheel"
           style={{
             background:
-              "conic-gradient(from 90deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)",
-          }}
+              "conic-gradient(from 0deg, #ff0000 0deg, #ffff00 60deg, #00ff00 120deg, #00ffff 180deg, #0000ff 240deg, #ff00ff 300deg, #ff0000 360deg)",
+            cursor: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Ccircle cx='12' cy='12' r='7' stroke='white' stroke-width='3' /%3E%3Ccircle cx='12' cy='12' r='7' stroke='black' stroke-width='1.5' /%3E%3C/svg%3E\") 12 12, crosshair",
+            WebkitPrintColorAdjust: "exact",
+            printColorAdjust: "exact",
+          } as any}
           role="slider"
           aria-label="Círculo cromático: selecciona el tono base"
           aria-valuenow={base.h}
@@ -166,26 +269,27 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
           aria-valuemax={360}
         >
           {/* inner hole */}
-          <div className="absolute inset-[22%] flex items-center justify-center rounded-full bg-background">
+          <div className="absolute inset-[22%] flex items-center justify-center rounded-full bg-background" style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" } as any}>
             <div
               className="size-12 rounded-full border border-border shadow-sm"
-              style={{ backgroundColor: baseHex }}
+              style={{ backgroundColor: baseHex, WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }}
               aria-hidden
             />
           </div>
           {/* marker */}
           <div
             className="pointer-events-none absolute size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-background shadow-md ring-1 ring-foreground/20"
-            style={{ left: `${markerX}%`, top: `${markerY}%`, backgroundColor: baseHex }}
+            style={{ left: `${markerX}%`, top: `${markerY}%`, backgroundColor: baseHex, WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }}
             aria-hidden
           />
         </motion.div>
       </div>
 
       {/* Lightness slider */}
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="lightness" className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-          Luminosidad
+      <div className="flex flex-col gap-1.5 no-print">
+        <label htmlFor="lightness" className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground flex justify-between items-center w-full">
+          <span>Luminosidad</span>
+          <span className="hidden print:inline font-mono text-[10px] text-muted-foreground uppercase">Nivel de brillo: {base.l}%</span>
         </label>
         <input
           id="lightness"
@@ -194,7 +298,16 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
           max={80}
           value={base.l}
           onChange={(e) => onBaseChange({ ...base, l: Number(e.target.value) })}
-          className="h-2 w-full cursor-pointer appearance-none rounded-full bg-muted accent-foreground"
+          className="h-2 w-full cursor-pointer appearance-none rounded-full bg-muted accent-foreground print:hidden"
+        />
+        {/* Static lightness gradient bar for print */}
+        <div 
+          className="hidden print:block h-2 w-full rounded-full"
+          style={{
+            background: `linear-gradient(to right, ${hslToHex({ h: base.h, s: base.s, l: 20 })}, ${hslToHex({ h: base.h, s: base.s, l: 50 })}, ${hslToHex({ h: base.h, s: base.s, l: 80 })})`,
+            WebkitPrintColorAdjust: "exact",
+            printColorAdjust: "exact",
+          }}
         />
       </div>
 
@@ -233,10 +346,10 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
               aria-checked={scheme === s.id}
               onClick={() => onSchemeChange(s.id)}
               className={cn(
-                "rounded-lg border px-3 py-2.5 text-left text-sm font-medium transition-colors",
-                scheme === s.id
-                  ? "border-foreground bg-foreground text-background"
-                  : "border-border bg-card text-foreground hover:bg-muted",
+                 "rounded-lg border px-3 py-2.5 text-left text-sm font-medium transition-colors",
+                 scheme === s.id
+                   ? "border-foreground bg-foreground text-background"
+                   : "border-border bg-card text-foreground hover:bg-muted",
               )}
             >
               {profile === "entrepreneur" ? s.entrepreneur : s.designer}
@@ -257,7 +370,7 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
             className="flex cursor-pointer flex-col gap-2 rounded-xl border border-blue-100 bg-blue-50/50 p-4 transition-colors hover:border-blue-300 hover:bg-blue-100/50 dark:border-blue-900/30 dark:bg-blue-950/20 dark:hover:bg-blue-900/40"
           >
             <div className="flex items-center gap-2">
-              <div className="h-4 w-4 rounded-full border border-black/10 shadow-sm" style={{ backgroundColor: baseHex }} />
+              <div className="h-4 w-4 rounded-full border border-black/10 shadow-sm" style={{ backgroundColor: baseHex, WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }} />
               <span className="font-semibold text-sm tracking-tight text-blue-900 dark:text-blue-300">Principal: {primaryPsycho.name}</span>
             </div>
             <div>
@@ -276,7 +389,7 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
               className="flex cursor-pointer flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50/50 p-4 transition-colors hover:border-slate-300 hover:bg-slate-100/50 dark:border-slate-800 dark:bg-slate-900/20 dark:hover:bg-slate-800/40"
             >
               <div className="flex items-center gap-2">
-                <div className="h-4 w-4 rounded-full border border-black/10 shadow-sm" style={{ backgroundColor: secondaryHex }} />
+                <div className="h-4 w-4 rounded-full border border-black/10 shadow-sm" style={{ backgroundColor: secondaryHex, WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }} />
                 <span className="font-semibold text-sm tracking-tight text-slate-900 dark:text-slate-300">Secundario: {secondaryPsycho.name}</span>
               </div>
               <div>
