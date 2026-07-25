@@ -1,15 +1,75 @@
 "use server"
 
-import { GoogleGenerativeAI } from "@google/generative-ai"
+// ─────────────────────────────────────────────
+// Motor de IA usando OpenRouter
+// Lista verificada de modelos gratuitos (consultada en tiempo real).
+// Si el primero falla, prueba el siguiente automáticamente.
+// ─────────────────────────────────────────────
+const FREE_MODELS = [
+  "openai/gpt-oss-20b:free",
+  "google/gemma-4-31b-it:free",
+  "google/gemma-4-26b-a4b-it:free",
+  "nvidia/nemotron-3-super-120b-a12b:free",
+  "nvidia/nemotron-3-nano-30b-a3b:free",
+  "nvidia/nemotron-nano-9b-v2:free",
+]
+const API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-export async function generateNameIdeas(focus: string) {
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY no está configurada en las variables de entorno.")
+async function callModel(apiKey: string, model: string, prompt: string): Promise<string> {
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer": "https://cromatic.app",
+      "X-Title": "Cromatic - Naming Tool",
+    },
+    body: JSON.stringify({
+      model,
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.8,
+    }),
+  })
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    const msg = (err as any)?.error?.message || res.statusText
+    throw Object.assign(new Error(msg), { status: res.status })
   }
 
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-  const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" })
+  const data = await res.json() as any
+  return data.choices?.[0]?.message?.content ?? ""
+}
 
+async function callAI(prompt: string): Promise<string> {
+  const apiKey = process.env.OPENROUTER_API_KEY
+
+  if (!apiKey || apiKey.includes("PEGA-TU-KEY")) {
+    throw new Error("OPENROUTER_API_KEY no configurada. Ve a openrouter.ai y pega tu clave en el .env")
+  }
+
+  for (const model of FREE_MODELS) {
+    try {
+      console.log(`[IA] Intentando con modelo: ${model}`)
+      const result = await callModel(apiKey, model, prompt)
+      console.log(`[IA] Éxito con: ${model}`)
+      return result
+    } catch (err: any) {
+      const isUnavailable = err?.message?.includes("unavailable for free") || err?.message?.includes("No endpoints found")
+      if (isUnavailable) {
+        console.warn(`[IA] Modelo no disponible: ${model}. Probando siguiente...`)
+        continue
+      }
+      // Si el error es diferente (ej: 429 cuota), lanzar directo
+      throw err
+    }
+  }
+
+  throw new Error("Ningún modelo gratuito está disponible ahora mismo. Intenta más tarde.")
+}
+
+
+export async function generateNameIdeas(focus: string): Promise<string[]> {
   const prompt = `Eres un experto en branding y creación de nombres de empresas (Naming).
 Un cliente te ha dado la siguiente descripción de su empresa o proyecto:
 "${focus}"
@@ -19,61 +79,51 @@ Responde ÚNICAMENTE con un array de strings en formato JSON, sin markdown, sin 
 Ejemplo: ["Nombre1", "Nombre2", "Nombre3", "Nombre4", "Nombre5"]`
 
   try {
-    const result = await model.generateContent(prompt)
-    const text = result.response.text().trim().replace(/```json/g, "").replace(/```/g, "")
-    const ideas = JSON.parse(text)
-    return ideas as string[]
+    const text = await callAI(prompt)
+    const cleaned = text.trim().replace(/```json/g, "").replace(/```/g, "").trim()
+    const match = cleaned.match(/\[.*\]/s)
+    if (!match) throw new Error("Respuesta inesperada del modelo")
+    return JSON.parse(match[0]) as string[]
   } catch (error: any) {
-    console.error("Error generating names:", error)
-    if (error?.status === 429 || error?.message?.includes("429")) {
-      return ["Servidor saturado. Espera unos segundos."]
-    }
-    // Devolvemos el mensaje exacto para saber por qué falla
-    return [`Error: ${error.message || "Hubo un problema de conexión con la IA"}`]
+    console.error("Error generando nombres:", error?.message)
+    if (error?.status === 429) return ["⏳ Límite momentáneo. Espera unos segundos e intenta de nuevo."]
+    if (error?.message?.includes("OPENROUTER_API_KEY")) return ["⚙️ Configura tu OPENROUTER_API_KEY en el archivo .env"]
+    return [`❌ Error: ${error.message || "Problema de conexión con la IA"}`]
   }
 }
 
-export async function getFontAdviceAI(focus: string, fontName: string, fontStyle: string) {
-  if (!process.env.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY no está configurada en las variables de entorno.")
-  }
-
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-  const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" })
-
-  const prompt = `Eres un Director de Arte experto en diseño de marcas, tipografía y psicología del color.
-Un cliente está creando la identidad visual para su empresa, la cual describe de la siguiente manera:
+export async function getFontAdviceAI(
+  focus: string,
+  fontName: string,
+  fontStyle: string
+): Promise<{ isGood: boolean; advice: string }> {
+  const prompt = `Eres un Director de Arte experto en diseño de marcas y tipografía.
+Un cliente está creando la identidad visual para su empresa:
 "${focus}"
 
-Para su logotipo y textos principales ha elegido la tipografía "${fontName}" (que pertenece a la familia ${fontStyle}).
+Ha elegido la tipografía "${fontName}" (familia: ${fontStyle}).
 
-Tu tarea es evaluar si esa elección tipográfica transmite las emociones correctas para el enfoque de su empresa.
-Responde ÚNICAMENTE con un objeto JSON válido, sin formato markdown, con dos propiedades:
-1. "isGood": booleano (true si la fuente encaja bien con la personalidad de la empresa, false si choca o da el mensaje equivocado).
-2. "advice": string (Un consejo amigable, profesional y directo de unos 2-3 párrafos cortos explicando por qué funciona genial o por qué debería buscar otra alternativa, mencionando específicamente cómo la fuente "${fontName}" impacta psicológicamente).
-
-Ejemplo de respuesta:
+Evalúa si esa tipografía transmite las emociones correctas para este negocio.
+Responde ÚNICAMENTE con un objeto JSON válido, sin markdown:
 {
-  "isGood": true,
-  "advice": "¡Excelente elección! La fuente..."
+  "isGood": true o false,
+  "advice": "consejo de 2-3 párrafos cortos"
 }`
 
   try {
-    const result = await model.generateContent(prompt)
-    const text = result.response.text().trim().replace(/```json/g, "").replace(/```/g, "")
-    const adviceData = JSON.parse(text)
-    return adviceData as { isGood: boolean; advice: string }
+    const text = await callAI(prompt)
+    const cleaned = text.trim().replace(/```json/g, "").replace(/```/g, "").trim()
+    const match = cleaned.match(/\{[\s\S]*\}/s)
+    if (!match) throw new Error("Respuesta inesperada del modelo")
+    return JSON.parse(match[0]) as { isGood: boolean; advice: string }
   } catch (error: any) {
-    console.error("Error getting font advice:", error)
-    if (error?.status === 429 || error?.message?.includes("429")) {
-      return {
-        isGood: false,
-        advice: "Has realizado demasiadas consultas seguidas. Nuestro Asesor Inteligente está descansando. Por favor, espera unos segundos e intenta de nuevo."
-      }
+    console.error("Error en asesor tipográfico:", error?.message)
+    if (error?.status === 429) {
+      return { isGood: false, advice: "⏳ El asesor está ocupado. Espera unos segundos e intenta de nuevo." }
     }
-    return {
-      isGood: true,
-      advice: `Hubo un error técnico: ${error.message || "Falla de conexión"}. Sin embargo, si te gusta cómo se ve, ¡sigue adelante!`
+    if (error?.message?.includes("OPENROUTER_API_KEY")) {
+      return { isGood: true, advice: "⚙️ Configura tu OPENROUTER_API_KEY en el archivo .env para activar el asesor." }
     }
+    return { isGood: true, advice: `Error técnico: ${error.message || "Falla de conexión"}. Si te gusta la fuente, ¡adelante!` }
   }
 }

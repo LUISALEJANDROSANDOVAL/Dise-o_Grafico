@@ -91,6 +91,8 @@ export default function NamingCreatorPage() {
   const [activeCategory, setActiveCategory] = useState("Todas")
 
   const [isGeneratingNames, setIsGeneratingNames] = useState(false)
+  const [namesCooldown, setNamesCooldown] = useState(0)
+  const [advisorCooldown, setAdvisorCooldown] = useState(0)
   const [generatedNames, setGeneratedNames] = useState<string[]>([])
 
   const [isAdvising, setIsAdvising] = useState(false)
@@ -127,6 +129,16 @@ export default function NamingCreatorPage() {
     })
   }, [filteredFonts])
 
+  const startCooldown = (setter: (v: number) => void, seconds = 15) => {
+    setter(seconds)
+    const interval = setInterval(() => {
+      setter((prev) => {
+        if (prev <= 1) { clearInterval(interval); return 0 }
+        return prev - 1
+      })
+    }, 1000)
+  }
+
   const handleGenerateNames = async () => {
     if (focus.trim().length < 5) return alert("Escribe un poco más sobre tu empresa primero.")
     setIsGeneratingNames(true)
@@ -134,6 +146,7 @@ export default function NamingCreatorPage() {
     setGeneratedNames(ideas)
     if (ideas.length > 0 && !namingIdea) setNamingIdea(ideas[0])
     setIsGeneratingNames(false)
+    startCooldown(setNamesCooldown, 15)
   }
 
   const handleEvaluateFont = async () => {
@@ -145,6 +158,7 @@ export default function NamingCreatorPage() {
     const result = await getFontAdviceAI(focus, selectedFont.name, selectedFont.style)
     setFontAdvice(result)
     setIsAdvising(false)
+    startCooldown(setAdvisorCooldown, 15)
   }
 
   useEffect(() => {
@@ -197,11 +211,11 @@ export default function NamingCreatorPage() {
                 <label htmlFor="nameIdea" className="text-sm font-semibold tracking-tight">2. Tu idea de Nombre</label>
                 <button
                   onClick={handleGenerateNames}
-                  disabled={isGeneratingNames}
+                  disabled={isGeneratingNames || namesCooldown > 0}
                   className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-200 disabled:opacity-50 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50"
                 >
                   {isGeneratingNames ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
-                  Auto Generar
+                  {namesCooldown > 0 ? `Espera ${namesCooldown}s` : "Auto Generar"}
                 </button>
               </div>
 
@@ -337,11 +351,11 @@ export default function NamingCreatorPage() {
             <div className="flex justify-center">
               <button
                 onClick={handleEvaluateFont}
-                disabled={isAdvising || focus.trim().length < 10}
+                disabled={isAdvising || focus.trim().length < 10 || advisorCooldown > 0}
                 className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200"
               >
                 {isAdvising ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-                Consultar Asesor Tipográfico
+                {advisorCooldown > 0 ? `Espera ${advisorCooldown}s` : "Consultar Asesor Tipográfico"}
               </button>
             </div>
 
