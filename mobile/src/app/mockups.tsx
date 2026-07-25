@@ -2,9 +2,8 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useCallback } from 'react';
-import { useFocusEffect } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { calculateContrastRatio, simulateDaltonism } from '../lib/colorEngine';
+import { useGlobalPalette } from '../lib/colorStore';
 
 const DEFAULT_PALETTE = {
   baseColor: '#FF8000',
@@ -18,25 +17,8 @@ const DEFAULT_PALETTE = {
 };
 
 export default function MockupsScreen() {
-  const [activePalette, setActivePalette] = useState(DEFAULT_PALETTE);
+  const activePalette = useGlobalPalette();
   const [daltonismType, setDaltonismType] = useState<'normal' | 'protanopia' | 'deuteranopia'>('normal');
-
-  // Cargar paleta activa desde AsyncStorage al entrar en foco
-  useFocusEffect(
-    useCallback(() => {
-      const loadPalette = async () => {
-        try {
-          const stored = await AsyncStorage.getItem('active_palette');
-          if (stored) {
-            setActivePalette(JSON.parse(stored));
-          }
-        } catch (err) {
-          console.error('Error al cargar paleta activa en mockups:', err);
-        }
-      };
-      loadPalette();
-    }, [])
-  );
 
   // Obtener colores básicos de la paleta
   const mainColorRaw = activePalette.swatches[0]?.hex || '#FF8000';
@@ -57,7 +39,7 @@ export default function MockupsScreen() {
   const labelContrast = calculateContrastRatio(inkColor, paperBg);
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f9f3eb' }}>
       {/* Header */}
       <View className="w-full flex-row justify-between items-center h-touch-target px-margin-mobile border-b border-border-subtle bg-background">
         <TouchableOpacity className="active:scale-95">
@@ -88,24 +70,43 @@ export default function MockupsScreen() {
             Simulador de Visión / Daltonismo (RF-13)
           </Text>
           <View className="flex-row gap-1">
-            {(['normal', 'protanopia', 'deuteranopia'] as const).map((type) => (
-              <TouchableOpacity
-                key={type}
-                onPress={() => setDaltonismType(type)}
-                style={daltonismType === type ? { backgroundColor: '#ffffff' } : null}
-                className={`flex-1 py-2 px-2 rounded-lg items-center justify-center ${
-                  daltonismType === type ? 'shadow-sm border border-border-subtle' : ''
-                }`}
-              >
-                <Text
-                  className={`font-label-caps text-[10px] font-bold uppercase tracking-wider ${
-                    daltonismType === type ? 'text-primary' : 'text-secondary'
-                  }`}
+            {(['normal', 'protanopia', 'deuteranopia'] as const).map((type) => {
+              const isSelected = daltonismType === type;
+              return (
+                <TouchableOpacity
+                  key={type}
+                  onPress={() => setDaltonismType(type)}
+                  style={{
+                    flex: 1,
+                    paddingVertical: 8,
+                    paddingHorizontal: 8,
+                    borderRadius: 8,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: isSelected ? '#ffffff' : 'transparent',
+                    borderWidth: isSelected ? 1 : 0,
+                    borderColor: isSelected ? '#e6e4e0' : 'transparent',
+                    shadowColor: isSelected ? '#000' : 'transparent',
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: isSelected ? 0.05 : 0,
+                    shadowRadius: 2,
+                    elevation: isSelected ? 1 : 0,
+                  }}
                 >
-                  {type === 'normal' ? 'Normal' : type === 'protanopia' ? 'Protanopía' : 'Deuteranopía'}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text
+                    style={{
+                      fontFamily: 'Inter-Bold',
+                      fontSize: 10,
+                      textTransform: 'uppercase',
+                      letterSpacing: 1,
+                      color: isSelected ? '#FF8000' : '#66645f' // Usando colores aproximados (primary / secondary)
+                    }}
+                  >
+                    {type === 'normal' ? 'Normal' : type === 'protanopia' ? 'Protanopía' : 'Deuteranopía'}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
 
@@ -117,7 +118,7 @@ export default function MockupsScreen() {
           <View className="w-full aspect-square bg-surface-container-low rounded-xl items-center justify-center border border-border-subtle relative overflow-hidden mb-4">
             <TouchableOpacity 
               activeOpacity={0.9} 
-              style={[styles.paperShadow, { backgroundColor: mainColor }]}
+              style={{ ...styles.paperShadow, backgroundColor: mainColor }}
               className="w-[280px] h-[160px] rounded-sm border border-border-subtle justify-between p-6"
             >
               <View className="flex-row justify-between items-start">
@@ -164,10 +165,10 @@ export default function MockupsScreen() {
           <View className="w-full aspect-square bg-surface-container-low rounded-xl items-center justify-center border border-border-subtle relative overflow-hidden mb-4">
             <TouchableOpacity 
               activeOpacity={0.9} 
-              style={[styles.paperShadow, { backgroundColor: accentColor }]}
+              style={{ ...styles.paperShadow, backgroundColor: accentColor }}
               className="w-[145px] h-[260px] rounded-t-[72px] rounded-b-md border border-border-subtle items-center pt-10 pb-8 px-4"
             >
-              <View className="w-3.5 h-3.5 rounded-full border border-border-subtle absolute top-6" style={[styles.innerShadow, { backgroundColor: paperBg, borderColor: inkColor }]} />
+              <View className="w-3.5 h-3.5 rounded-full border border-border-subtle absolute top-6" style={{ ...styles.innerShadow, backgroundColor: paperBg, borderColor: inkColor }} />
               
               {/* Etiqueta Minimalista Blanca/Papel */}
               <View style={{ backgroundColor: paperBg, borderColor: inkColor }} className="items-center mt-6 w-full p-3 rounded border">
