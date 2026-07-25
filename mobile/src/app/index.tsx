@@ -6,10 +6,10 @@ import QRCode from 'react-native-qrcode-svg';
 import Svg, { Path, G } from 'react-native-svg';
 import chroma from 'chroma-js';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withSequence, withTiming } from 'react-native-reanimated';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { generateHarmonies, convertColorFormats, HarmonyType, SwatchData, ColorFormats } from '../lib/colorEngine';
 import { savePalette } from '../lib/services/paletteService';
 import { initAnonymousSession } from '../lib/services/authService';
+import { colorStore, useGlobalColor, paletteStore } from '../lib/colorStore';
 
 const HARMONY_CHIPS: { type: HarmonyType; label: string }[] = [
   { type: 'complementary', label: 'Complementario' },
@@ -77,7 +77,8 @@ function VectorColorWheel({ size = WHEEL_SIZE }: { size?: number }) {
 
 export default function PaletteScreen() {
   const [selectorPos, setSelectorPos] = useState({ x: 75, y: 25 });
-  const [baseColorHex, setBaseColorHex] = useState('#FF8000');
+  const baseColorHex = useGlobalColor();
+  const setBaseColorHex = colorStore.setColor;
   const [currentAngleDeg, setCurrentAngleDeg] = useState(30);
   const [hexInput, setHexInput] = useState('FF8000');
   const [activeHarmony, setActiveHarmony] = useState<HarmonyType>('complementary');
@@ -233,18 +234,11 @@ export default function PaletteScreen() {
 
   // Persistir paleta activa localmente para sincronizar entre pantallas
   useEffect(() => {
-    const persistActivePalette = async () => {
-      try {
-        await AsyncStorage.setItem('active_palette', JSON.stringify({
-          baseColor: baseColorHex,
-          harmony: activeHarmony,
-          swatches: swatches,
-        }));
-      } catch (err) {
-        console.error('Error al guardar paleta activa en AsyncStorage:', err);
-      }
-    };
-    persistActivePalette();
+    paletteStore.setPalette({
+      baseColor: baseColorHex,
+      harmony: activeHarmony,
+      swatches: swatches,
+    });
   }, [swatches, baseColorHex, activeHarmony]);
 
   // Guardar paleta en la base de datos Supabase
@@ -274,7 +268,7 @@ export default function PaletteScreen() {
     : `https://rulec.app/paleta?color=${encodeURIComponent(baseColorHex)}&harmony=${activeHarmony}`;
 
   return (
-    <SafeAreaView className="flex-1 bg-paper-bg">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#FAF6EF' }}>
       {/* Toast Notification Flotante */}
       {toastMessage && (
         <View className="absolute top-12 left-margin-mobile right-margin-mobile z-50 bg-ink-text px-4 py-3 rounded-xl shadow-lg border border-border-subtle flex-row items-center justify-between">

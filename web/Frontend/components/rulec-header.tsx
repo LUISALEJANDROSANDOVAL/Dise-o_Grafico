@@ -36,7 +36,7 @@ export function RulecHeader({ profile = "entrepreneur", onProfileChange = () => 
     })
 
     return () => subscription.unsubscribe()
-  }, [supabase.auth])
+  }, [])
 
   const handleSignIn = () => {
     supabase.auth.signInWithOAuth({
@@ -62,8 +62,6 @@ export function RulecHeader({ profile = "entrepreneur", onProfileChange = () => 
               v1.0
             </span>
           </div>
-
-          {/* Se han eliminado los enlaces a Herramienta y Guía: Elegir Nombre */}
         </div>
 
         {/* Right side controls */}
@@ -107,12 +105,12 @@ export function RulecHeader({ profile = "entrepreneur", onProfileChange = () => 
         {/* Auth controls */}
         {session ? (
           <div className={cn("flex items-center gap-2 pl-3 ml-1", !hideProfileToggle && "border-l border-border")}>
-            <Link href="/mis-paletas">
-              <Button variant="ghost" size="sm" className="hidden sm:flex gap-2">
+            <Button variant="ghost" size="sm" className="hidden sm:flex gap-2" asChild>
+              <Link href="/mis-paletas">
                 <LayoutDashboard className="h-4 w-4" />
                 Mis Paletas
-              </Button>
-            </Link>
+              </Link>
+            </Button>
             <Button variant="outline" size="sm" onClick={handleSignOut} className="gap-2">
               <LogOut className="h-4 w-4" />
               <span className="hidden sm:inline">Salir</span>

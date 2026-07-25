@@ -3,17 +3,16 @@
 import { useEffect, useState } from "react"
 import { RulecHeader, type Profile } from "@/components/rulec-header"
 import { motion } from "framer-motion"
-import { Sparkles, BrainCircuit, Hourglass, CheckCircle2 } from "lucide-react"
+import { Sparkles, BrainCircuit, Hourglass, CheckCircle2, ArrowRight } from "lucide-react"
+import Link from "next/link"
+import { useTheme } from "@/hooks/useTheme"
+import { useDragScroll } from "@/hooks/useDragScroll"
 
 export default function ElegirNombrePage() {
-  const [theme, setTheme] = useState<"light" | "dark">("light")
+  const [theme, setTheme] = useTheme()
+  const dragScroll = useDragScroll<HTMLDivElement>()
   const [profile, setProfile] = useState<Profile>("entrepreneur")
 
-  useEffect(() => {
-    const root = document.documentElement
-    root.classList.toggle("dark", theme === "dark")
-    root.classList.toggle("light", theme === "light")
-  }, [theme])
 
   return (
     <div className="flex min-h-dvh flex-col bg-slate-50 text-slate-950 dark:bg-[#0a0a0a] dark:text-slate-50 selection:bg-blue-500/30">
@@ -25,9 +24,9 @@ export default function ElegirNombrePage() {
         hideProfileToggle={true}
       />
 
-      <main className="mx-auto flex w-full max-w-5xl flex-col gap-16 px-6 py-16 md:py-24">
+      <main className="mx-auto flex w-full max-w-full flex-col justify-center gap-8 px-6 py-4 md:px-12 lg:px-24 md:py-8 min-h-[calc(100vh-100px)]">
         {/* Hero Section */}
-        <div className="flex flex-col gap-6 text-center">
+        <div className="flex flex-col gap-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -55,14 +54,17 @@ export default function ElegirNombrePage() {
           </motion.p>
         </div>
 
-        {/* Steps Grid */}
-        <div className="grid gap-6 md:grid-cols-2">
+        {/* Steps Slider */}
+        <div 
+          {...dragScroll}
+          className={`flex w-full snap-x snap-mandatory gap-4 overflow-x-auto pb-4 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${dragScroll.className}`}
+        >
           {/* Tip 1 */}
           <motion.section 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="group flex flex-col gap-4 rounded-3xl border border-slate-200/60 bg-white/50 p-8 shadow-sm backdrop-blur-xl transition-colors hover:border-blue-500/30 dark:border-white/10 dark:bg-black/40 dark:hover:border-blue-500/30"
+            className="group flex w-full min-w-[85vw] max-w-[400px] flex-none snap-center flex-col gap-4 rounded-3xl border border-slate-200/60 bg-white/50 p-8 shadow-sm backdrop-blur-xl transition-colors hover:border-blue-500/30 sm:min-w-[400px] dark:border-white/10 dark:bg-black/40 dark:hover:border-blue-500/30"
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
               <BrainCircuit className="h-6 w-6" />
@@ -78,7 +80,7 @@ export default function ElegirNombrePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="group flex flex-col gap-4 rounded-3xl border border-slate-200/60 bg-white/50 p-8 shadow-sm backdrop-blur-xl transition-colors hover:border-purple-500/30 dark:border-white/10 dark:bg-black/40 dark:hover:border-purple-500/30"
+            className="group flex w-full min-w-[85vw] max-w-[400px] flex-none snap-center flex-col gap-4 rounded-3xl border border-slate-200/60 bg-white/50 p-8 shadow-sm backdrop-blur-xl transition-colors hover:border-purple-500/30 sm:min-w-[400px] dark:border-white/10 dark:bg-black/40 dark:hover:border-purple-500/30"
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-100 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400">
               <Sparkles className="h-6 w-6" />
@@ -94,7 +96,7 @@ export default function ElegirNombrePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.5 }}
-            className="group flex flex-col gap-4 rounded-3xl border border-slate-200/60 bg-white/50 p-8 shadow-sm backdrop-blur-xl transition-colors hover:border-rose-500/30 dark:border-white/10 dark:bg-black/40 dark:hover:border-rose-500/30"
+            className="group flex w-full min-w-[85vw] max-w-[400px] flex-none snap-center flex-col gap-4 rounded-3xl border border-slate-200/60 bg-white/50 p-8 shadow-sm backdrop-blur-xl transition-colors hover:border-rose-500/30 sm:min-w-[400px] dark:border-white/10 dark:bg-black/40 dark:hover:border-rose-500/30"
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-100 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400">
               <Hourglass className="h-6 w-6" />
@@ -110,7 +112,7 @@ export default function ElegirNombrePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="group flex flex-col gap-4 rounded-3xl border border-slate-200/60 bg-white/50 p-8 shadow-sm backdrop-blur-xl transition-colors hover:border-amber-500/30 dark:border-white/10 dark:bg-black/40 dark:hover:border-amber-500/30"
+            className="group flex w-full min-w-[85vw] max-w-[400px] flex-none snap-center flex-col gap-4 rounded-3xl border border-slate-200/60 bg-white/50 p-8 shadow-sm backdrop-blur-xl transition-colors hover:border-amber-500/30 sm:min-w-[400px] dark:border-white/10 dark:bg-black/40 dark:hover:border-amber-500/30"
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">
               <CheckCircle2 className="h-6 w-6" />
@@ -121,6 +123,22 @@ export default function ElegirNombrePage() {
             </p>
           </motion.section>
         </div>
+
+        {/* CTA Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.8 }}
+          className="flex justify-center pt-2"
+        >
+          <Link
+            href="/elegir-nombre/crear"
+            className="group inline-flex items-center gap-2 rounded-full bg-blue-600 px-8 py-4 text-base font-semibold text-white transition-all hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-500/20 active:scale-95"
+          >
+            Empezar a crear mi nombre
+            <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+          </Link>
+        </motion.div>
       </main>
     </div>
   )
