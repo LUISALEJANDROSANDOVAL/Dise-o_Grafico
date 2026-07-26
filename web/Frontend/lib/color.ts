@@ -61,6 +61,34 @@ export function cmykString(hex: string): string {
   return `${c}, ${m}, ${y}, ${Math.round(k * 100)}`
 }
 
+export function cmykFormatted(hex: string): string {
+  const { r, g, b } = hexToRgb(hex)
+  const rN = r / 255
+  const gN = g / 255
+  const bN = b / 255
+  const k = 1 - Math.max(rN, gN, bN)
+  if (k === 1) return "C: 0% | M: 0% | Y: 0% | K: 100%"
+  const c = Math.round(((1 - rN - k) / (1 - k)) * 100)
+  const m = Math.round(((1 - gN - k) / (1 - k)) * 100)
+  const y = Math.round(((1 - bN - k) / (1 - k)) * 100)
+  const kVal = Math.round(k * 100)
+  return `C: ${c}% | M: ${m}% | Y: ${y}% | K: ${kVal}%`
+}
+
+export function cmykCompact(hex: string): string {
+  const { r, g, b } = hexToRgb(hex)
+  const rN = r / 255
+  const gN = g / 255
+  const bN = b / 255
+  const k = 1 - Math.max(rN, gN, bN)
+  if (k === 1) return "C 0  M 0  Y 0  K 100"
+  const c = Math.round(((1 - rN - k) / (1 - k)) * 100)
+  const m = Math.round(((1 - gN - k) / (1 - k)) * 100)
+  const y = Math.round(((1 - bN - k) / (1 - k)) * 100)
+  const kVal = Math.round(k * 100)
+  return `C ${c}  M ${m}  Y ${y}  K ${kVal}`
+}
+
 export function hexToHsl(hex: string): HSL {
   const { r, g, b } = hexToRgb(hex)
   const rN = r / 255

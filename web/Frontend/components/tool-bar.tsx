@@ -2,10 +2,12 @@
 
 import { useEffect, useRef, useState } from "react"
 import QRCode from "qrcode"
-import { Eye, FileDown, QrCode, Check, X, Save, Loader2 } from "lucide-react"
+import { Eye, FileDown, QrCode, Check, X, Save, Loader2, Code, Download, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { type ColorblindMode, CB_LABELS, type Swatch } from "@/lib/color"
+import type { Profile } from "@/components/rulec-header"
+import { downloadCSS, generateTailwindConfig, downloadASE } from "@/utils/export-formats"
 
 const CB_MODES: ColorblindMode[] = ["none", "protanopia", "deuteranopia", "tritanopia"]
 
@@ -16,12 +18,15 @@ type Props = {
   onExport: () => void
   onSave?: () => void
   isSaving?: boolean
+  profile: Profile
 }
 
-export function ToolBar({ colorblind, onColorblindChange, palette, onExport, onSave, isSaving }: Props) {
+export function ToolBar({ colorblind, onColorblindChange, palette, onExport, onSave, isSaving, profile }: Props) {
   const [cbOpen, setCbOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
+  const [techExportOpen, setTechExportOpen] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [copiedTailwind, setCopiedTailwind] = useState(false)
   const [qr, setQr] = useState<string | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -41,6 +46,13 @@ export function ToolBar({ colorblind, onColorblindChange, palette, onExport, onS
     navigator.clipboard?.writeText(shareUrl)
     setCopied(true)
     setTimeout(() => setCopied(false), 1500)
+  }
+
+  function handleCopyTailwind() {
+    const config = generateTailwindConfig(palette)
+    navigator.clipboard?.writeText(config)
+    setCopiedTailwind(true)
+    setTimeout(() => setCopiedTailwind(false), 1500)
   }
 
   return (
@@ -71,7 +83,7 @@ export function ToolBar({ colorblind, onColorblindChange, palette, onExport, onS
                   <button
                     key={m}
                     onClick={() => {
-                      onColorblindChange(m)
+                       onColorblindChange(m)
                       setCbOpen(false)
                     }}
                     className={cn(
@@ -125,6 +137,76 @@ export function ToolBar({ colorblind, onColorblindChange, palette, onExport, onS
             )}
           </div>
 
+          {/* Technical Export Dropdown for Designer Profile */}
+          {profile === "designer" && (
+            <div className="relative">
+              <Button variant="outline" onClick={() => setTechExportOpen((o) => !o)} aria-expanded={techExportOpen}>
+                <Code className="text-blue-500" />
+                <span className="hidden sm:inline">Exportar Técnico</span>
+                <span className="sm:hidden">Formatos</span>
+              </Button>
+              {techExportOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setTechExportOpen(false)} aria-hidden />
+                  <div className="absolute bottom-full right-0 z-20 mb-2 w-72 rounded-lg border border-border bg-popover p-4 shadow-lg">
+                    <div className="mb-3 flex items-center justify-between">
+                      <span className="text-sm font-semibold text-foreground">Exportación Técnica</span>
+                      <button onClick={() => setTechExportOpen(false)} aria-label="Cerrar">
+                        <X className="size-4 text-muted-foreground" />
+                      </button>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full justify-start gap-2"
+                        onClick={() => {
+                          downloadCSS(palette)
+                          setTechExportOpen(false)
+                        }}
+                      >
+                        <Download className="size-3.5 text-blue-500" />
+                        Descargar Variables CSS (.css)
+                      </Button>
+
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full justify-start gap-2"
+                        onClick={() => {
+                          downloadASE(palette)
+                          setTechExportOpen(false)
+                        }}
+                      >
+                        <Download className="size-3.5 text-emerald-500" />
+                        Descargar Muestras Adobe (.ase)
+                      </Button>
+
+                      <div className="mt-2 border-t border-border pt-2">
+                        <span className="block text-[11px] font-medium text-muted-foreground mb-1">
+                          Configuración Tailwind CSS
+                        </span>
+                        <div className="relative rounded bg-muted p-2 font-mono text-[9px] text-muted-foreground max-h-24 overflow-y-auto">
+                          <pre>{generateTailwindConfig(palette)}</pre>
+                        </div>
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className="mt-2 w-full gap-2 text-xs"
+                          onClick={handleCopyTailwind}
+                        >
+                          {copiedTailwind ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+                          {copiedTailwind ? "Configuración Copiada" : "Copiar Config Tailwind"}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
           {/* Save Palette */}
           {onSave && (
             <Button onClick={onSave} disabled={isSaving} className="bg-blue-600 hover:bg-blue-700 text-white">
@@ -146,3 +228,4 @@ export function ToolBar({ colorblind, onColorblindChange, palette, onExport, onS
     </div>
   )
 }
+
