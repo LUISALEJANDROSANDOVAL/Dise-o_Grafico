@@ -145,6 +145,7 @@ function HerramientaContent() {
         onExport={handleExport}
         onSave={handleSave}
         isSaving={isPending}
+        profile={profile}
       />
     </div>
   )

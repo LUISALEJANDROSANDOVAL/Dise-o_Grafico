@@ -14,6 +14,7 @@ import {
   rgbString,
   cmykString,
   hslToHex,
+  cmykCompact,
 } from "@/lib/color"
 import type { Profile } from "@/components/rulec-header"
 
@@ -134,17 +135,12 @@ function Swatches({
               </span>
             </div>
 
-            <div className="flex flex-col gap-1 px-1.5 py-1.5">
-              <span className="font-mono text-[10px] text-foreground sm:text-xs">{s.hex}</span>
+            <div className="flex flex-col gap-0.5 px-2 py-1.5">
+              <span className="font-mono text-[10px] font-semibold text-foreground sm:text-xs">{s.hex}</span>
+              <span className="font-mono text-[9px] text-neutral-400 dark:text-neutral-500 print:text-neutral-700 font-medium tracking-tight leading-none">{cmykCompact(s.hex)}</span>
 
               {isDesigner && (
-                <>
-                  <div className="flex flex-col gap-0.5 font-mono text-[9px] leading-tight text-muted-foreground">
-                    <span>RGB {rgbString(s.hex)}</span>
-                    <span>CMYK {cmykString(s.hex)}</span>
-                  </div>
-                  <DesignerSliders index={i} swatch={s} onChange={onSwatchChange} />
-                </>
+                <DesignerSliders index={i} swatch={s} onChange={onSwatchChange} />
               )}
             </div>
           </motion.div>

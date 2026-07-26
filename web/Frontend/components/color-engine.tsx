@@ -5,7 +5,7 @@ import { motion } from "framer-motion"
 import { ImageIcon, Pipette, BrainCircuit, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { type HSL, type Scheme, SCHEMES, hslToHex, hexToHsl } from "@/lib/color"
+import { type HSL, type Scheme, SCHEMES, hslToHex, hexToHsl, cmykCompact } from "@/lib/color"
 import type { Profile } from "@/components/rulec-header"
 
 type Props = {
@@ -240,7 +240,10 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
     <section className="flex flex-col gap-6" aria-label="Motor de color">
       <div className="flex items-baseline justify-between">
         <h2 className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Motor de color</h2>
-        <span className="font-mono text-xs text-muted-foreground">{baseHex}</span>
+        <div className="flex flex-col items-end text-right">
+          <span className="font-mono text-xs font-semibold text-foreground">{baseHex}</span>
+          <span className="font-mono text-[9px] text-neutral-400 dark:text-neutral-500 print:text-neutral-700 font-medium tracking-tight mt-0.5">{cmykCompact(baseHex)}</span>
+        </div>
       </div>
 
       {/* Chromatic wheel */}
