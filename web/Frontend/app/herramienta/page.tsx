@@ -156,6 +156,7 @@ function HerramientaContent() {
             <PsychologyReport
               base={base}
               scheme={scheme}
+              palette={palette}
               onClose={() => setShowFullAnalysis(false)}
             />
           ) : (

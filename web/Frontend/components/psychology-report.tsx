@@ -3,16 +3,18 @@
 import { motion } from "framer-motion"
 import { BrainCircuit, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { type HSL, type Scheme, SCHEMES, hslToHex } from "@/lib/color"
+import { type HSL, type Scheme, type Swatch, SCHEMES, hslToHex } from "@/lib/color"
 import { getColorPsychology } from "@/components/color-engine"
+import { PalettePersonality } from "@/components/palette-personality"
 
 type Props = {
   base: HSL
   scheme: Scheme
+  palette: Swatch[]
   onClose: () => void
 }
 
-export function PsychologyReport({ base, scheme, onClose }: Props) {
+export function PsychologyReport({ base, scheme, palette, onClose }: Props) {
   const baseHex = hslToHex(base)
   const primaryPsycho = getColorPsychology(base.h)
   
@@ -90,6 +92,10 @@ export function PsychologyReport({ base, scheme, onClose }: Props) {
             <p className="text-base leading-relaxed text-indigo-800/80 dark:text-indigo-200/80">
               {SCHEMES.find(s => s.id === scheme)?.explanation}
             </p>
+          </div>
+          
+          <div className="pt-2">
+            <PalettePersonality palette={palette} />
           </div>
         </div>
       </div>
