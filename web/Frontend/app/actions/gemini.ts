@@ -81,7 +81,7 @@ Ejemplo: ["Nombre1", "Nombre2", "Nombre3", "Nombre4", "Nombre5"]`
   try {
     const text = await callAI(prompt)
     const cleaned = text.trim().replace(/```json/g, "").replace(/```/g, "").trim()
-    const match = cleaned.match(/\[.*\]/s)
+    const match = cleaned.match(/\[[\s\S]*\]/)
     if (!match) throw new Error("Respuesta inesperada del modelo")
     return JSON.parse(match[0]) as string[]
   } catch (error: any) {
@@ -113,7 +113,7 @@ Responde ÚNICAMENTE con un objeto JSON válido, sin markdown:
   try {
     const text = await callAI(prompt)
     const cleaned = text.trim().replace(/```json/g, "").replace(/```/g, "").trim()
-    const match = cleaned.match(/\{[\s\S]*\}/s)
+    const match = cleaned.match(/\{[\s\S]*\}/)
     if (!match) throw new Error("Respuesta inesperada del modelo")
     return JSON.parse(match[0]) as { isGood: boolean; advice: string }
   } catch (error: any) {
