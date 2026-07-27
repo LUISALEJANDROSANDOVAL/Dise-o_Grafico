@@ -2,13 +2,43 @@ export type HSL = { h: number; s: number; l: number }
 export type Swatch = { h: number; s: number; l: number; hex: string }
 export type Scheme = "mono" | "analogous" | "complementary" | "triad" | "split" | "tetradic"
 
-export const SCHEMES: { id: Scheme; entrepreneur: string; designer: string }[] = [
-  { id: "mono", entrepreneur: "Un solo color", designer: "Monocromático" },
-  { id: "analogous", entrepreneur: "Colores vecinos", designer: "Análogos" },
-  { id: "complementary", entrepreneur: "Alto contraste", designer: "Complementarios" },
-  { id: "split", entrepreneur: "Contraste suave", designer: "Complementarios extendidos" },
-  { id: "triad", entrepreneur: "Tres tonos", designer: "Tríada" },
-  { id: "tetradic", entrepreneur: "Cuatro tonos", designer: "Tetrádica" },
+export const SCHEMES: { id: Scheme; entrepreneur: string; designer: string; explanation: string }[] = [
+  { 
+    id: "mono", 
+    entrepreneur: "Un solo color", 
+    designer: "Monocromático",
+    explanation: "El esquema monocromático utiliza un solo color base con variaciones de saturación y luminosidad. Funciona perfectamente porque crea un aspecto cohesivo, elegante y muy limpio sin el riesgo de choques visuales."
+  },
+  { 
+    id: "analogous", 
+    entrepreneur: "Colores vecinos", 
+    designer: "Análogos",
+    explanation: "Los colores análogos se encuentran uno al lado del otro en el círculo cromático. Funcionan juntos porque comparten matices subyacentes, creando diseños armoniosos, relajantes y naturales que son muy agradables a la vista."
+  },
+  { 
+    id: "complementary", 
+    entrepreneur: "Alto contraste", 
+    designer: "Complementarios",
+    explanation: "Los esquemas complementarios utilizan colores opuestos en el círculo cromático (ej. cálido vs. frío). Funcionan porque crean el máximo contraste visual, lo que hace que los elementos resalten instantáneamente y atraigan la atención."
+  },
+  { 
+    id: "split", 
+    entrepreneur: "Contraste suave", 
+    designer: "Complementarios extendidos",
+    explanation: "Variación del esquema complementario que usa los dos colores adyacentes al opuesto. Funciona porque mantiene un contraste alto pero con menos tensión visual, resultando más fácil de equilibrar que el complementario directo."
+  },
+  { 
+    id: "triad", 
+    entrepreneur: "Tres tonos", 
+    designer: "Tríada",
+    explanation: "La tríada utiliza tres colores espaciados equitativamente en el círculo cromático. Funciona porque ofrece un alto contraste visual al tiempo que mantiene el equilibrio y la riqueza del color, ideal para marcas dinámicas y juveniles."
+  },
+  { 
+    id: "tetradic", 
+    entrepreneur: "Cuatro tonos", 
+    designer: "Tetrádica",
+    explanation: "El esquema tetrádico utiliza cuatro colores dispuestos en dos pares complementarios. Funciona porque ofrece la mayor variedad cromática posible, permitiendo diseños muy vibrantes y complejos si se balancean bien."
+  },
 ]
 
 function clamp(n: number, min = 0, max = 100) {

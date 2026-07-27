@@ -27,7 +27,7 @@ export function ToolBar({ colorblind, onColorblindChange, palette, onExport, onS
 
   const shareUrl =
     typeof window !== "undefined"
-      ? `${window.location.origin}${window.location.pathname}?p=${palette.map((s) => s.hex.slice(1)).join("-")}`
+      ? `${window.location.origin}/p/${palette.map((s) => s.hex.slice(1)).join("-")}`
       : ""
 
   useEffect(() => {
