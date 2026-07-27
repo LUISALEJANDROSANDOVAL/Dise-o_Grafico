@@ -5,7 +5,7 @@ import { motion } from "framer-motion"
 import { ImageIcon, Pipette, BrainCircuit, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { type HSL, type Scheme, SCHEMES, hslToHex, hexToHsl } from "@/lib/color"
+import { type HSL, type Scheme, SCHEMES, hslToHex, hexToHsl, generatePalette } from "@/lib/color"
 import type { Profile } from "@/components/rulec-header"
 
 type Props = {
@@ -338,22 +338,37 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
           Esquema de color
         </span>
         <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Esquema de color">
-          {SCHEMES.map((s) => (
-            <button
-              key={s.id}
-              role="radio"
-              aria-checked={scheme === s.id}
-              onClick={() => onSchemeChange(s.id)}
-              className={cn(
-                 "rounded-lg border px-3 py-2.5 text-left text-sm font-medium transition-colors",
-                 scheme === s.id
-                   ? "border-foreground bg-foreground text-background"
-                   : "border-border bg-card text-foreground hover:bg-muted",
-              )}
-            >
-              {profile === "entrepreneur" ? s.entrepreneur : s.designer}
-            </button>
-          ))}
+          {SCHEMES.map((s) => {
+            const previewPalette = generatePalette(base, s.id)
+            return (
+              <button
+                key={s.id}
+                role="radio"
+                aria-checked={scheme === s.id}
+                onClick={() => onSchemeChange(s.id)}
+                className={cn(
+                   "rounded-lg border px-3 py-2.5 text-left text-sm font-medium transition-colors",
+                   scheme === s.id
+                     ? "border-foreground bg-foreground text-background"
+                     : "border-border bg-card text-foreground hover:bg-muted",
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <span>{profile === "entrepreneur" ? s.entrepreneur : s.designer}</span>
+                  <div className="flex gap-0.5">
+                    {previewPalette.map((p, i) => (
+                      <span 
+                        key={i} 
+                        className="size-2 rounded-full border border-black/10 dark:border-white/10" 
+                        style={{ backgroundColor: p.hex }} 
+                        aria-hidden
+                      />
+                    ))}
+                  </div>
+                </div>
+              </button>
+            )
+          })}
         </div>
       </div>
         

@@ -127,55 +127,55 @@ function make(h: number, s: number, l: number): Swatch {
 }
 
 export function generatePalette(base: HSL, scheme: Scheme): Swatch[] {
-  const { h, s } = base
+  const { h, s, l } = base
   switch (scheme) {
     case "mono":
       return [
-        make(h, s, 92),
-        make(h, s, 72),
-        make(h, s, 52),
-        make(h, s, 34),
-        make(h, s, 18),
+        make(h, s, l + 40),
+        make(h, s, l + 20),
+        make(h, s, l),
+        make(h, s, l - 18),
+        make(h, s, l - 34),
       ]
     case "analogous":
       return [
-        make(h - 30, s, 55),
-        make(h - 15, s, 50),
-        make(h, s, 48),
-        make(h + 15, s, 50),
-        make(h + 30, s, 55),
+        make(h - 30, s, l + 7),
+        make(h - 15, s, l + 2),
+        make(h, s, l),
+        make(h + 15, s, l + 2),
+        make(h + 30, s, l + 7),
       ]
     case "complementary":
       return [
-        make(h, s, 45),
-        make(h, s, 68),
-        make(h, 12, 94),
-        make(h + 180, s, 68),
-        make(h + 180, s, 45),
+        make(h, s, l),
+        make(h, s, l + 23),
+        make(h, 12, l + 49),
+        make(h + 180, s, l + 23),
+        make(h + 180, s, l),
       ]
     case "split":
       return [
-        make(h, s, 50),
-        make(h + 150, s, 55),
-        make(h + 210, s, 55),
-        make(h, Math.max(10, s - 30), 85),
-        make(h, s, 22),
+        make(h, s, l),
+        make(h + 150, s, l + 5),
+        make(h + 210, s, l + 5),
+        make(h, Math.max(10, s - 30), l + 35),
+        make(h, s, l - 28),
       ]
     case "triad":
       return [
-        make(h, s, 50),
-        make(h + 120, s, 50),
-        make(h + 240, s, 50),
-        make(h, Math.max(10, s - 40), 88),
-        make(h, s, 22),
+        make(h, s, l),
+        make(h + 120, s, l),
+        make(h + 240, s, l),
+        make(h, Math.max(10, s - 40), l + 38),
+        make(h, s, l - 28),
       ]
     case "tetradic":
       return [
-        make(h, s, 50),
-        make(h + 60, s, 52),
-        make(h + 180, s, 50),
-        make(h + 240, s, 52),
-        make(h, Math.max(10, s - 30), 22),
+        make(h, s, l),
+        make(h + 60, s, l + 2),
+        make(h + 180, s, l),
+        make(h + 240, s, l + 2),
+        make(h, Math.max(10, s - 30), l - 28),
       ]
   }
 }
@@ -241,4 +241,23 @@ export const CB_LABELS: Record<ColorblindMode, string> = {
   protanopia: "Protanopía",
   deuteranopia: "Deuteranopía",
   tritanopia: "Tritanopía",
+}
+
+export function simulateCMYK(hex: string): string {
+  const hsl = hexToHsl(hex)
+  let { h, s, l } = hsl
+  
+  // CMYK inks can't reach high saturation, reduce by ~20-30%
+  s = Math.min(s, s * 0.75)
+  if (s > 50) s -= 10
+  
+  // Dull the lightness for very bright colors to simulate uncoated paper
+  if (l > 75 && s > 20) l -= 8
+  if (l > 40 && l <= 75) l -= 4
+  
+  // Greens and blues lose even more vibrancy in CMYK
+  if (h > 90 && h < 160) s *= 0.7 
+  if (h > 180 && h < 260) s *= 0.75
+  
+  return hslToHex({ h: Math.round(h), s: Math.round(s), l: Math.round(l) })
 }

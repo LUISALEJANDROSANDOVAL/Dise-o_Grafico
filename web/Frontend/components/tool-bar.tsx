@@ -6,6 +6,7 @@ import { Eye, FileDown, QrCode, Check, X, Save, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { type ColorblindMode, CB_LABELS, type Swatch } from "@/lib/color"
+import { exportToPDF, exportToASE, exportToCSS } from "@/lib/export"
 
 const CB_MODES: ColorblindMode[] = ["none", "protanopia", "deuteranopia", "tritanopia"]
 
@@ -13,14 +14,14 @@ type Props = {
   colorblind: ColorblindMode
   onColorblindChange: (m: ColorblindMode) => void
   palette: Swatch[]
-  onExport: () => void
   onSave?: () => void
   isSaving?: boolean
 }
 
-export function ToolBar({ colorblind, onColorblindChange, palette, onExport, onSave, isSaving }: Props) {
+export function ToolBar({ colorblind, onColorblindChange, palette, onSave, isSaving }: Props) {
   const [cbOpen, setCbOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
+  const [exportOpen, setExportOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const [qr, setQr] = useState<string | null>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -135,11 +136,37 @@ export function ToolBar({ colorblind, onColorblindChange, palette, onExport, onS
           )}
 
           {/* Export */}
-          <Button onClick={onExport} variant="secondary">
-            <FileDown />
-            <span className="hidden sm:inline">Exportar PDF</span>
-            <span className="sm:hidden">PDF</span>
-          </Button>
+          <div className="relative">
+            <Button onClick={() => setExportOpen((o) => !o)} variant="secondary" aria-expanded={exportOpen}>
+              <FileDown />
+              <span className="hidden sm:inline">Exportar</span>
+            </Button>
+            {exportOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setExportOpen(false)} aria-hidden />
+                <div className="absolute bottom-full right-0 z-20 mb-2 w-48 overflow-hidden rounded-lg border border-border bg-popover p-1 shadow-lg">
+                  <button
+                    onClick={() => { exportToPDF(palette); setExportOpen(false) }}
+                    className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-sm transition-colors hover:bg-muted text-foreground"
+                  >
+                    <FileDown className="size-4" /> Kit Básico (PDF)
+                  </button>
+                  <button
+                    onClick={() => { exportToASE(palette); setExportOpen(false) }}
+                    className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-sm transition-colors hover:bg-muted text-foreground"
+                  >
+                    <FileDown className="size-4" /> Formato Adobe (.ase)
+                  </button>
+                  <button
+                    onClick={() => { exportToCSS(palette); setExportOpen(false) }}
+                    className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-sm transition-colors hover:bg-muted text-foreground"
+                  >
+                    <FileDown className="size-4" /> Variables Web (.css)
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
       <canvas ref={canvasRef} className="hidden" />

@@ -90,9 +90,7 @@ function HerramientaContent() {
   // Apply theme class to <html>
 
 
-  function handleExport() {
-    window.print()
-  }
+
 
   function handleSave() {
     if (!session) {
@@ -176,7 +174,6 @@ function HerramientaContent() {
         colorblind={colorblind}
         onColorblindChange={setColorblind}
         palette={palette}
-        onExport={handleExport}
         onSave={handleSave}
         isSaving={isPending}
       />
