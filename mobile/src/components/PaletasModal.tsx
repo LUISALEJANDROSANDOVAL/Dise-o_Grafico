@@ -12,8 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getUserPalettes, SavedPalette } from '../lib/services/paletteService';
 import { colorStore } from '../lib/colorStore';
-import { useRouter } from 'expo-router';
-
+import { router } from 'expo-router';
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -154,7 +153,6 @@ interface PaletasModalProps {
 }
 
 export default function PaletasModal({ visible, onClose }: PaletasModalProps) {
-  const router = useRouter();
   const setBaseColorHex = colorStore.setColor;
 
   const [palettes, setPalettes] = useState<SavedPalette[]>([]);
