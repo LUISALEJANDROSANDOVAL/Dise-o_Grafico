@@ -1,6 +1,28 @@
 import { supabase } from '../supabase';
 import { initAnonymousSession } from './authService';
 import { SwatchData } from '../colorEngine';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const USER_ID_KEY = 'cromatic_user_id';
+
+/**
+ * Obtiene o persiste el userId activo de forma robusta.
+ * Guarda el userId en una clave propia de AsyncStorage como doble respaldo.
+ */
+async function getRobustUserId(): Promise<string | null> {
+  const sessionUserId = await initAnonymousSession();
+  if (sessionUserId) {
+    // Siempre actualizar el respaldo local con el ID más reciente
+    try { await AsyncStorage.setItem(USER_ID_KEY, sessionUserId); } catch {}
+    return sessionUserId;
+  }
+  // Fallback: leer el respaldo local si la sesión falló
+  try {
+    const cached = await AsyncStorage.getItem(USER_ID_KEY);
+    if (cached) return cached;
+  } catch {}
+  return null;
+}
 
 export interface SavedPalette {
   id?: string;
@@ -16,7 +38,7 @@ export interface SavedPalette {
  */
 export async function savePalette(colorBase: string, esquemaTipo: string, colores: SwatchData[]): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
-    const userId = await initAnonymousSession();
+    const userId = await getRobustUserId();
 
     const payload = {
       usuario_id: userId || null,
@@ -48,7 +70,8 @@ export async function savePalette(colorBase: string, esquemaTipo: string, colore
  */
 export async function getUserPalettes(): Promise<SavedPalette[]> {
   try {
-    const userId = await initAnonymousSession();
+    const userId = await getRobustUserId();
+    console.log('[Paletas] userId activo:', userId);
     if (!userId) return [];
 
     const { data, error } = await supabase
@@ -56,6 +79,8 @@ export async function getUserPalettes(): Promise<SavedPalette[]> {
       .select('*')
       .eq('usuario_id', userId)
       .order('creado_en', { ascending: false });
+
+    console.log('[Paletas] resultado:', data?.length ?? 0, 'paletas | error:', error?.message ?? 'ninguno');
 
     if (error) {
       console.error('Error Supabase fetch paletas:', error.message);

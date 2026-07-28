@@ -1,12 +1,15 @@
 import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
 import { useGlobalColor } from '../lib/colorStore';
 import { getPsychologyForColor } from '../lib/data/colorPsychology';
+import PaletasModal from '../components/PaletasModal';
 
 export default function PsychologyScreen() {
   const baseColorHex = useGlobalColor();
   const psychology = getPsychologyForColor(baseColorHex);
+  const [showPaletas, setShowPaletas] = useState(false);
 
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -16,12 +19,13 @@ export default function PsychologyScreen() {
           <Ionicons name="menu-outline" size={24} color="#0b0704" />
         </TouchableOpacity>
         <Text className="font-display-lg text-[32px] tracking-tight text-primary">
-          RULEC
+          CROMATIC
         </Text>
-        <TouchableOpacity className="active:scale-95">
+        <TouchableOpacity className="active:scale-95" onPress={() => setShowPaletas(true)}>
           <Ionicons name="person-circle-outline" size={24} color="#0b0704" />
         </TouchableOpacity>
       </View>
+      <PaletasModal visible={showPaletas} onClose={() => setShowPaletas(false)} />
 
       <ScrollView className="flex-1 px-margin-mobile pt-8 pb-32">
         {/* Header Section */}
