@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { calculateContrastRatio, simulateDaltonism } from '../lib/colorEngine';
 import { useGlobalPalette } from '../lib/colorStore';
 import PaletasModal from '../components/PaletasModal';
@@ -79,10 +79,22 @@ export default function MockupsScreen() {
                 <TouchableOpacity
                   key={type}
                   onPress={() => setDaltonismType(type)}
-                  style={daltonismType === type ? { backgroundColor: '#ffffff' } : null}
-                  className={`py-2 px-4 rounded-lg items-center justify-center ${
-                    daltonismType === type ? 'shadow-sm border border-border-subtle' : ''
-                  }`}
+                  style={
+                    daltonismType === type
+                      ? {
+                          backgroundColor: '#ffffff',
+                          borderWidth: 1,
+                          borderColor: 'rgba(36, 31, 26, 0.08)',
+                          // Inline shadow — NativeWind `shadow-*` toggles break Expo Router nav context
+                          shadowColor: '#000',
+                          shadowOffset: { width: 0, height: 1 },
+                          shadowOpacity: 0.1,
+                          shadowRadius: 2,
+                          elevation: 2,
+                        }
+                      : undefined
+                  }
+                  className="py-2 px-4 rounded-lg items-center justify-center"
                 >
                   <Text
                     className={`font-label-caps text-[10px] font-bold uppercase tracking-wider ${
