@@ -8,7 +8,7 @@ Tras analizar los requisitos funcionales y no funcionales del proyecto, así com
 - [ ] **RF-18 - Modo Guiado (Cuestionario Inteligente):** Implementar un formulario interactivo rápido que pregunte al usuario por el rubro o tipo de marca (ej. "restaurante", "tecnología", "salud") y, a partir de sus respuestas, la plataforma le sugiera automáticamente paletas de colores apropiadas. Esto evitará que los usuarios no técnicos dependan de la selección manual en el círculo cromático.
 
 ## 2. Tests y Validación de Paleta
-- [ ] **RF-14 - Test de Temperatura / Personalidad:** Desarrollar un pequeño componente visual que evalúe la paleta seleccionada y determine en tiempo real si se percibe como "cálida/fría", "seria/divertida" o "moderna/clásica" basado en la predominancia de los colores de la paleta.
+- [] **RF-14 - Test de Temperatura / Personalidad:** Desarrollar un pequeño componente visual que evalúe la paleta seleccionada y determine en tiempo real si se percibe como "cálida/fría", "seria/divertida" o "moderna/clásica" basado en la predominancia de los colores de la paleta.
 
 ## 3. Exportación Profesional
 - [x] **RF-21 - Exportar PDF real (Kit Básico de Marca):** Sustituir el actual comando `window.print()` por una librería de generación de PDFs (como `jspdf` o `@react-pdf/renderer`) para entregar un documento pulido y profesional que el microempresario pueda descargar.
