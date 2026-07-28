@@ -81,7 +81,7 @@ Ejemplo: ["Nombre1", "Nombre2", "Nombre3", "Nombre4", "Nombre5"]`
   try {
     const text = await callAI(prompt)
     const cleaned = text.trim().replace(/```json/g, "").replace(/```/g, "").trim()
-    const match = cleaned.match(/\[.*\]/s)
+    const match = cleaned.match(/\[[\s\S]*\]/)
     if (!match) throw new Error("Respuesta inesperada del modelo")
     return JSON.parse(match[0]) as string[]
   } catch (error: any) {
@@ -113,7 +113,7 @@ Responde ÚNICAMENTE con un objeto JSON válido, sin markdown:
   try {
     const text = await callAI(prompt)
     const cleaned = text.trim().replace(/```json/g, "").replace(/```/g, "").trim()
-    const match = cleaned.match(/\{[\s\S]*\}/s)
+    const match = cleaned.match(/\{[\s\S]*\}/)
     if (!match) throw new Error("Respuesta inesperada del modelo")
     return JSON.parse(match[0]) as { isGood: boolean; advice: string }
   } catch (error: any) {
@@ -126,4 +126,88 @@ Responde ÚNICAMENTE con un objeto JSON válido, sin markdown:
     }
     return { isGood: true, advice: `Error técnico: ${error.message || "Falla de conexión"}. Si te gusta la fuente, ¡adelante!` }
   }
+}
+
+// ─────────────────────────────────────────────
+// IA VISIÓN - Detector de Logos
+// ─────────────────────────────────────────────
+export async function detectLogoType(base64Image: string): Promise<{ success: boolean; type?: string; explanation?: string; error?: string }> {
+  const apiKey = process.env.OPENROUTER_API_KEY
+
+  if (!apiKey || apiKey.includes("PEGA-TU-KEY")) {
+    return { success: false, error: "OPENROUTER_API_KEY no configurada. Ve a openrouter.ai y pega tu clave en el .env" }
+  }
+
+  // Modelos con capacidad de visión en OpenRouter
+  const VISION_MODELS = [
+    "google/gemini-2.0-flash-lite-preview-02-05:free",
+    "google/gemini-2.0-pro-exp-02-05:free",
+    "google/gemini-1.5-pro", 
+    "openai/gpt-4o-mini"
+  ]
+
+  const prompt = `Actúa como un experto en diseño gráfico y branding. Analiza la imagen adjunta y determina a cuál de las siguientes 4 categorías de diseño de marca pertenece:
+1. Isotipo (Solo símbolo/icono, sin texto)
+2. Logotipo (Solo texto/tipografía)
+3. Imagotipo (Símbolo + Texto, separados y distinguibles)
+4. Isologo (Símbolo y Texto completamente integrados, indivisibles)
+
+Responde ÚNICAMENTE con un objeto JSON válido, sin markdown ni explicaciones adicionales:
+{
+  "type": "Isotipo" | "Logotipo" | "Imagotipo" | "Isologo",
+  "explanation": "Una breve explicación de 2 líneas del porqué pertenece a esta categoría basándote en lo que ves en la imagen."
+}`
+
+  for (const model of VISION_MODELS) {
+    try {
+      console.log(`[IA Visión] Intentando con modelo: ${model}`)
+      
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "https://cromatic.app",
+          "X-Title": "Cromatic - Logo Detector",
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            {
+              role: "user",
+              content: [
+                { type: "text", text: prompt },
+                { type: "image_url", image_url: { url: base64Image } }
+              ]
+            }
+          ],
+          temperature: 0.2,
+        }),
+      })
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        const msg = (err as any)?.error?.message || res.statusText
+        throw Object.assign(new Error(msg), { status: res.status })
+      }
+
+      const data = await res.json() as any
+      const text = data.choices?.[0]?.message?.content ?? ""
+      
+      const cleaned = text.trim().replace(/```json/g, "").replace(/```/g, "").trim()
+      const match = cleaned.match(/\{[\s\S]*\}/s)
+      if (!match) throw new Error("Respuesta inesperada del modelo")
+      
+      const result = JSON.parse(match[0]) as { type: string; explanation: string }
+      console.log(`[IA Visión] Éxito con: ${model}`)
+      return { success: true, ...result }
+      
+    } catch (err: any) {
+      console.warn(`[IA Visión] Modelo falló: ${model}. Error: ${err.message}`)
+      continue
+    }
+  }
+
+  // Si llegamos aquí, ningún modelo funcionó
+  return { success: false, error: "Ningún modelo de visión gratuito está disponible ahora mismo. Por favor, intenta de nuevo más tarde." }
 }

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Palette, Store, Wand2, Eye, ShieldCheck, ArrowRight, BookOpen } from "lucide-react"
+import { Palette, Store, Wand2, Eye, ShieldCheck, ArrowRight, BookOpen, Download } from "lucide-react"
 import { InteractiveParticles } from "@/components/interactive-particles"
 import { RulecHeader } from "@/components/rulec-header"
 import { useTheme } from "@/hooks/useTheme"
@@ -81,7 +81,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}
-            className="grid gap-6 md:grid-cols-3"
+            className="grid gap-6 md:grid-cols-2"
           >
             {/* Entrepreneur Card */}
             <div className="group relative flex h-full flex-col rounded-[2rem] border border-slate-200/60 bg-white/50 p-8 shadow-sm backdrop-blur-xl transition-all duration-300 hover:border-blue-500/30 hover:shadow-xl hover:shadow-blue-500/5 dark:border-white/10 dark:bg-black/40 dark:hover:border-blue-500/30">
@@ -137,6 +137,26 @@ export default function LandingPage() {
                 >
                   Leer la guía <ArrowRight className="h-4 w-4" />
                 </Link>
+              </div>
+            </div>
+
+            {/* Brief Card */}
+            <div className="group relative flex h-full flex-col rounded-[2rem] border border-slate-200/60 bg-white/50 p-8 shadow-sm backdrop-blur-xl transition-all duration-300 hover:border-pink-500/30 hover:shadow-xl hover:shadow-pink-500/5 dark:border-white/10 dark:bg-black/40 dark:hover:border-pink-500/30">
+              <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-pink-100 text-pink-600 dark:bg-pink-500/10 dark:text-pink-400">
+                <Download className="h-7 w-7" strokeWidth={1.5} />
+              </div>
+              <h3 className="mb-3 text-3xl font-bold tracking-tight">Brief de Marca</h3>
+              <p className="mb-8 text-slate-600 dark:text-slate-400 leading-relaxed">
+                Descarga nuestro Brief de Identidad Corporativa para ayudarte a estructurar y definir los valores y objetivos de tu marca.
+              </p>
+              <div className="mt-auto">
+                <a 
+                  href="/Brief_Identidad_Corporativa_Diseno_grafico_Publicitario_2026.pdf"
+                  download
+                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-pink-200 bg-pink-50/50 px-6 font-semibold text-pink-900 transition-all hover:border-pink-300 hover:bg-pink-100 active:scale-[0.98] dark:border-pink-900/50 dark:bg-pink-900/20 dark:text-pink-300 dark:hover:border-pink-800 dark:hover:bg-pink-900/40"
+                >
+                  Descargar PDF <Download className="h-4 w-4" />
+                </a>
               </div>
             </div>
           </motion.div>

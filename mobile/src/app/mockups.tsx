@@ -2,9 +2,8 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useCallback } from 'react';
-import { useFocusEffect } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { calculateContrastRatio, simulateDaltonism } from '../lib/colorEngine';
+import { useGlobalPalette } from '../lib/colorStore';
 
 const DEFAULT_PALETTE = {
   baseColor: '#FF8000',
@@ -18,25 +17,8 @@ const DEFAULT_PALETTE = {
 };
 
 export default function MockupsScreen() {
-  const [activePalette, setActivePalette] = useState(DEFAULT_PALETTE);
+  const activePalette = useGlobalPalette();
   const [daltonismType, setDaltonismType] = useState<'normal' | 'protanopia' | 'deuteranopia' | 'tritanopia' | 'achromatopsia'>('normal');
-
-  // Cargar paleta activa desde AsyncStorage al entrar en foco
-  useFocusEffect(
-    useCallback(() => {
-      const loadPalette = async () => {
-        try {
-          const stored = await AsyncStorage.getItem('active_palette');
-          if (stored) {
-            setActivePalette(JSON.parse(stored));
-          }
-        } catch (err) {
-          console.error('Error al cargar paleta activa en mockups:', err);
-        }
-      };
-      loadPalette();
-    }, [])
-  );
 
   // Obtener colores básicos de la paleta
   const mainColorRaw = activePalette.swatches[0]?.hex || '#FF8000';
@@ -57,7 +39,7 @@ export default function MockupsScreen() {
   const labelContrast = calculateContrastRatio(inkColor, paperBg);
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f9f3eb' }}>
       {/* Header */}
       <View className="w-full flex-row justify-between items-center h-touch-target px-margin-mobile border-b border-border-subtle bg-background">
         <TouchableOpacity className="active:scale-95">
@@ -123,7 +105,7 @@ export default function MockupsScreen() {
           <View className="w-full aspect-square bg-surface-container-low rounded-xl items-center justify-center border border-border-subtle relative overflow-hidden mb-4">
             <TouchableOpacity 
               activeOpacity={0.9} 
-              style={[styles.paperShadow, { backgroundColor: mainColor }]}
+              style={{ ...styles.paperShadow, backgroundColor: mainColor }}
               className="w-[280px] h-[160px] rounded-sm border border-border-subtle justify-between p-6"
             >
               <View className="flex-row justify-between items-start">
@@ -170,10 +152,10 @@ export default function MockupsScreen() {
           <View className="w-full aspect-square bg-surface-container-low rounded-xl items-center justify-center border border-border-subtle relative overflow-hidden mb-4">
             <TouchableOpacity 
               activeOpacity={0.9} 
-              style={[styles.paperShadow, { backgroundColor: accentColor }]}
+              style={{ ...styles.paperShadow, backgroundColor: accentColor }}
               className="w-[145px] h-[260px] rounded-t-[72px] rounded-b-md border border-border-subtle items-center pt-10 pb-8 px-4"
             >
-              <View className="w-3.5 h-3.5 rounded-full border border-border-subtle absolute top-6" style={[styles.innerShadow, { backgroundColor: paperBg, borderColor: inkColor }]} />
+              <View className="w-3.5 h-3.5 rounded-full border border-border-subtle absolute top-6" style={{ ...styles.innerShadow, backgroundColor: paperBg, borderColor: inkColor }} />
               
               {/* Etiqueta Minimalista Blanca/Papel */}
               <View style={{ backgroundColor: paperBg, borderColor: inkColor }} className="items-center mt-6 w-full p-3 rounded border">

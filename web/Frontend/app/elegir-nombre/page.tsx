@@ -7,15 +7,26 @@ import { Sparkles, BrainCircuit, Hourglass, CheckCircle2, ArrowRight } from "luc
 import Link from "next/link"
 import { useTheme } from "@/hooks/useTheme"
 import { useDragScroll } from "@/hooks/useDragScroll"
+import { BrandingTypes } from "@/components/branding-types"
+import { ChevronDown } from "lucide-react"
+import { cn } from "@/lib/utils"
 
 export default function ElegirNombrePage() {
   const [theme, setTheme] = useTheme()
   const dragScroll = useDragScroll<HTMLDivElement>()
   const [profile, setProfile] = useState<Profile>("entrepreneur")
+  const [showBranding, setShowBranding] = useState(false)
 
+  const handleShowBranding = () => {
+    setShowBranding(true)
+  }
+
+  const handleHideBranding = () => {
+    setShowBranding(false)
+  }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-slate-50 text-slate-950 dark:bg-[#0a0a0a] dark:text-slate-50 selection:bg-blue-500/30">
+    <div className="flex h-screen flex-col overflow-hidden bg-slate-50 text-slate-950 dark:bg-[#0a0a0a] dark:text-slate-50 selection:bg-blue-500/30">
       <RulecHeader
         profile={profile}
         onProfileChange={setProfile}
@@ -24,9 +35,10 @@ export default function ElegirNombrePage() {
         hideProfileToggle={true}
       />
 
-      <main className="mx-auto flex w-full max-w-full flex-col justify-center gap-8 px-6 py-4 md:px-12 lg:px-24 md:py-8 min-h-[calc(100vh-100px)]">
-        {/* Hero Section */}
-        <div className="flex flex-col gap-4 text-center">
+      {/* Hero Section */}
+      {!showBranding && (
+        <main id="hero-section" className="mx-auto flex w-full h-full max-w-full flex-col items-center justify-center gap-6 px-6 pb-6 pt-2 md:px-12 lg:px-24 animate-in fade-in zoom-in-95 duration-500">
+          <div className="flex flex-col gap-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -57,7 +69,7 @@ export default function ElegirNombrePage() {
         {/* Steps Slider */}
         <div 
           {...dragScroll}
-          className={`flex w-full snap-x snap-mandatory gap-4 overflow-x-auto pb-4 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${dragScroll.className}`}
+          className={`flex w-full snap-x snap-mandatory gap-4 overflow-x-auto pb-2 pt-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${dragScroll.className}`}
         >
           {/* Tip 1 */}
           <motion.section 
@@ -129,7 +141,7 @@ export default function ElegirNombrePage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.8 }}
-          className="flex justify-center pt-2"
+          className="flex flex-col items-center gap-12 pt-2"
         >
           <Link
             href="/elegir-nombre/crear"
@@ -139,7 +151,32 @@ export default function ElegirNombrePage() {
             <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
           </Link>
         </motion.div>
+
+        {/* Scroll down indicator - Always visible at bottom */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 1.2 }}
+          className="mt-4 mb-4 flex justify-center"
+        >
+          <button 
+            onClick={handleShowBranding}
+            className="group flex animate-bounce flex-col items-center gap-1 rounded-full border border-slate-200/60 bg-white/80 px-6 py-2 text-slate-500 shadow-sm backdrop-blur-xl transition-all hover:border-blue-500/30 hover:bg-white hover:text-blue-600 dark:border-white/10 dark:bg-black/60 dark:hover:border-blue-500/30 dark:hover:bg-black dark:hover:text-blue-400"
+            aria-label="Ver tipos de diseño de marca"
+          >
+            <span className="text-[10px] font-bold uppercase tracking-widest">Tipos de logo</span>
+            <ChevronDown className="h-4 w-4 transition-transform group-hover:translate-y-1" />
+          </button>
+        </motion.div>
       </main>
+    )}
+
+      {/* Branding Types Section */}
+      {showBranding && (
+        <div className="w-full h-full flex flex-col justify-center animate-in fade-in slide-in-from-bottom-8 duration-700 pb-12 pt-4 px-6 md:px-12">
+          <BrandingTypes onBack={handleHideBranding} />
+        </div>
+      )}
     </div>
   )
 }

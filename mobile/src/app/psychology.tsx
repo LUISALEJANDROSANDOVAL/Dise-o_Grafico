@@ -9,7 +9,7 @@ export default function PsychologyScreen() {
   const psychology = getPsychologyForColor(baseColorHex);
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#FAF6EF' }}>
       {/* Header */}
       <View className="w-full flex-row justify-between items-center h-touch-target px-margin-mobile border-b border-border-subtle bg-background">
         <TouchableOpacity className="active:scale-95">

@@ -9,6 +9,7 @@ export interface BrandCase {
 export interface ColorPsychology {
   name: string;
   hex: string;
+  type?: 'Primario' | 'Secundario' | 'Otro';
   headline: string;
   paragraphs: string[];
   emotions: string[];
@@ -20,6 +21,7 @@ export const COLOR_PSYCHOLOGY_CATALOG: ColorPsychology[] = [
   {
     name: 'Rojo',
     hex: '#E53935',
+    type: 'Primario',
     headline: 'Urgencia, Pasión y Disrupción.',
     paragraphs: [
       'El rojo es el color de mayor impacto fisiológico. Acelera el pulso y llama a la acción inmediata. En contextos de marca, comunica energía, audacia y un espíritu disruptivo que no teme ser el centro de atención.',
@@ -42,6 +44,7 @@ export const COLOR_PSYCHOLOGY_CATALOG: ColorPsychology[] = [
   {
     name: 'Naranja',
     hex: '#FF8000',
+    type: 'Secundario',
     headline: 'Optimismo, Accesibilidad y Movimiento.',
     paragraphs: [
       'El naranja combina la energía del rojo con la calidez del amarillo. Es el tono por excelencia de la sociabilidad, el entusiasmo y la accesibilidad, derribando barreras entre la marca y el usuario.',
@@ -64,6 +67,7 @@ export const COLOR_PSYCHOLOGY_CATALOG: ColorPsychology[] = [
   {
     name: 'Amarillo',
     hex: '#FDD835',
+    type: 'Primario',
     headline: 'Claridad, Alegría y Advertencia.',
     paragraphs: [
       'El amarillo es el primer color que el ojo humano procesa. Refleja la luz y comunica un optimismo radiante, claridad mental y una alerta amigable.',
@@ -86,6 +90,7 @@ export const COLOR_PSYCHOLOGY_CATALOG: ColorPsychology[] = [
   {
     name: 'Verde Bosque',
     hex: '#2A4B3C',
+    type: 'Secundario',
     headline: 'Naturaleza, Equilibrio y Crecimiento.',
     paragraphs: [
       'Este tono evoca la quietud inalterable de los bosques densos y la vitalidad silenciosa de la flora en crecimiento. Comunica una estabilidad institucional, una conexión auténtica y enraizada con el entorno.',
@@ -113,6 +118,7 @@ export const COLOR_PSYCHOLOGY_CATALOG: ColorPsychology[] = [
   {
     name: 'Azul',
     hex: '#0080FF',
+    type: 'Primario',
     headline: 'Confianza, Inteligencia y Espacio.',
     paragraphs: [
       'El azul domina el panorama corporativo por su universalidad. Evoca la inmensidad del cielo y el océano, promoviendo una sensación de seguridad, lógica y comunicación clara.',
@@ -135,6 +141,7 @@ export const COLOR_PSYCHOLOGY_CATALOG: ColorPsychology[] = [
   {
     name: 'Púrpura',
     hex: '#8E24AA',
+    type: 'Secundario',
     headline: 'Imaginación, Lujo y Misterio.',
     paragraphs: [
       'Históricamente asociado a la realeza por la rareza de su pigmento, el púrpura combina la estabilidad del azul con la energía del rojo. Es el color de la introspección profunda y la creatividad ilimitada.',
@@ -157,6 +164,7 @@ export const COLOR_PSYCHOLOGY_CATALOG: ColorPsychology[] = [
   {
     name: 'Rosa',
     hex: '#FF0080',
+    type: 'Otro',
     headline: 'Empatía, Cuidado y Subversión.',
     paragraphs: [
       'Lejos de los estereotipos, el rosa contemporáneo es una fuerza de disrupción amable. Evoca empatía genuina, cuidado personal y, en sus tonos más brillantes, una audacia irreverente.',

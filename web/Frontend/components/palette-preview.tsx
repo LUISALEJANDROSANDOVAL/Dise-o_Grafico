@@ -13,6 +13,8 @@ import {
   simulate,
   rgbString,
   cmykString,
+  hslToHex,
+  simulateCMYK,
 } from "@/lib/color"
 import type { Profile } from "@/components/rulec-header"
 
@@ -21,13 +23,14 @@ type Props = {
   colorblind: ColorblindMode
   profile: Profile
   onSwatchChange: (index: number, hsl: HSL) => void
+  base: HSL
 }
 
-export function PalettePreview({ palette, colorblind, profile, onSwatchChange }: Props) {
+export function PalettePreview({ palette, colorblind, profile, onSwatchChange, base }: Props) {
   const display = palette.map((s) => simulate(s.hex, colorblind))
 
   // Roles derived from the palette
-  const brand = display[2]
+  const brand = simulate(hslToHex(base), colorblind)
   const accent = display[3]
   const dark = display[4]
   const light = display[0]
@@ -43,14 +46,12 @@ export function PalettePreview({ palette, colorblind, profile, onSwatchChange }:
         visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
       }}
     >
-      <Swatches palette={palette} display={display} profile={profile} onSwatchChange={onSwatchChange} />
-
       <AnimatePresence mode="wait">
         <Accessibility key={brand} brand={brand} profile={profile} />
       </AnimatePresence>
 
       <motion.div variants={sectionVariant}>
-        <h3 className="mb-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+        <h3 className="mb-3 font-mono text-xs uppercase tracking-widest text-muted-foreground no-print">
           Mockups en tiempo real
         </h3>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -58,13 +59,15 @@ export function PalettePreview({ palette, colorblind, profile, onSwatchChange }:
           <MobileApp brand={brand} accent={accent} light={light} dark={dark} />
         </div>
       </motion.div>
+
+      <Swatches palette={palette} display={display} profile={profile} onSwatchChange={onSwatchChange} />
     </motion.section>
   )
 }
 
 const sectionVariant = {
   hidden: { opacity: 0, y: 12 },
-  visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 26 } },
+  visible: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 300, damping: 26 } },
 }
 
 function Swatches({
@@ -79,6 +82,7 @@ function Swatches({
   onSwatchChange: (index: number, hsl: HSL) => void
 }) {
   const [copied, setCopied] = useState<string | null>(null)
+  const [showCMYK, setShowCMYK] = useState(false)
   const isDesigner = profile === "designer"
 
   function copy(hex: string) {
@@ -88,43 +92,57 @@ function Swatches({
   }
 
   return (
-    <motion.div variants={sectionVariant}>
-      <div className="mb-3 flex items-baseline justify-between">
-        <h3 className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Paleta generada</h3>
+    <motion.div variants={sectionVariant} id="export-palette" className="bg-background">
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <h3 className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Paleta generada</h3>
+          <button
+            onClick={() => setShowCMYK(!showCMYK)}
+            className="text-xs text-muted-foreground hover:text-foreground underline decoration-dashed underline-offset-4 transition-colors"
+          >
+            {showCMYK ? "Ocultar vista de impresión" : "Generar vista CMYK (Impresión)"}
+          </button>
+        </div>
         <span className="font-mono text-xs text-muted-foreground">{palette.length} tonos</span>
       </div>
-      <div className={cn("grid gap-2", isDesigner ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-5")}>
+      <div 
+        className={cn("grid gap-2", isDesigner ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-5")}
+        style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" } as React.CSSProperties}
+      >
         {palette.map((s, i) => (
           <motion.div
             key={i}
             layout
             className="flex flex-col overflow-hidden rounded-lg border border-border bg-card"
+            style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" } as React.CSSProperties}
           >
-            <button
+            <div
+              role="button"
               onClick={() => copy(s.hex)}
-              className="group relative block h-16 w-full text-left sm:h-24"
+              className="group relative block h-16 w-full cursor-pointer text-left sm:h-24"
+              style={{ backgroundColor: display[i], WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" } as React.CSSProperties}
               aria-label={`Copiar ${s.hex}`}
             >
               {/* Animated color layer — cross-fades when the scheme changes */}
               <AnimatePresence mode="popLayout">
                 <motion.span
                   key={display[i]}
-                  className="absolute inset-0 block"
-                  style={{ backgroundColor: display[i] }}
+                  className="absolute inset-0 block print:hidden"
+                  style={{ backgroundColor: display[i], WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" } as React.CSSProperties}
                   initial={{ opacity: 0, scale: 1.04 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.35, ease: "easeOut" }}
                 />
               </AnimatePresence>
-              <span className="absolute right-1 top-1 z-10 rounded bg-background/85 p-1 opacity-0 transition-opacity group-hover:opacity-100">
+              <span className="absolute right-1 top-1 z-10 rounded bg-background/85 p-1 opacity-0 transition-opacity group-hover:opacity-100 print:hidden">
                 {copied === s.hex ? (
                   <Check className="size-3 text-foreground" />
                 ) : (
                   <Copy className="size-3 text-foreground" />
                 )}
               </span>
-            </button>
+            </div>
 
             <div className="flex flex-col gap-1 px-1.5 py-1.5">
               <span className="font-mono text-[10px] text-foreground sm:text-xs">{s.hex}</span>
@@ -142,6 +160,63 @@ function Swatches({
           </motion.div>
         ))}
       </div>
+
+      {showCMYK && (
+        <motion.div 
+          initial={{ opacity: 0, height: 0 }} 
+          animate={{ opacity: 1, height: "auto" }} 
+          className="mt-6 border-t border-border pt-6"
+        >
+          <div className="mb-3">
+            <h3 className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+              Simulación de Impresión (Pérdida de CMYK)
+            </h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Así es como se verían aproximadamente los colores al imprimirse en papel (tarjetas, afiches). Los colores digitales brillantes pierden saturación en tintas reales.
+            </p>
+          </div>
+          <div 
+            className={cn("grid gap-2", isDesigner ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-5")}
+            style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" } as React.CSSProperties}
+          >
+            {palette.map((s, i) => {
+              const cmykHex = simulateCMYK(display[i])
+              return (
+                <div
+                  key={`cmyk-${i}`}
+                  className="flex flex-col overflow-hidden rounded-lg border border-border bg-card"
+                  style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" } as React.CSSProperties}
+                >
+                  <div
+                    role="button"
+                    onClick={() => copy(cmykHex)}
+                    className="group relative block h-16 w-full cursor-pointer text-left sm:h-24"
+                    style={{ backgroundColor: cmykHex, WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" } as React.CSSProperties}
+                    aria-label={`Copiar ${cmykHex}`}
+                  >
+                    <span className="absolute right-1 top-1 z-10 rounded bg-background/85 p-1 opacity-0 transition-opacity group-hover:opacity-100 print:hidden">
+                      {copied === cmykHex ? (
+                        <Check className="size-3 text-foreground" />
+                      ) : (
+                        <Copy className="size-3 text-foreground" />
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-1 px-1.5 py-1.5">
+                    <span className="font-mono text-[10px] text-foreground sm:text-xs">{cmykHex}</span>
+                    {isDesigner && (
+                      <div className="flex flex-col gap-0.5 font-mono text-[9px] leading-tight text-muted-foreground">
+                        <span>RGB {rgbString(cmykHex)}</span>
+                        <span>CMYK {cmykString(cmykHex)}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </motion.div>
+      )}
     </motion.div>
   )
 }
@@ -242,7 +317,7 @@ function BusinessCard({
   brand: string
 }) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 bg-background p-2 -m-2 rounded" id="export-card">
       <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
         Tarjeta de presentación
       </span>

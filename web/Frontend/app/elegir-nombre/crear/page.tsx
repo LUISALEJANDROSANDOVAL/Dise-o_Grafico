@@ -129,7 +129,7 @@ export default function NamingCreatorPage() {
     })
   }, [filteredFonts])
 
-  const startCooldown = (setter: (v: number) => void, seconds = 15) => {
+  const startCooldown = (setter: React.Dispatch<React.SetStateAction<number>>, seconds = 15) => {
     setter(seconds)
     const interval = setInterval(() => {
       setter((prev) => {
