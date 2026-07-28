@@ -11,6 +11,7 @@ import { useState, useRef, useMemo, type Dispatch, type SetStateAction } from 'r
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { generateNameIdeas, getFontAdviceAI } from '../lib/services/aiService';
+import PaletasModal from '../components/PaletasModal';
 
 // ─── Catálogo de fuentes instaladas ────────────────────────────────────────────
 const FONT_CATALOG: { id: string; name: string; family: string; style: string; category: string }[] = [
@@ -75,6 +76,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 // ─── Componente principal ───────────────────────────────────────────────────────
 export default function NamingScreen() {
   const [fase, setFase] = useState<'guia' | 'taller'>('guia');
+  const [showPaletas, setShowPaletas] = useState(false);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -83,11 +85,12 @@ export default function NamingScreen() {
         <TouchableOpacity className="active:scale-95">
           <Ionicons name="menu-outline" size={24} color="#0b0704" />
         </TouchableOpacity>
-        <Text className="font-display-lg text-[28px] tracking-tight text-primary">RULEC</Text>
-        <TouchableOpacity className="active:scale-95">
+        <Text className="font-display-lg text-[28px] tracking-tight text-primary">CROMATIC</Text>
+        <TouchableOpacity className="active:scale-95" onPress={() => setShowPaletas(true)}>
           <Ionicons name="person-circle-outline" size={24} color="#0b0704" />
         </TouchableOpacity>
       </View>
+      <PaletasModal visible={showPaletas} onClose={() => setShowPaletas(false)} />
 
       {fase === 'guia' ? (
         <GuiaView onStart={() => setFase('taller')} />

@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState, useCallback } from 'react';
 import { calculateContrastRatio, simulateDaltonism } from '../lib/colorEngine';
 import { useGlobalPalette } from '../lib/colorStore';
+import PaletasModal from '../components/PaletasModal';
 
 const DEFAULT_PALETTE = {
   baseColor: '#FF8000',
@@ -19,6 +20,7 @@ const DEFAULT_PALETTE = {
 export default function MockupsScreen() {
   const activePalette = useGlobalPalette();
   const [daltonismType, setDaltonismType] = useState<'normal' | 'protanopia' | 'deuteranopia' | 'tritanopia' | 'achromatopsia'>('normal');
+  const [showPaletas, setShowPaletas] = useState(false);
 
   // Obtener colores básicos de la paleta
   const mainColorRaw = activePalette.swatches[0]?.hex || '#FF8000';
@@ -46,12 +48,14 @@ export default function MockupsScreen() {
           <Ionicons name="menu-outline" size={24} color="#0b0704" />
         </TouchableOpacity>
         <Text className="font-display-lg text-[32px] tracking-tight text-primary">
-          RULEC
+          CROMATIC
         </Text>
-        <TouchableOpacity className="active:scale-95">
+        <TouchableOpacity className="active:scale-95" onPress={() => setShowPaletas(true)}>
           <Ionicons name="person-circle-outline" size={24} color="#0b0704" />
         </TouchableOpacity>
       </View>
+
+      <PaletasModal visible={showPaletas} onClose={() => setShowPaletas(false)} />
 
       <ScrollView className="flex-1 px-margin-mobile pt-6 pb-32">
         {/* Header Section */}

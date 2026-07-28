@@ -10,6 +10,7 @@ import { generateHarmonies, convertColorFormats, HarmonyType, SwatchData, ColorF
 import { savePalette } from '../lib/services/paletteService';
 import { initAnonymousSession } from '../lib/services/authService';
 import { colorStore, useGlobalColor, paletteStore } from '../lib/colorStore';
+import PaletasModal from '../components/PaletasModal';
 
 const HARMONY_CHIPS: { type: HarmonyType; label: string }[] = [
   { type: 'complementary', label: 'Complementario' },
@@ -90,6 +91,7 @@ export default function PaletteScreen() {
   const [isSaving, setIsSaving] = useState(false);
   const [savedPaletteId, setSavedPaletteId] = useState<string | null>(null);
   const [showQrModal, setShowQrModal] = useState(false);
+  const [showPaletas, setShowPaletas] = useState(false);
   const [selectedTechSwatchIndex, setSelectedTechSwatchIndex] = useState<number | null>(null);
   const [techFormats, setTechFormats] = useState<ColorFormats | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -288,12 +290,14 @@ export default function PaletteScreen() {
           <Ionicons name="menu-outline" size={24} color="#0b0704" />
         </TouchableOpacity>
         <Text className="font-display-lg text-[32px] tracking-tight text-primary">
-          RULEC
+          CROMATIC
         </Text>
-        <TouchableOpacity className="active:scale-95">
+        <TouchableOpacity className="active:scale-95" onPress={() => setShowPaletas(true)}>
           <Ionicons name="person-circle-outline" size={24} color="#0b0704" />
         </TouchableOpacity>
       </View>
+
+      <PaletasModal visible={showPaletas} onClose={() => setShowPaletas(false)} />
 
       <ScrollView className="flex-1 px-margin-mobile pt-8 pb-32">
         {/* Title Section */}

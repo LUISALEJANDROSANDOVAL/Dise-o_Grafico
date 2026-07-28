@@ -138,6 +138,10 @@ export default function AppLayout() {
           tabBarIcon: ({ color }) => <Ionicons name="text-outline" size={24} color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="paletas"
+        options={{ href: null }}
+      />
     </Tabs>
   );
 }
