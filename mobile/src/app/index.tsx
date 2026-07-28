@@ -3,7 +3,8 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
-import Svg, { Path, G } from 'react-native-svg';
+import Svg, { Path, G, Polygon, Line as SvgLine } from 'react-native-svg';
+import * as Haptics from 'expo-haptics';
 import chroma from 'chroma-js';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withSequence, withTiming } from 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -52,29 +53,40 @@ function TrianglePointer({ color = '#FFFFFF', size = 18, rotationDeg = 0, isPrim
 }
 
 /**
- * Rueda Cromática Vectorial Limpia y Ultra-Fluida a 60 FPS (RF-03, RF-04)
+ * Rueda Cromática Vectorial Ultra-Fluida (Gradiente Cónico 360°)
  */
 function VectorColorWheel({ size = WHEEL_SIZE }: { size?: number }) {
   const center = size / 2;
   const radius = size / 2;
-  const numSlices = WHEEL_COLORS.length;
+  const numSlices = 120; // 3 grados cada una para degradado súper suave
   const angleStep = (2 * Math.PI) / numSlices;
+
+  // Memoizar para evitar re-renders en esta parte pesada a 60 FPS
+  const wheelPaths = useMemo(() => {
+    return Array.from({ length: numSlices }).map((_, index) => {
+      const startAngle = index * angleStep;
+      // +0.05 para solapar un poco y evitar líneas blancas de antialiasing
+      const endAngle = (index + 1) * angleStep + 0.05; 
+      
+      const x1 = center + radius * Math.cos(startAngle);
+      const y1 = center + radius * Math.sin(startAngle);
+      const x2 = center + radius * Math.cos(endAngle);
+      const y2 = center + radius * Math.sin(endAngle);
+
+      const pathData = `M ${center} ${center} L ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2} Z`;
+      
+      // Calcular color HSL: 360 grados / numSlices
+      const hue = (index * 360) / numSlices;
+      const color = `hsl(${hue}, 100%, 50%)`;
+
+      return <Path key={index} d={pathData} fill={color} />;
+    });
+  }, [center, radius, numSlices, angleStep]);
 
   return (
     <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
       <G rotation={-90} origin={`${center}, ${center}`}>
-        {WHEEL_COLORS.map((color, index) => {
-          const startAngle = index * angleStep;
-          const endAngle = (index + 1) * angleStep + 0.03;
-          const x1 = center + radius * Math.cos(startAngle);
-          const y1 = center + radius * Math.sin(startAngle);
-          const x2 = center + radius * Math.cos(endAngle);
-          const y2 = center + radius * Math.sin(endAngle);
-
-          const pathData = `M ${center} ${center} L ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2} Z`;
-
-          return <Path key={index} d={pathData} fill={color} />;
-        })}
+        {wheelPaths}
       </G>
     </Svg>
   );
@@ -132,6 +144,8 @@ export default function PaletteScreen() {
     }, 3000);
   };
 
+  const lastHapticAngle = useRef<number>(-1);
+
   // Procesar toque o arrastre continuo a 60 FPS (RF-04)
   const processWheelTouch = (x: number, y: number) => {
     const center = WHEEL_SIZE / 2;
@@ -143,6 +157,13 @@ export default function PaletteScreen() {
     if (angleDeg < 0) angleDeg += 360;
 
     setCurrentAngleDeg(angleDeg);
+
+    // Retroalimentación háptica cada 15 grados (simula pasos físicos magnéticos)
+    const currentStep = Math.floor(angleDeg / 15);
+    if (lastHapticAngle.current !== currentStep) {
+      Haptics.selectionAsync().catch(() => {});
+      lastHapticAngle.current = currentStep;
+    }
 
     try {
       const newHex = chroma.hsl(angleDeg, 1, 0.5).hex().toUpperCase();
@@ -334,7 +355,27 @@ export default function PaletteScreen() {
             >
               <VectorColorWheel size={WHEEL_SIZE} />
               
-              {/* TRIÁNGULOS APUNTADORES GEOMÉTRICOS (Complementario = 2, Tríada = 3, Análogo = 3) */}
+              {/* LÍNEAS GEOMÉTRICAS DE ARMONÍA */}
+              {trianglePointers.length > 1 && (
+                <View className="absolute w-full h-full pointer-events-none z-10" style={{ opacity: 0.5 }}>
+                  <Svg width="100%" height="100%" viewBox="0 0 100 100">
+                    {activeHarmony === 'complementary' ? (
+                      <SvgLine 
+                        x1={trianglePointers[0].x} y1={trianglePointers[0].y} 
+                        x2={trianglePointers[1].x} y2={trianglePointers[1].y} 
+                        stroke="#0b0704" strokeWidth="0.8" strokeDasharray="2, 2" 
+                      />
+                    ) : (
+                      <Polygon
+                        points={trianglePointers.map(p => `${p.x},${p.y}`).join(' ')}
+                        stroke="#0b0704" strokeWidth="0.8" fill="rgba(255,255,255,0.05)" strokeDasharray="2, 2"
+                      />
+                    )}
+                  </Svg>
+                </View>
+              )}
+
+              {/* TRIÁNGULOS APUNTADORES */}
               {trianglePointers.map((ptr, index) => (
                 <View 
                   key={index}
