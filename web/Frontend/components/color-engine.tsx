@@ -190,6 +190,9 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
     }
   }, [])
 
+  // active palette for pointers
+  const activePalette = generatePalette(base, scheme)
+
   // marker position on the ring
   const visualAngle = base.h
   const angleRad = ((visualAngle - 90) * Math.PI) / 180
@@ -264,13 +267,46 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
           aria-valuemin={0}
           aria-valuemax={360}
         >
-          {/* SVG Single Elegant Pointer */}
+          {/* SVG Pointers (Principal + Secundarios) */}
           <svg viewBox="0 0 100 100" className="pointer-events-none absolute inset-0 h-full w-full overflow-visible z-10">
-            <line 
-              x1="50" y1="50" x2={markerX} y2={markerY} 
-              className="stroke-foreground/20 dark:stroke-foreground/30" 
-              strokeWidth="0.6" 
-            />
+            {activePalette.map((swatch, i) => {
+              const isBase = i === 0;
+              
+              if (isBase) {
+                // Línea principal (aguja elegante)
+                return (
+                  <line 
+                    key={i}
+                    x1="50" y1="50" x2={markerX} y2={markerY} 
+                    className="stroke-foreground/20 dark:stroke-foreground/30" 
+                    strokeWidth="0.6" 
+                  />
+                )
+              }
+              
+              // Flechitas secundarias (más tenues y con puntitos pequeños)
+              const angleRad = ((swatch.h - 90) * Math.PI) / 180
+              const r = 50 * (0.35 + (swatch.s / 100) * 0.6)
+              const x = Number((50 + r * Math.cos(angleRad)).toFixed(4))
+              const y = Number((50 + r * Math.sin(angleRad)).toFixed(4))
+
+              return (
+                <g key={i}>
+                  <line 
+                    x1="50" y1="50" x2={x} y2={y} 
+                    className="stroke-foreground/10 dark:stroke-foreground/10" 
+                    strokeWidth="0.3" 
+                  />
+                  <circle 
+                    cx={x} cy={y} 
+                    r="1.2" 
+                    fill={swatch.hex} 
+                    className="stroke-background shadow-sm" 
+                    strokeWidth="0.5" 
+                  />
+                </g>
+              )
+            })}
           </svg>
 
           {/* inner hole */}
