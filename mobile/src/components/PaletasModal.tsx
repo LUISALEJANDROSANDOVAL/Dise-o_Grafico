@@ -9,10 +9,13 @@ import {
   Dimensions, StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { getUserPalettes, SavedPalette } from '../lib/services/paletteService';
 import { colorStore } from '../lib/colorStore';
 import { router } from 'expo-router';
+import { useCromaticTheme, CromaticTheme } from '../hooks/use-cromatic-theme';
+import { cromaticVars } from '../constants/cromatic-vars';
+
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -33,14 +36,300 @@ const HARMONY_LABELS: Record<string, string> = {
   monochrome: 'Monocromo',
 };
 
+function createStyles(c: CromaticTheme) {
+  return StyleSheet.create({
+    backdrop: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    },
+    sheet: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: SCREEN_HEIGHT * 0.88,
+      backgroundColor: c.surface,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      overflow: 'hidden',
+    },
+    handleContainer: {
+      alignItems: 'center',
+      paddingTop: 10,
+      paddingBottom: 4,
+    },
+    handle: {
+      width: 36,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: c.handle,
+    },
+    sheetHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      paddingHorizontal: 20,
+      paddingTop: 16,
+      paddingBottom: 20,
+      borderBottomWidth: 1,
+      borderBottomColor: c.border,
+    },
+    sheetSuperLabel: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 10,
+      color: c.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 3,
+      marginBottom: 2,
+    },
+    sheetTitle: {
+      fontFamily: 'PlayfairDisplay-Bold',
+      fontSize: 32,
+      color: c.text,
+      lineHeight: 36,
+    },
+    sheetCount: {
+      fontFamily: 'Inter',
+      fontSize: 12,
+      color: c.textMuted,
+      marginTop: 4,
+    },
+    closeBtn: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: c.closeBtnBg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 4,
+    },
+    loadingContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    loadingText: {
+      fontFamily: 'Inter',
+      fontSize: 13,
+      color: c.textMuted,
+      marginTop: 12,
+    },
+    filters: {
+      flexDirection: 'row',
+      gap: 8,
+      paddingHorizontal: 20,
+      paddingTop: 16,
+      paddingBottom: 12,
+    },
+    filterBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      paddingHorizontal: 14,
+      paddingVertical: 7,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: c.buttonBorder,
+      backgroundColor: c.buttonBg,
+    },
+    filterBtnActive: {
+      backgroundColor: c.buttonBgActive,
+      borderColor: c.buttonBorder,
+    },
+    filterLabel: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 10,
+      textTransform: 'uppercase',
+      letterSpacing: 0.8,
+      color: c.buttonTextMuted,
+    },
+    filterLabelActive: {
+      color: c.buttonTextOnActive,
+    },
+    list: {
+      flex: 1,
+    },
+    card: {
+      marginBottom: 14,
+      backgroundColor: c.card,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: c.border,
+      overflow: 'hidden',
+    },
+    colorBand: {
+      flexDirection: 'row',
+      height: 52,
+    },
+    cardBody: {
+      padding: 14,
+    },
+    cardRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 10,
+    },
+    hexRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    dot: {
+      width: 18,
+      height: 18,
+      borderRadius: 9,
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    hexText: {
+      fontFamily: 'Inter-Bold',
+      fontSize: 13,
+      color: c.text,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    },
+    badge: {
+      backgroundColor: c.chipBg,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 20,
+      paddingHorizontal: 10,
+      paddingVertical: 3,
+    },
+    badgeText: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 9,
+      color: c.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+    },
+    chips: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 5,
+      marginBottom: 10,
+    },
+    chip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      backgroundColor: c.chipBg,
+      borderWidth: 1,
+      borderColor: c.border,
+      borderRadius: 20,
+      paddingLeft: 5,
+      paddingRight: 8,
+      paddingVertical: 2,
+    },
+    chipDot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+    },
+    chipLabel: {
+      fontFamily: 'Inter-SemiBold',
+      fontSize: 9,
+      color: c.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: 0.8,
+    },
+    cardFooter: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingTop: 10,
+      borderTopWidth: 1,
+      borderTopColor: c.border,
+    },
+    dateText: {
+      fontFamily: 'Inter',
+      fontSize: 11,
+      color: c.textMuted,
+    },
+    loadBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      backgroundColor: 'rgba(255, 128, 0, 0.10)',
+      borderRadius: 20,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+    },
+    loadText: {
+      fontFamily: 'Inter-Bold',
+      fontSize: 10,
+      color: '#FF8000',
+    },
+    emptyContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 32,
+      paddingBottom: 40,
+    },
+    emptyOuter: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      backgroundColor: c.emptyOuter,
+      borderWidth: 1,
+      borderColor: c.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 20,
+    },
+    emptyInner: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      borderWidth: 1.5,
+      borderStyle: 'dashed',
+      borderColor: c.handle,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    emptyTitle: {
+      fontFamily: 'Inter-Bold',
+      fontSize: 20,
+      color: c.text,
+      textAlign: 'center',
+      marginBottom: 8,
+    },
+    emptySubtitle: {
+      fontFamily: 'Inter',
+      fontSize: 13,
+      color: c.textMuted,
+      textAlign: 'center',
+      lineHeight: 20,
+      maxWidth: 240,
+    },
+    spectrumRow: {
+      flexDirection: 'row',
+      marginTop: 32,
+      gap: 6,
+      opacity: 0.25,
+    },
+    spectrumBox: {
+      width: 30,
+      height: 30,
+      borderRadius: 8,
+    },
+  });
+}
+
+type SheetStyles = ReturnType<typeof createStyles>;
+
 // ── PaletteCard ───────────────────────────────────────────────────────────────
 
 function PaletteCard({
-  palette, onLoad, index,
+  palette, onLoad, index, styles, colors,
 }: {
   palette: SavedPalette;
   onLoad: (p: SavedPalette) => void;
   index: number;
+  styles: SheetStyles;
+  colors: CromaticTheme;
 }) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(16)).current;
@@ -69,16 +358,13 @@ function PaletteCard({
         activeOpacity={0.82}
         style={styles.card}
       >
-        {/* Banda de colores */}
         <View style={styles.colorBand}>
           {swatches.length > 0
             ? swatches.map((s, i) => <View key={i} style={{ flex: 1, backgroundColor: s.hex }} />)
             : <View style={{ flex: 1, backgroundColor: baseHex }} />}
         </View>
 
-        {/* Body */}
         <View style={styles.cardBody}>
-          {/* Fila superior */}
           <View style={styles.cardRow}>
             <View style={styles.hexRow}>
               <View style={[styles.dot, { backgroundColor: baseHex }]} />
@@ -89,7 +375,6 @@ function PaletteCard({
             </View>
           </View>
 
-          {/* Chips de colores */}
           {swatches.length > 0 && (
             <View style={styles.chips}>
               {swatches.map((s, i) => (
@@ -103,10 +388,9 @@ function PaletteCard({
             </View>
           )}
 
-          {/* Footer */}
           <View style={styles.cardFooter}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-              <Ionicons name="time-outline" size={11} color="#66645f" />
+              <Ionicons name="time-outline" size={11} color={colors.textMuted} />
               <Text style={styles.dateText}>{formatDate(palette.creado_en)}</Text>
             </View>
             <View style={styles.loadBadge}>
@@ -122,12 +406,12 @@ function PaletteCard({
 
 // ── EmptyState ────────────────────────────────────────────────────────────────
 
-function EmptyState() {
+function EmptyState({ styles, colors }: { styles: SheetStyles; colors: CromaticTheme }) {
   return (
     <View style={styles.emptyContainer}>
       <View style={styles.emptyOuter}>
         <View style={styles.emptyInner}>
-          <Ionicons name="color-palette-outline" size={26} color="#66645f" />
+          <Ionicons name="color-palette-outline" size={26} color={colors.textMuted} />
         </View>
       </View>
       <Text style={styles.emptyTitle}>Sin paletas guardadas</Text>
@@ -154,17 +438,18 @@ interface PaletasModalProps {
 
 export default function PaletasModal({ visible, onClose }: PaletasModalProps) {
   const setBaseColorHex = colorStore.setColor;
+  const { colors, isDark } = useCromaticTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
+  const themeVars = isDark ? cromaticVars.dark : cromaticVars.light;
 
   const [palettes, setPalettes] = useState<SavedPalette[]>([]);
   const [loading, setLoading] = useState(false);
   const [sortBy, setSortBy] = useState<'reciente' | 'armonia'>('reciente');
 
-  // Animación del sheet (slide desde abajo)
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
   useEffect(() => {
     if (visible) {
-      // Abrir: deslizar hacia arriba
       setLoading(true);
       Animated.spring(slideAnim, {
         toValue: 0,
@@ -177,7 +462,6 @@ export default function PaletasModal({ visible, onClose }: PaletasModalProps) {
         setLoading(false);
       }).catch(() => setLoading(false));
     } else {
-      // Cerrar: deslizar hacia abajo
       Animated.timing(slideAnim, {
         toValue: SCREEN_HEIGHT,
         duration: 280,
@@ -213,18 +497,13 @@ export default function PaletasModal({ visible, onClose }: PaletasModalProps) {
       onRequestClose={onClose}
       statusBarTranslucent
     >
-      {/* Backdrop semitransparente — toca para cerrar */}
       <Pressable style={styles.backdrop} onPress={onClose} />
 
-      {/* Sheet que sube */}
-      <Animated.View style={[styles.sheet, { transform: [{ translateY: slideAnim }] }]}>
-
-        {/* Handle bar */}
+      <Animated.View style={[styles.sheet, themeVars, { transform: [{ translateY: slideAnim }] }]}>
         <View style={styles.handleContainer}>
           <View style={styles.handle} />
         </View>
 
-        {/* Header del modal */}
         <View style={styles.sheetHeader}>
           <View>
             <Text style={styles.sheetSuperLabel}>Archivo Personal</Text>
@@ -236,21 +515,19 @@ export default function PaletasModal({ visible, onClose }: PaletasModalProps) {
             )}
           </View>
           <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.7}>
-            <Ionicons name="close" size={20} color="#241F1A" />
+            <Ionicons name="close" size={20} color={colors.icon} />
           </TouchableOpacity>
         </View>
 
-        {/* Contenido */}
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#FF8000" />
             <Text style={styles.loadingText}>Cargando archivo cromático...</Text>
           </View>
         ) : palettes.length === 0 ? (
-          <EmptyState />
+          <EmptyState styles={styles} colors={colors} />
         ) : (
           <>
-            {/* Filtros */}
             <View style={styles.filters}>
               {([
                 { id: 'reciente' as const, label: 'Recientes', icon: 'time-outline' as const },
@@ -262,7 +539,11 @@ export default function PaletasModal({ visible, onClose }: PaletasModalProps) {
                   style={[styles.filterBtn, sortBy === id && styles.filterBtnActive]}
                   activeOpacity={0.75}
                 >
-                  <Ionicons name={icon} size={11} color={sortBy === id ? '#FAF6EF' : '#66645f'} />
+                  <Ionicons
+                    name={icon}
+                    size={11}
+                    color={sortBy === id ? colors.buttonTextOnActive : colors.buttonTextMuted}
+                  />
                   <Text style={[styles.filterLabel, sortBy === id && styles.filterLabelActive]}>
                     {label}
                   </Text>
@@ -270,14 +551,20 @@ export default function PaletasModal({ visible, onClose }: PaletasModalProps) {
               ))}
             </View>
 
-            {/* Lista */}
             <ScrollView
               style={styles.list}
               contentContainerStyle={{ paddingBottom: 48, paddingHorizontal: 20 }}
               showsVerticalScrollIndicator={false}
             >
               {sorted.map((p, i) => (
-                <PaletteCard key={p.id ?? i} palette={p} onLoad={handleLoad} index={i} />
+                <PaletteCard
+                  key={p.id ?? i}
+                  palette={p}
+                  onLoad={handleLoad}
+                  index={i}
+                  styles={styles}
+                  colors={colors}
+                />
               ))}
             </ScrollView>
           </>
@@ -286,287 +573,3 @@ export default function PaletasModal({ visible, onClose }: PaletasModalProps) {
     </Modal>
   );
 }
-
-// ── Estilos ───────────────────────────────────────────────────────────────────
-
-const styles = StyleSheet.create({
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(36, 31, 26, 0.5)',
-  },
-  sheet: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: SCREEN_HEIGHT * 0.88,
-    backgroundColor: '#f9f3eb',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    overflow: 'hidden',
-  },
-  handleContainer: {
-    alignItems: 'center',
-    paddingTop: 10,
-    paddingBottom: 4,
-  },
-  handle: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: 'rgba(36, 31, 26, 0.15)',
-  },
-  sheetHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(36, 31, 26, 0.08)',
-  },
-  sheetSuperLabel: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 10,
-    color: '#66645f',
-    textTransform: 'uppercase',
-    letterSpacing: 3,
-    marginBottom: 2,
-  },
-  sheetTitle: {
-    fontFamily: 'PlayfairDisplay-Bold',
-    fontSize: 32,
-    color: '#241F1A',
-    lineHeight: 36,
-  },
-  sheetCount: {
-    fontFamily: 'Inter',
-    fontSize: 12,
-    color: '#66645f',
-    marginTop: 4,
-  },
-  closeBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(36, 31, 26, 0.07)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 4,
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  loadingText: {
-    fontFamily: 'Inter',
-    fontSize: 13,
-    color: '#66645f',
-    marginTop: 12,
-  },
-  filters: {
-    flexDirection: 'row',
-    gap: 8,
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 12,
-  },
-  filterBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(36, 31, 26, 0.12)',
-    backgroundColor: 'transparent',
-  },
-  filterBtnActive: {
-    backgroundColor: '#241F1A',
-    borderColor: '#241F1A',
-  },
-  filterLabel: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 10,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    color: '#66645f',
-  },
-  filterLabelActive: {
-    color: '#FAF6EF',
-  },
-  list: {
-    flex: 1,
-  },
-  // PaletteCard
-  card: {
-    marginBottom: 14,
-    backgroundColor: '#f0ebe2',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(36, 31, 26, 0.08)',
-    overflow: 'hidden',
-  },
-  colorBand: {
-    flexDirection: 'row',
-    height: 52,
-  },
-  cardBody: {
-    padding: 14,
-  },
-  cardRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 10,
-  },
-  hexRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  dot: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    borderWidth: 1,
-    borderColor: 'rgba(36, 31, 26, 0.1)',
-  },
-  hexText: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 13,
-    color: '#241F1A',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  badge: {
-    backgroundColor: '#f9f3eb',
-    borderWidth: 1,
-    borderColor: 'rgba(36, 31, 26, 0.10)',
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-  },
-  badgeText: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 9,
-    color: '#66645f',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  chips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 5,
-    marginBottom: 10,
-  },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#f9f3eb',
-    borderWidth: 1,
-    borderColor: 'rgba(36, 31, 26, 0.08)',
-    borderRadius: 20,
-    paddingLeft: 5,
-    paddingRight: 8,
-    paddingVertical: 2,
-  },
-  chipDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  chipLabel: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 9,
-    color: '#66645f',
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(36, 31, 26, 0.07)',
-  },
-  dateText: {
-    fontFamily: 'Inter',
-    fontSize: 11,
-    color: '#66645f',
-  },
-  loadBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: 'rgba(255, 128, 0, 0.10)',
-    borderRadius: 20,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  loadText: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 10,
-    color: '#FF8000',
-  },
-  // EmptyState
-  emptyContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 32,
-    paddingBottom: 40,
-  },
-  emptyOuter: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#f0ebe2',
-    borderWidth: 1,
-    borderColor: 'rgba(36, 31, 26, 0.08)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  emptyInner: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    borderWidth: 1.5,
-    borderStyle: 'dashed',
-    borderColor: 'rgba(36, 31, 26, 0.15)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emptyTitle: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 20,
-    color: '#241F1A',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontFamily: 'Inter',
-    fontSize: 13,
-    color: '#66645f',
-    textAlign: 'center',
-    lineHeight: 20,
-    maxWidth: 240,
-  },
-  spectrumRow: {
-    flexDirection: 'row',
-    marginTop: 32,
-    gap: 6,
-    opacity: 0.25,
-  },
-  spectrumBox: {
-    width: 30,
-    height: 30,
-    borderRadius: 8,
-  },
-});

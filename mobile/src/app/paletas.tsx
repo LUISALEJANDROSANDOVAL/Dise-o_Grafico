@@ -5,6 +5,9 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { getUserPalettes, SavedPalette } from '../lib/services/paletteService';
 import { colorStore } from '../lib/colorStore';
+import AppHeader from '../components/AppHeader';
+import { useCromaticTheme, buttonStyle, buttonTextStyle } from '../hooks/use-cromatic-theme';
+import { cromaticVars } from '../constants/cromatic-vars';
 
 // ——————————————————————————————————————————
 // Helper: formatear la fecha de forma legible
@@ -32,6 +35,7 @@ const HARMONY_LABELS: Record<string, string> = {
 // Tarjeta individual de paleta (PaletteCard)
 // ——————————————————————————————————————————
 function PaletteCard({ palette, onLoad, index }: { palette: SavedPalette; onLoad: (p: SavedPalette) => void; index: number }) {
+  const { colors } = useCromaticTheme();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
 
@@ -114,7 +118,7 @@ function PaletteCard({ palette, onLoad, index }: { palette: SavedPalette; onLoad
           {/* Footer: fecha + indicador de acción */}
           <View className="flex-row items-center justify-between pt-3 border-t border-border-subtle/50">
             <View className="flex-row items-center gap-1.5">
-              <Ionicons name="time-outline" size={12} color="#66645f" />
+              <Ionicons name="time-outline" size={12} color={colors.textMuted} />
               <Text className="font-body-md text-[12px] text-secondary">
                 {formatDate(palette.creado_en)}
               </Text>
@@ -136,12 +140,13 @@ function PaletteCard({ palette, onLoad, index }: { palette: SavedPalette; onLoad
 // Pantalla vacía — cuando no hay paletas
 // ——————————————————————————————————————————
 function EmptyState({ fadeAnim }: { fadeAnim: Animated.Value }) {
+  const { colors } = useCromaticTheme();
   return (
     <Animated.View style={{ opacity: fadeAnim }} className="flex-1 items-center justify-center pb-24 px-8 pt-8">
       {/* Ilustración circular doble */}
       <View className="w-28 h-28 rounded-full bg-surface-container-low border border-border-subtle items-center justify-center mb-6">
         <View className="w-16 h-16 rounded-full border-2 border-dashed border-border-subtle items-center justify-center">
-          <Ionicons name="color-palette-outline" size={28} color="#66645f" />
+          <Ionicons name="color-palette-outline" size={28} color={colors.textMuted} />
         </View>
       </View>
 
@@ -170,6 +175,8 @@ function EmptyState({ fadeAnim }: { fadeAnim: Animated.Value }) {
 export default function PaletasScreen() {
   const router = useRouter();
   const setBaseColorHex = colorStore.setColor;
+  const { colors, isDark } = useCromaticTheme();
+  const themeVars = isDark ? cromaticVars.dark : cromaticVars.light;
 
   const [palettes, setPalettes] = useState<SavedPalette[]>([]);
   const [loading, setLoading] = useState(true);
@@ -237,17 +244,8 @@ export default function PaletasScreen() {
   });
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      {/* ── Header consistente con el resto de pantallas ── */}
-      <View className="w-full flex-row justify-between items-center h-touch-target px-margin-mobile border-b border-border-subtle bg-background">
-        <TouchableOpacity className="active:scale-95">
-          <Ionicons name="menu-outline" size={24} color="#0b0704" />
-        </TouchableOpacity>
-        <Text className="font-display-lg text-[32px] tracking-tight text-primary">CROMATIC</Text>
-        <TouchableOpacity className="active:scale-95">
-          <Ionicons name="person-circle-outline" size={24} color="#0b0704" />
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={[{ flex: 1, backgroundColor: colors.bg }, themeVars]} className="bg-background">
+      <AppHeader />
 
       {/* ── Estados: cargando / error / contenido ── */}
       {loading ? (
@@ -257,7 +255,7 @@ export default function PaletasScreen() {
         </View>
       ) : error ? (
         <View className="flex-1 items-center justify-center px-8">
-          <Ionicons name="cloud-offline-outline" size={48} color="#66645f" />
+          <Ionicons name="cloud-offline-outline" size={48} color={colors.textMuted} />
           <Text className="font-headline-sm text-[18px] text-ink-text font-bold text-center mt-4 mb-2">Error de conexión</Text>
           <Text className="font-body-md text-[13px] text-secondary text-center">{error}</Text>
         </View>
@@ -300,12 +298,12 @@ export default function PaletasScreen() {
                         ? 'border-ink-text'
                         : 'border-border-subtle'
                     }`}
-                    style={sortBy === id ? { backgroundColor: '#241F1A' } : { backgroundColor: 'transparent' }}
+                    style={buttonStyle(colors, sortBy === id)}
                   >
-                    <Ionicons name={icon} size={12} color={sortBy === id ? '#FAF6EF' : '#66645f'} />
+                    <Ionicons name={icon} size={12} color={sortBy === id ? colors.buttonTextOnActive : colors.buttonTextMuted} />
                     <Text
                       className="font-label-caps text-[10px] uppercase tracking-wider"
-                      style={{ color: sortBy === id ? '#FAF6EF' : '#66645f' }}
+                      style={buttonTextStyle(colors, sortBy === id)}
                     >
                       {label}
                     </Text>
@@ -327,7 +325,7 @@ export default function PaletasScreen() {
 
               {/* ── Nota de pie ── */}
               <View className="px-margin-mobile mt-2 mb-4 flex-row items-start gap-2">
-                <Ionicons name="information-circle-outline" size={14} color="#66645f" style={{ marginTop: 1 }} />
+                <Ionicons name="information-circle-outline" size={14} color={colors.textMuted} style={{ marginTop: 1 }} />
                 <Text className="font-body-md text-[11px] text-secondary leading-relaxed flex-1">
                   Las paletas se guardan asociadas a tu sesión. Toca una tarjeta para cargarla en el motor de color.
                 </Text>

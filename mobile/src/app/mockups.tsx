@@ -5,6 +5,9 @@ import { useState } from 'react';
 import { calculateContrastRatio, simulateDaltonism } from '../lib/colorEngine';
 import { useGlobalPalette } from '../lib/colorStore';
 import PaletasModal from '../components/PaletasModal';
+import AppHeader from '../components/AppHeader';
+import { useCromaticTheme, buttonStyle, buttonTextStyle } from '../hooks/use-cromatic-theme';
+import { cromaticVars } from '../constants/cromatic-vars';
 
 const DEFAULT_PALETTE = {
   baseColor: '#FF8000',
@@ -21,6 +24,8 @@ export default function MockupsScreen() {
   const activePalette = useGlobalPalette();
   const [daltonismType, setDaltonismType] = useState<'normal' | 'protanopia' | 'deuteranopia' | 'tritanopia' | 'achromatopsia'>('normal');
   const [showPaletas, setShowPaletas] = useState(false);
+  const { colors, isDark } = useCromaticTheme();
+  const themeVars = isDark ? cromaticVars.dark : cromaticVars.light;
 
   // Obtener colores básicos de la paleta
   const mainColorRaw = activePalette.swatches[0]?.hex || '#FF8000';
@@ -41,19 +46,8 @@ export default function MockupsScreen() {
   const labelContrast = calculateContrastRatio(inkColor, paperBg);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f9f3eb' }}>
-      {/* Header */}
-      <View className="w-full flex-row justify-between items-center h-touch-target px-margin-mobile border-b border-border-subtle bg-background">
-        <TouchableOpacity className="active:scale-95">
-          <Ionicons name="menu-outline" size={24} color="#0b0704" />
-        </TouchableOpacity>
-        <Text className="font-display-lg text-[32px] tracking-tight text-primary">
-          CROMATIC
-        </Text>
-        <TouchableOpacity className="active:scale-95" onPress={() => setShowPaletas(true)}>
-          <Ionicons name="person-circle-outline" size={24} color="#0b0704" />
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={[{ flex: 1, backgroundColor: colors.bg }, themeVars]} className="bg-background">
+      <AppHeader onProfilePress={() => setShowPaletas(true)} />
 
       <PaletasModal visible={showPaletas} onClose={() => setShowPaletas(false)} />
 
@@ -74,32 +68,24 @@ export default function MockupsScreen() {
             Simulador de Visión / Daltonismo (RF-13)
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="w-full">
-            <View className="flex-row gap-2 px-1 bg-surface-container-low p-1.5 rounded-xl border border-border-subtle">
+            <View
+              className="flex-row gap-2 px-1 p-1.5 rounded-xl"
+              style={{
+                backgroundColor: colors.buttonBg,
+                borderWidth: 1,
+                borderColor: colors.buttonBorder,
+              }}
+            >
               {(['normal', 'protanopia', 'deuteranopia', 'tritanopia', 'achromatopsia'] as const).map((type) => (
                 <TouchableOpacity
                   key={type}
                   onPress={() => setDaltonismType(type)}
-                  style={
-                    daltonismType === type
-                      ? {
-                          backgroundColor: '#ffffff',
-                          borderWidth: 1,
-                          borderColor: 'rgba(36, 31, 26, 0.08)',
-                          // Inline shadow — NativeWind `shadow-*` toggles break Expo Router nav context
-                          shadowColor: '#000',
-                          shadowOffset: { width: 0, height: 1 },
-                          shadowOpacity: 0.1,
-                          shadowRadius: 2,
-                          elevation: 2,
-                        }
-                      : undefined
-                  }
-                  className="py-2 px-4 rounded-lg items-center justify-center"
+                  style={buttonStyle(colors, daltonismType === type)}
+                  className="py-2 px-4 items-center justify-center"
                 >
                   <Text
-                    className={`font-label-caps text-[10px] font-bold uppercase tracking-wider ${
-                      daltonismType === type ? 'text-primary' : 'text-secondary'
-                    }`}
+                    className="font-label-caps text-[10px] font-bold uppercase tracking-wider"
+                    style={buttonTextStyle(colors, daltonismType === type)}
                   >
                     {type === 'normal' ? 'Normal' 
                       : type === 'protanopia' ? 'Protanopía' 

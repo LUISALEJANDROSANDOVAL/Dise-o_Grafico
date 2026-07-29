@@ -12,6 +12,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { generateNameIdeas, getFontAdviceAI } from '../lib/services/aiService';
 import PaletasModal from '../components/PaletasModal';
+import AppHeader from '../components/AppHeader';
+import { useCromaticTheme, buttonStyle, buttonTextStyle } from '../hooks/use-cromatic-theme';
+import { cromaticVars } from '../constants/cromatic-vars';
 
 // ─── Catálogo de fuentes instaladas ────────────────────────────────────────────
 const FONT_CATALOG: { id: string; name: string; family: string; style: string; category: string }[] = [
@@ -77,19 +80,12 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 export default function NamingScreen() {
   const [fase, setFase] = useState<'guia' | 'taller'>('guia');
   const [showPaletas, setShowPaletas] = useState(false);
+  const { colors, isDark } = useCromaticTheme();
+  const themeVars = isDark ? cromaticVars.dark : cromaticVars.light;
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      {/* Header */}
-      <View className="w-full flex-row justify-between items-center h-touch-target px-margin-mobile border-b border-border-subtle bg-background">
-        <TouchableOpacity className="active:scale-95">
-          <Ionicons name="menu-outline" size={24} color="#0b0704" />
-        </TouchableOpacity>
-        <Text className="font-display-lg text-[28px] tracking-tight text-primary">CROMATIC</Text>
-        <TouchableOpacity className="active:scale-95" onPress={() => setShowPaletas(true)}>
-          <Ionicons name="person-circle-outline" size={24} color="#0b0704" />
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={[{ flex: 1, backgroundColor: colors.bg }, themeVars]} className="bg-background" edges={['top']}>
+      <AppHeader titleSize={28} onProfilePress={() => setShowPaletas(true)} />
       <PaletasModal visible={showPaletas} onClose={() => setShowPaletas(false)} />
 
       {fase === 'guia' ? (
@@ -105,6 +101,7 @@ export default function NamingScreen() {
 function GuiaView({ onStart }: { onStart: () => void }) {
   const scrollRef = useRef<ScrollView>(null);
   const [activeCard, setActiveCard] = useState(0);
+  const { colors, isDark } = useCromaticTheme();
 
   return (
     <View className="flex-1">
@@ -127,7 +124,7 @@ function GuiaView({ onStart }: { onStart: () => void }) {
               width: activeCard === i ? 20 : 6,
               height: 6,
               borderRadius: 3,
-              backgroundColor: activeCard === i ? '#241F1A' : '#D9D2C5',
+              backgroundColor: activeCard === i ? colors.text : colors.borderStrong,
             }}
           />
         ))}
@@ -174,12 +171,13 @@ function GuiaView({ onStart }: { onStart: () => void }) {
         <TouchableOpacity
           onPress={onStart}
           activeOpacity={0.85}
-          className="bg-ink-text rounded-2xl py-4 items-center flex-row justify-center gap-3"
+          style={buttonStyle(colors, isDark)}
+          className="rounded-2xl py-4 items-center flex-row justify-center gap-3"
         >
-          <Text className="font-headline-sm text-[16px] text-paper-bg">
+          <Text className="font-headline-sm text-[16px]" style={buttonTextStyle(colors, isDark)}>
             Empezar a crear mi nombre
           </Text>
-          <Ionicons name="arrow-forward" size={18} color="#FAF6EF" />
+          <Ionicons name="arrow-forward" size={18} color={isDark ? colors.buttonTextOnActive : colors.buttonText} />
         </TouchableOpacity>
       </View>
     </View>
@@ -188,6 +186,7 @@ function GuiaView({ onStart }: { onStart: () => void }) {
 
 // ─── FASE 2: Taller de Naming y Tipografía ─────────────────────────────────────
 function TallerView({ onBack }: { onBack: () => void }) {
+  const { colors, isDark } = useCromaticTheme();
   const [focus, setFocus] = useState('');
   const [namingIdea, setNamingIdea] = useState('');
   const [generatedNames, setGeneratedNames] = useState<string[]>([]);
@@ -265,7 +264,7 @@ function TallerView({ onBack }: { onBack: () => void }) {
 
         {/* Botón volver */}
         <TouchableOpacity onPress={onBack} className="flex-row items-center gap-1 mb-6" activeOpacity={0.7}>
-          <Ionicons name="arrow-back" size={16} color="#605e59" />
+          <Ionicons name="arrow-back" size={16} color={colors.textSecondary} />
           <Text className="font-body-md text-[14px] text-secondary">Volver a la guía</Text>
         </TouchableOpacity>
 
@@ -292,7 +291,7 @@ function TallerView({ onBack }: { onBack: () => void }) {
               value={focus}
               onChangeText={setFocus}
               placeholder="Ej: Un despacho de abogados, una marca de joyería moderna, un videojuego retro..."
-              placeholderTextColor="rgba(135, 135, 139, 0.5)"
+              placeholderTextColor={isDark ? 'rgba(176, 172, 166, 0.55)' : 'rgba(135, 135, 139, 0.5)'}
               className="font-body-md text-[15px] text-primary p-4 min-h-[90px]"
               style={{ textAlignVertical: 'top' }}
             />
@@ -338,12 +337,12 @@ function TallerView({ onBack }: { onBack: () => void }) {
 
           {/* Input del nombre */}
           <View className="bg-surface-container-lowest border border-border-subtle rounded-xl flex-row items-center px-4">
-            <Ionicons name="create-outline" size={16} color="#605e59" />
+            <Ionicons name="create-outline" size={16} color={colors.textSecondary} />
             <TextInput
               value={namingIdea}
               onChangeText={setNamingIdea}
               placeholder="Escribe o selecciona un nombre..."
-              placeholderTextColor="rgba(135, 135, 139, 0.5)"
+              placeholderTextColor={isDark ? 'rgba(176, 172, 166, 0.55)' : 'rgba(135, 135, 139, 0.5)'}
               className="flex-1 font-body-md text-[15px] text-primary py-3 ml-2"
               autoCorrect={false}
             />
@@ -372,17 +371,17 @@ function TallerView({ onBack }: { onBack: () => void }) {
 
           {/* Buscador */}
           <View className="bg-surface-container-lowest border border-border-subtle rounded-xl flex-row items-center px-3 mb-3">
-            <Ionicons name="search-outline" size={16} color="#605e59" />
+            <Ionicons name="search-outline" size={16} color={colors.textSecondary} />
             <TextInput
               value={searchQuery}
               onChangeText={setSearchQuery}
               placeholder="Buscar fuente... (ej: Serif, Script)"
-              placeholderTextColor="rgba(135, 135, 139, 0.5)"
+              placeholderTextColor={isDark ? 'rgba(176, 172, 166, 0.55)' : 'rgba(135, 135, 139, 0.5)'}
               className="flex-1 font-body-md text-[14px] text-primary py-3 ml-2"
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <Ionicons name="close-circle" size={16} color="#605e59" />
+                <Ionicons name="close-circle" size={16} color={colors.textSecondary} />
               </TouchableOpacity>
             )}
           </View>
@@ -395,14 +394,12 @@ function TallerView({ onBack }: { onBack: () => void }) {
                   key={cat}
                   onPress={() => setActiveCategory(cat)}
                   className="px-3 py-1.5 rounded-full"
-                  style={{
-                    backgroundColor: activeCategory === cat ? '#241F1A' : '#F3EDE6',
-                  }}
+                  style={buttonStyle(colors, activeCategory === cat)}
                 >
                   <Text style={{
                     fontFamily: 'Inter-SemiBold',
                     fontSize: 12,
-                    color: activeCategory === cat ? '#FAF6EF' : '#605e59',
+                    ...buttonTextStyle(colors, activeCategory === cat),
                   }}>
                     {cat}
                   </Text>
@@ -426,10 +423,7 @@ function TallerView({ onBack }: { onBack: () => void }) {
                   style={{
                     width: (SCREEN_WIDTH - 52) / 2,
                     padding: 12,
-                    borderRadius: 12,
-                    borderWidth: isSelected ? 1.5 : 1,
-                    borderColor: isSelected ? '#241F1A' : 'rgba(36, 31, 26, 0.08)',
-                    backgroundColor: isSelected ? '#241F1A' : '#FFFFFF',
+                    ...buttonStyle(colors, isSelected),
                   }}
                 >
                   <Text
@@ -437,7 +431,7 @@ function TallerView({ onBack }: { onBack: () => void }) {
                     style={{
                       fontFamily: font.family,
                       fontSize: 15,
-                      color: isSelected ? '#FAF6EF' : '#241F1A',
+                      ...buttonTextStyle(colors, isSelected),
                       marginBottom: 4,
                     }}
                   >
@@ -447,7 +441,7 @@ function TallerView({ onBack }: { onBack: () => void }) {
                     style={{
                       fontFamily: 'Inter',
                       fontSize: 10,
-                      color: isSelected ? 'rgba(250,246,239,0.6)' : '#605e59',
+                      color: isSelected ? colors.buttonTextMuted : colors.textSecondary,
                     }}
                   >
                     {font.style}
@@ -457,7 +451,7 @@ function TallerView({ onBack }: { onBack: () => void }) {
             })}
             {filteredFonts.length === 0 && (
               <View className="w-full items-center py-10">
-                <Ionicons name="search-outline" size={32} color="#D9D2C5" />
+                <Ionicons name="search-outline" size={32} color={colors.borderStrong} />
                 <Text className="font-body-md text-[14px] text-secondary mt-2">
                   No se encontraron fuentes para "{searchQuery}"
                 </Text>
@@ -473,7 +467,7 @@ function TallerView({ onBack }: { onBack: () => void }) {
           </Text>
           <View className="bg-surface-container-lowest border border-border-subtle rounded-2xl p-8 items-center justify-center min-h-[140px]">
             <View className="flex-row items-center gap-1.5 mb-4 px-3 py-1 rounded-full bg-surface-container">
-              <Ionicons name="text-outline" size={12} color="#605e59" />
+              <Ionicons name="text-outline" size={12} color={colors.textSecondary} />
               <Text className="font-label-caps text-[10px] text-secondary uppercase tracking-wide">
                 {selectedFont.name}
               </Text>
@@ -484,7 +478,7 @@ function TallerView({ onBack }: { onBack: () => void }) {
               style={{
                 fontFamily: selectedFont.family,
                 fontSize: 40,
-                color: '#241F1A',
+                color: colors.text,
                 textAlign: 'center',
                 lineHeight: 48,
               }}
@@ -506,15 +500,15 @@ function TallerView({ onBack }: { onBack: () => void }) {
           <TouchableOpacity
             onPress={handleEvaluateFont}
             disabled={isAdvising || focus.trim().length < 10 || advisorCooldown > 0}
-            className="bg-ink-text rounded-xl py-4 flex-row items-center justify-center gap-2 mb-4"
-            style={{ opacity: focus.trim().length < 10 ? 0.4 : 1 }}
+            style={[buttonStyle(colors, isDark), { opacity: focus.trim().length < 10 ? 0.4 : 1 }]}
+            className="rounded-xl py-4 flex-row items-center justify-center gap-2 mb-4"
             activeOpacity={0.85}
           >
             {isAdvising
-              ? <ActivityIndicator size="small" color="#FAF6EF" />
-              : <Ionicons name="sparkles-outline" size={18} color="#FAF6EF" />
+              ? <ActivityIndicator size="small" color={isDark ? colors.buttonTextOnActive : colors.buttonText} />
+              : <Ionicons name="sparkles-outline" size={18} color={isDark ? colors.buttonTextOnActive : colors.buttonText} />
             }
-            <Text className="font-headline-sm text-[15px] text-paper-bg">
+            <Text className="font-headline-sm text-[15px]" style={buttonTextStyle(colors, isDark)}>
               {advisorCooldown > 0
                 ? `Espera ${advisorCooldown}s`
                 : isAdvising
