@@ -1,8 +1,10 @@
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from 'nativewind';
 import { useCromaticTheme } from '@/hooks/use-cromatic-theme';
 import { cromaticVars } from '@/constants/cromatic-vars';
+
+const logoSource = require('../../assets/images/cromatic-logo.png');
 
 type AppHeaderProps = {
   onProfilePress?: () => void;
@@ -13,22 +15,34 @@ export default function AppHeader({ onProfilePress, titleSize = 32 }: AppHeaderP
   const { toggleColorScheme } = useColorScheme();
   const { colors, isDark } = useCromaticTheme();
   const themeVars = isDark ? cromaticVars.dark : cromaticVars.light;
+  const logoSize = Math.max(30, Math.round(titleSize * 0.95));
 
   return (
     <View
-      style={themeVars}
-      className="w-full flex-row justify-between items-center h-touch-target px-margin-mobile border-b border-border-subtle bg-background"
+      style={[{ minHeight: 56 }, themeVars]}
+      className="w-full flex-row justify-between items-center px-margin-mobile py-2 border-b border-border-subtle bg-background"
     >
       <TouchableOpacity className="active:scale-95" accessibilityLabel="Menú">
         <Ionicons name="menu-outline" size={24} color={colors.icon} />
       </TouchableOpacity>
 
-      <Text
-        className="font-display-lg tracking-tight text-primary"
-        style={{ fontSize: titleSize }}
+      <View
+        className="flex-row items-center gap-2"
+        accessibilityRole="header"
+        accessibilityLabel="Cromatic"
       >
-        CROMATIC
-      </Text>
+        <Image
+          source={logoSource}
+          style={{ width: logoSize, height: logoSize }}
+          resizeMode="contain"
+        />
+        <Text
+          className="font-display-lg tracking-tight text-primary"
+          style={{ fontSize: titleSize }}
+        >
+          CROMATIC
+        </Text>
+      </View>
 
       <View className="flex-row items-center gap-3">
         <TouchableOpacity
