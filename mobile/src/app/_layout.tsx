@@ -4,6 +4,7 @@ import { View } from 'react-native';
 import { useEffect } from 'react';
 import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import { PlayfairDisplay_600SemiBold, PlayfairDisplay_700Bold } from '@expo-google-fonts/playfair-display';
@@ -27,11 +28,15 @@ import '../global.css';
 
 SplashScreen.preventAutoHideAsync();
 
+const TAB_BAR_HEIGHT = 64;
+
 export default function AppLayout() {
   const { colorScheme } = useColorScheme();
+  const insets = useSafeAreaInsets();
   const isDark = colorScheme === 'dark';
   const theme = isDark ? cromaticColors.dark : cromaticColors.light;
   const themeVars = isDark ? cromaticVars.dark : cromaticVars.light;
+  const tabBarBottomInset = Math.max(insets.bottom, 12);
 
   const [loaded, error] = useFonts({
     'Inter': Inter_400Regular,
@@ -86,7 +91,8 @@ export default function AppLayout() {
             bottom: 0,
             left: 0,
             right: 0,
-            height: 64,
+            height: TAB_BAR_HEIGHT + tabBarBottomInset,
+            paddingBottom: tabBarBottomInset,
             backgroundColor: theme.surface,
             borderTopWidth: 1,
             borderTopColor: theme.border,

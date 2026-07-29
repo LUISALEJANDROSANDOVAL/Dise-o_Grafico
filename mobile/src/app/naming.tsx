@@ -8,7 +8,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { useState, useRef, useMemo, type Dispatch, type SetStateAction } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { generateNameIdeas, getFontAdviceAI } from '../lib/services/aiService';
 import PaletasModal from '../components/PaletasModal';
@@ -102,6 +102,9 @@ function GuiaView({ onStart }: { onStart: () => void }) {
   const scrollRef = useRef<ScrollView>(null);
   const [activeCard, setActiveCard] = useState(0);
   const { colors, isDark } = useCromaticTheme();
+  const insets = useSafeAreaInsets();
+  // Tab bar (64) + system nav inset + breathing room above the bar
+  const ctaBottomPad = 64 + Math.max(insets.bottom, 12) + 16;
 
   return (
     <View className="flex-1">
@@ -166,8 +169,8 @@ function GuiaView({ onStart }: { onStart: () => void }) {
         ))}
       </ScrollView>
 
-      {/* Botón CTA */}
-      <View className="px-margin-mobile pb-8 pt-6">
+      {/* Botón CTA — elevado por encima del tab bar + nav del sistema */}
+      <View className="px-margin-mobile pt-6" style={{ paddingBottom: ctaBottomPad }}>
         <TouchableOpacity
           onPress={onStart}
           activeOpacity={0.85}
@@ -175,7 +178,7 @@ function GuiaView({ onStart }: { onStart: () => void }) {
           className="rounded-2xl py-4 items-center flex-row justify-center gap-3"
         >
           <Text className="font-headline-sm text-[16px]" style={buttonTextStyle(colors, isDark)}>
-            Empezar a crear mi nombre
+            Taller de naming
           </Text>
           <Ionicons name="arrow-forward" size={18} color={isDark ? colors.buttonTextOnActive : colors.buttonText} />
         </TouchableOpacity>
@@ -187,6 +190,7 @@ function GuiaView({ onStart }: { onStart: () => void }) {
 // ─── FASE 2: Taller de Naming y Tipografía ─────────────────────────────────────
 function TallerView({ onBack }: { onBack: () => void }) {
   const { colors, isDark } = useCromaticTheme();
+  const insets = useSafeAreaInsets();
   const [focus, setFocus] = useState('');
   const [namingIdea, setNamingIdea] = useState('');
   const [generatedNames, setGeneratedNames] = useState<string[]>([]);
@@ -259,7 +263,11 @@ function TallerView({ onBack }: { onBack: () => void }) {
   }
 
   return (
-    <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      className="flex-1"
+      contentContainerStyle={{ paddingBottom: 64 + Math.max(insets.bottom, 12) + 48 }}
+      showsVerticalScrollIndicator={false}
+    >
       <View className="px-margin-mobile pt-5">
 
         {/* Botón volver */}
