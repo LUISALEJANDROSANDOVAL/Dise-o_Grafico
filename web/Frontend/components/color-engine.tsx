@@ -195,11 +195,8 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
   const angleRad = ((visualAngle - 90) * Math.PI) / 180
   const radiusPct = 50 * (0.35 + (base.s / 100) * 0.6)
 
-  const rawX = 50 + radiusPct * Math.cos(angleRad)
-  const rawY = 50 + radiusPct * Math.sin(angleRad)
-
-  const markerX = Number(rawX.toFixed(4))
-  const markerY = Number(rawY.toFixed(4))
+  const markerX = Number((50 + radiusPct * Math.cos(angleRad)).toFixed(4))
+  const markerY = Number((50 + radiusPct * Math.sin(angleRad)).toFixed(4))
 
   async function handleImage(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -267,17 +264,30 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
           aria-valuemin={0}
           aria-valuemax={360}
         >
+          {/* SVG Single Elegant Pointer */}
+          <svg viewBox="0 0 100 100" className="pointer-events-none absolute inset-0 h-full w-full overflow-visible z-10">
+            <line 
+              x1="50" y1="50" x2={markerX} y2={markerY} 
+              className="stroke-foreground/20 dark:stroke-foreground/30" 
+              strokeWidth="0.6" 
+            />
+          </svg>
+
           {/* inner hole */}
-          <div className="absolute inset-[22%] flex items-center justify-center rounded-full bg-background" style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" } as any}>
+          <div className="absolute inset-[22%] flex items-center justify-center rounded-full bg-background z-0" style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" } as any}>
             <div
-              className="size-12 rounded-full border border-border shadow-sm"
+              className="size-12 rounded-full border border-border shadow-inner"
               style={{ backgroundColor: baseHex, WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }}
               aria-hidden
             />
           </div>
-          {/* marker */}
+
+          {/* Tiny center anchor dot */}
+          <div className="pointer-events-none absolute left-1/2 top-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-foreground/30 z-20" />
+
+          {/* Premium Floating Marker */}
           <div
-            className="pointer-events-none absolute size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-background shadow-md ring-1 ring-foreground/20"
+            className="pointer-events-none absolute size-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-[2.5px] border-background shadow-md ring-1 ring-foreground/10 z-20 transition-transform duration-75"
             style={{ left: `${markerX}%`, top: `${markerY}%`, backgroundColor: baseHex, WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }}
             aria-hidden
           />
