@@ -12,6 +12,9 @@ import { savePalette } from '../lib/services/paletteService';
 import { initAnonymousSession } from '../lib/services/authService';
 import { colorStore, useGlobalColor, paletteStore } from '../lib/colorStore';
 import PaletasModal from '../components/PaletasModal';
+import AppHeader from '../components/AppHeader';
+import { useCromaticTheme, buttonStyle, buttonTextStyle } from '../hooks/use-cromatic-theme';
+import { cromaticVars } from '../constants/cromatic-vars';
 
 const HARMONY_CHIPS: { type: HarmonyType; label: string }[] = [
   { type: 'complementary', label: 'Complementario' },
@@ -295,8 +298,11 @@ export default function PaletteScreen() {
     ? `https://rulec.app/paleta/${savedPaletteId}` 
     : `https://rulec.app/paleta?color=${encodeURIComponent(baseColorHex)}&harmony=${activeHarmony}`;
 
+  const { colors, isDark } = useCromaticTheme();
+  const themeVars = isDark ? cromaticVars.dark : cromaticVars.light;
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#FAF6EF' }}>
+    <SafeAreaView style={[{ flex: 1, backgroundColor: colors.bg }, themeVars]} className="bg-background">
       {/* Toast Notification Flotante */}
       {toastMessage && (
         <View className="absolute top-12 left-margin-mobile right-margin-mobile z-50 bg-ink-text px-4 py-3 rounded-xl shadow-lg border border-border-subtle flex-row items-center justify-between">
@@ -305,18 +311,7 @@ export default function PaletteScreen() {
         </View>
       )}
 
-      {/* Header Editorial */}
-      <View className="w-full flex-row justify-between items-center h-touch-target px-margin-mobile border-b border-border-subtle bg-background">
-        <TouchableOpacity className="active:scale-95">
-          <Ionicons name="menu-outline" size={24} color="#0b0704" />
-        </TouchableOpacity>
-        <Text className="font-display-lg text-[32px] tracking-tight text-primary">
-          CROMATIC
-        </Text>
-        <TouchableOpacity className="active:scale-95" onPress={() => setShowPaletas(true)}>
-          <Ionicons name="person-circle-outline" size={24} color="#0b0704" />
-        </TouchableOpacity>
-      </View>
+      <AppHeader onProfilePress={() => setShowPaletas(true)} />
 
       <PaletasModal visible={showPaletas} onClose={() => setShowPaletas(false)} />
 
@@ -355,12 +350,12 @@ export default function PaletteScreen() {
                       <SvgLine 
                         x1={trianglePointers[0].x} y1={trianglePointers[0].y} 
                         x2={trianglePointers[1].x} y2={trianglePointers[1].y} 
-                        stroke="#0b0704" strokeWidth="0.8" strokeDasharray="2, 2" 
+                        stroke={colors.icon} strokeWidth="0.8" strokeDasharray="2, 2" 
                       />
                     ) : (
                       <Polygon
                         points={trianglePointers.map(p => `${p.x},${p.y}`).join(' ')}
-                        stroke="#0b0704" strokeWidth="0.8" fill="rgba(255,255,255,0.05)" strokeDasharray="2, 2"
+                        stroke={colors.icon} strokeWidth="0.8" fill="rgba(255,255,255,0.05)" strokeDasharray="2, 2"
                       />
                     )}
                   </Svg>
@@ -447,36 +442,40 @@ export default function PaletteScreen() {
           <View className="flex-row gap-2 mb-2">
             <TouchableOpacity 
               onPress={() => handleAdjustLightness(-1)}
-              className="flex-1 h-9 bg-surface-container-lowest border border-border-subtle rounded-lg items-center justify-center flex-row gap-1 active:scale-95"
+              style={buttonStyle(colors)}
+              className="flex-1 h-9 items-center justify-center flex-row gap-1 active:scale-95"
             >
-              <Ionicons name="moon-outline" size={14} color="#241F1A" />
-              <Text className="font-button-text text-[12px] text-ink-text font-medium">Oscurecer</Text>
+              <Ionicons name="moon-outline" size={14} color={colors.buttonText} />
+              <Text className="font-button-text text-[12px] font-medium" style={buttonTextStyle(colors)}>Oscurecer</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
               onPress={() => handleAdjustLightness(1)}
-              className="flex-1 h-9 bg-surface-container-lowest border border-border-subtle rounded-lg items-center justify-center flex-row gap-1 active:scale-95"
+              style={buttonStyle(colors)}
+              className="flex-1 h-9 items-center justify-center flex-row gap-1 active:scale-95"
             >
-              <Ionicons name="sunny-outline" size={14} color="#241F1A" />
-              <Text className="font-button-text text-[12px] text-ink-text font-medium">Aclarar</Text>
+              <Ionicons name="sunny-outline" size={14} color={colors.buttonText} />
+              <Text className="font-button-text text-[12px] font-medium" style={buttonTextStyle(colors)}>Aclarar</Text>
             </TouchableOpacity>
           </View>
 
           <View className="flex-row gap-2">
             <TouchableOpacity 
               onPress={() => handleAdjustSaturate(-1)}
-              className="flex-1 h-9 bg-surface-container-lowest border border-border-subtle rounded-lg items-center justify-center flex-row gap-1 active:scale-95"
+              style={buttonStyle(colors)}
+              className="flex-1 h-9 items-center justify-center flex-row gap-1 active:scale-95"
             >
-              <Ionicons name="water-outline" size={14} color="#241F1A" />
-              <Text className="font-button-text text-[12px] text-ink-text font-medium">Desaturar</Text>
+              <Ionicons name="water-outline" size={14} color={colors.buttonText} />
+              <Text className="font-button-text text-[12px] font-medium" style={buttonTextStyle(colors)}>Desaturar</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
               onPress={() => handleAdjustSaturate(1)}
-              className="flex-1 h-9 bg-surface-container-lowest border border-border-subtle rounded-lg items-center justify-center flex-row gap-1 active:scale-95"
+              style={buttonStyle(colors)}
+              className="flex-1 h-9 items-center justify-center flex-row gap-1 active:scale-95"
             >
-              <Ionicons name="sparkles-outline" size={14} color="#241F1A" />
-              <Text className="font-button-text text-[12px] text-ink-text font-medium">Intensificar</Text>
+              <Ionicons name="sparkles-outline" size={14} color={colors.buttonText} />
+              <Text className="font-button-text text-[12px] font-medium" style={buttonTextStyle(colors)}>Intensificar</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -493,15 +492,13 @@ export default function PaletteScreen() {
                 <TouchableOpacity 
                   key={chip.type}
                   onPress={() => setActiveHarmony(chip.type)}
-                  className={`px-5 h-touch-target items-center justify-center rounded-[6px] border ${
-                    isSelected 
-                      ? 'bg-ink-text border-ink-text' 
-                      : 'border-border-subtle bg-surface-container-lowest'
-                  } active:scale-95`}
+                  style={buttonStyle(colors, isSelected)}
+                  className="px-5 h-touch-target items-center justify-center active:scale-95"
                 >
-                  <Text className={`font-label-caps text-[12px] tracking-widest uppercase ${
-                    isSelected ? 'text-paper-bg' : 'text-ink-text'
-                  }`}>
+                  <Text
+                    className="font-label-caps text-[12px] tracking-widest uppercase"
+                    style={buttonTextStyle(colors, isSelected)}
+                  >
                     {chip.label}
                   </Text>
                 </TouchableOpacity>
@@ -544,14 +541,24 @@ export default function PaletteScreen() {
             activeOpacity={0.8}
             onPress={handleSavePalette}
             disabled={isSaving}
-            className="flex-1 h-touch-target bg-primary rounded-lg items-center justify-center flex-row gap-2"
+            style={buttonStyle(colors, isDark)}
+            className="flex-1 h-touch-target items-center justify-center flex-row gap-2"
           >
             {isSaving ? (
-              <ActivityIndicator color="#FAF6EF" />
+              <ActivityIndicator color={isDark ? colors.buttonTextOnActive : colors.buttonText} />
             ) : (
               <>
-                <Ionicons name="bookmark-outline" size={18} color="#FAF6EF" />
-                <Text className="font-button-text text-[14px] text-paper-bg font-medium">Guardar Paleta</Text>
+                <Ionicons
+                  name="bookmark-outline"
+                  size={18}
+                  color={isDark ? colors.buttonTextOnActive : colors.buttonText}
+                />
+                <Text
+                  className="font-button-text text-[14px] font-medium"
+                  style={buttonTextStyle(colors, isDark)}
+                >
+                  Guardar Paleta
+                </Text>
               </>
             )}
           </TouchableOpacity>
@@ -559,10 +566,11 @@ export default function PaletteScreen() {
           <TouchableOpacity 
             activeOpacity={0.8}
             onPress={() => setShowQrModal(true)}
-            className="px-5 h-touch-target bg-surface-container-low border border-border-subtle rounded-lg items-center justify-center flex-row gap-2"
+            style={buttonStyle(colors)}
+            className="px-5 h-touch-target items-center justify-center flex-row gap-2"
           >
-            <Ionicons name="qr-code-outline" size={18} color="#241F1A" />
-            <Text className="font-button-text text-[14px] text-ink-text font-medium">QR</Text>
+            <Ionicons name="qr-code-outline" size={18} color={colors.buttonText} />
+            <Text className="font-button-text text-[14px] font-medium" style={buttonTextStyle(colors)}>QR</Text>
           </TouchableOpacity>
         </View>
 
@@ -577,7 +585,7 @@ export default function PaletteScreen() {
         onRequestClose={() => setSelectedTechSwatchIndex(null)}
       >
         <View className="flex-1 bg-black/60 justify-end">
-          <View className="w-full bg-paper-bg rounded-t-3xl p-6 border-t border-border-subtle shadow-2xl">
+          <View style={themeVars} className="w-full bg-paper-bg rounded-t-3xl p-6 border-t border-border-subtle shadow-2xl">
             {selectedTechSwatchIndex !== null && (
               <>
                 <View className="flex-row justify-between items-center w-full mb-4 pb-2 border-b border-border-subtle">
@@ -589,7 +597,7 @@ export default function PaletteScreen() {
                     </View>
                   </View>
                   <TouchableOpacity onPress={() => setSelectedTechSwatchIndex(null)}>
-                    <Ionicons name="close" size={24} color="#0b0704" />
+                    <Ionicons name="close" size={24} color={colors.icon} />
                   </TouchableOpacity>
                 </View>
 
@@ -624,7 +632,7 @@ export default function PaletteScreen() {
                             }}
                             className="w-8 h-8 rounded-full bg-paper-bg items-center justify-center shadow-sm"
                           >
-                            <Ionicons name="remove" size={16} color="#241F1A" />
+                            <Ionicons name="remove" size={16} color={colors.icon} />
                           </TouchableOpacity>
                           
                           <Text className="font-button-text text-[12px] text-ink-text">{Math.round(val)}</Text>
@@ -644,7 +652,7 @@ export default function PaletteScreen() {
                             }}
                             className="w-8 h-8 rounded-full bg-paper-bg items-center justify-center shadow-sm"
                           >
-                            <Ionicons name="add" size={16} color="#241F1A" />
+                            <Ionicons name="add" size={16} color={colors.icon} />
                           </TouchableOpacity>
                         </View>
                       </View>
@@ -682,10 +690,11 @@ export default function PaletteScreen() {
                     triggerToast(`Copiado ${swatches[selectedTechSwatchIndex].hex} al portapapeles`);
                     setSelectedTechSwatchIndex(null);
                   }}
-                  className="w-full h-touch-target bg-primary rounded-lg items-center justify-center flex-row gap-2"
+                  style={buttonStyle(colors, isDark)}
+                  className="w-full h-touch-target items-center justify-center flex-row gap-2"
                 >
-                  <Ionicons name="copy-outline" size={18} color="#FAF6EF" />
-                  <Text className="font-button-text text-[14px] text-paper-bg font-medium">Copiar Código HEX</Text>
+                  <Ionicons name="copy-outline" size={18} color={isDark ? colors.buttonTextOnActive : colors.buttonText} />
+                  <Text className="font-button-text text-[14px] font-medium" style={buttonTextStyle(colors, isDark)}>Copiar Código HEX</Text>
                 </TouchableOpacity>
               </>
             )}
@@ -701,16 +710,16 @@ export default function PaletteScreen() {
         onRequestClose={() => setShowQrModal(false)}
       >
         <View className="flex-1 bg-black/60 items-center justify-center p-margin-mobile">
-          <View className="w-full max-w-[340px] bg-paper-bg rounded-2xl p-6 items-center border border-border-subtle shadow-xl">
+          <View style={themeVars} className="w-full max-w-[340px] bg-paper-bg rounded-2xl p-6 items-center border border-border-subtle shadow-xl">
             <View className="flex-row justify-between items-center w-full mb-6 border-b border-border-subtle pb-3">
               <Text className="font-headline-sm text-[20px] text-primary">Compartir Paleta</Text>
               <TouchableOpacity onPress={() => setShowQrModal(false)}>
-                <Ionicons name="close" size={24} color="#0b0704" />
+                <Ionicons name="close" size={24} color={colors.icon} />
               </TouchableOpacity>
             </View>
 
-            <View className="p-4 bg-white rounded-xl border border-border-subtle mb-6 items-center justify-center">
-              <QRCode value={shareUrl} size={200} color="#241F1A" backgroundColor="#FFFFFF" />
+            <View className="p-4 bg-surface-container-lowest rounded-xl border border-border-subtle mb-6 items-center justify-center">
+              <QRCode value={shareUrl} size={200} color={colors.qrFg} backgroundColor={colors.qrBg} />
             </View>
 
             <Text className="font-body-md text-[13px] text-secondary text-center mb-6 leading-relaxed">
@@ -719,9 +728,10 @@ export default function PaletteScreen() {
 
             <TouchableOpacity 
               onPress={() => setShowQrModal(false)}
-              className="w-full h-touch-target bg-primary rounded-lg items-center justify-center"
+              style={buttonStyle(colors, isDark)}
+              className="w-full h-touch-target items-center justify-center"
             >
-              <Text className="font-button-text text-[14px] text-paper-bg font-medium">Cerrar</Text>
+              <Text className="font-button-text text-[14px] font-medium" style={buttonTextStyle(colors, isDark)}>Cerrar</Text>
             </TouchableOpacity>
           </View>
         </View>

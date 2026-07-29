@@ -5,26 +5,20 @@ import { useState } from 'react';
 import { useGlobalColor } from '../lib/colorStore';
 import { getPsychologyForColor } from '../lib/data/colorPsychology';
 import PaletasModal from '../components/PaletasModal';
+import AppHeader from '../components/AppHeader';
+import { useCromaticTheme } from '../hooks/use-cromatic-theme';
+import { cromaticVars } from '../constants/cromatic-vars';
 
 export default function PsychologyScreen() {
   const baseColorHex = useGlobalColor();
   const psychology = getPsychologyForColor(baseColorHex);
   const [showPaletas, setShowPaletas] = useState(false);
+  const { colors, isDark } = useCromaticTheme();
+  const themeVars = isDark ? cromaticVars.dark : cromaticVars.light;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#FAF6EF' }}>
-      {/* Header */}
-      <View className="w-full flex-row justify-between items-center h-touch-target px-margin-mobile border-b border-border-subtle bg-background">
-        <TouchableOpacity className="active:scale-95">
-          <Ionicons name="menu-outline" size={24} color="#0b0704" />
-        </TouchableOpacity>
-        <Text className="font-display-lg text-[32px] tracking-tight text-primary">
-          CROMATIC
-        </Text>
-        <TouchableOpacity className="active:scale-95" onPress={() => setShowPaletas(true)}>
-          <Ionicons name="person-circle-outline" size={24} color="#0b0704" />
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={[{ flex: 1, backgroundColor: colors.bg }, themeVars]} className="bg-background">
+      <AppHeader onProfilePress={() => setShowPaletas(true)} />
       <PaletasModal visible={showPaletas} onClose={() => setShowPaletas(false)} />
 
       <ScrollView className="flex-1 px-margin-mobile pt-8 pb-32">
@@ -86,7 +80,7 @@ export default function PsychologyScreen() {
             <Text className="font-headline-sm text-[20px] text-ink-text">Marcas Inspiradoras</Text>
             <TouchableOpacity className="flex-row items-center gap-1">
               <Text className="font-button-text text-[14px] font-medium text-secondary">Ver más</Text>
-              <Ionicons name="arrow-forward" size={16} color="#605e59" />
+              <Ionicons name="arrow-forward" size={16} color={colors.textSecondary} />
             </TouchableOpacity>
           </View>
 
