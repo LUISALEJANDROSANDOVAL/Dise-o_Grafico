@@ -1,12 +1,13 @@
 "use client"
 
-import { useRef, useState, useEffect } from "react"
+import { useRef, useState, useEffect, useMemo } from "react"
 import { motion } from "framer-motion"
 import { ImageIcon, Pipette, BrainCircuit, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { type HSL, type Scheme, SCHEMES, hslToHex, hexToHsl, generatePalette } from "@/lib/color"
 import type { Profile } from "@/components/rulec-header"
+import { ImagePickerModal } from "@/components/image-picker-modal"
 
 type Props = {
   base: HSL
@@ -71,6 +72,7 @@ export function getColorPsychology(h: number) {
 export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profile, onShowAnalysis }: Props) {
   const wheelRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const [pickerImageSrc, setPickerImageSrc] = useState<string | null>(null)
 
   const baseRef = useRef(base)
   useEffect(() => {
@@ -204,35 +206,13 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
   async function handleImage(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    const img = new Image()
-    img.crossOrigin = "anonymous"
-    img.onload = () => {
-      const canvas = document.createElement("canvas")
-      const size = 40
-      canvas.width = size
-      canvas.height = size
-      const ctx = canvas.getContext("2d")
-      if (!ctx) return
-      ctx.drawImage(img, 0, 0, size, size)
-      const { data } = ctx.getImageData(0, 0, size, size)
-      let r = 0
-      let g = 0
-      let b = 0
-      let count = 0
-      for (let i = 0; i < data.length; i += 4) {
-        r += data[i]
-        g += data[i + 1]
-        b += data[i + 2]
-        count++
-      }
-      const toHex = (v: number) =>
-        Math.round(v / count)
-          .toString(16)
-          .padStart(2, "0")
-      onBaseChange(hexToHsl(`#${toHex(r)}${toHex(g)}${toHex(b)}`))
-      URL.revokeObjectURL(img.src)
-    }
-    img.src = URL.createObjectURL(file)
+    
+    // Convert to ObjectURL and open the modal
+    const url = URL.createObjectURL(file)
+    setPickerImageSrc(url)
+    
+    // Reset input so the same file can be selected again
+    e.target.value = ""
   }
 
   return (
@@ -431,6 +411,19 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
           </Button>
         </div>
       )}
+
+      {/* Image Picker Modal */}
+      <ImagePickerModal 
+        isOpen={!!pickerImageSrc}
+        onClose={() => {
+          if (pickerImageSrc) URL.revokeObjectURL(pickerImageSrc)
+          setPickerImageSrc(null)
+        }}
+        imageSrc={pickerImageSrc}
+        onColorExtracted={(hex) => {
+          onBaseChange(hexToHsl(hex))
+        }}
+      />
     </section>
   )
 }

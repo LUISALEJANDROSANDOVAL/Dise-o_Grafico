@@ -94,7 +94,7 @@ export default function LandingPage() {
               </p>
               <div className="mt-auto">
                 <Link 
-                  href="/herramienta?profile=entrepreneur"
+                  href="/modo-guiado"
                   className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-500 px-6 font-semibold text-white transition-all hover:bg-blue-600 active:scale-[0.98]"
                 >
                   Empezar modo guiado <ArrowRight className="h-4 w-4" />
