@@ -65,6 +65,7 @@ function HerramientaContent() {
 
   // Editable copy — lets Designer profile tweak individual swatches.
   const [palette, setPalette] = useState<Swatch[]>(initialSharedPalette || generated)
+  const [customPalette, setCustomPalette] = useState<Swatch[] | null>(null)
   const isFirstRender = useRef(true)
 
   // Reset manual edits whenever the base color or scheme changes, except on first load with shared link.
@@ -77,9 +78,15 @@ function HerramientaContent() {
       }
       return
     }
-    setPalette(generated)
+
+    if (customPalette) {
+      setPalette(customPalette)
+      setCustomPalette(null)
+    } else {
+      setPalette(generated)
+    }
     isFirstRender.current = false
-  }, [generated, initialSharedPalette])
+  }, [generated, initialSharedPalette, customPalette])
 
   function handleSwatchChange(index: number, hsl: HSL) {
     setPalette((prev) =>
@@ -147,6 +154,7 @@ function HerramientaContent() {
             onSchemeChange={setScheme}
             profile={profile}
             onShowAnalysis={() => setShowFullAnalysis(true)}
+            onCustomPaletteExtracted={(swatches) => setCustomPalette(swatches)}
           />
         </aside>
 

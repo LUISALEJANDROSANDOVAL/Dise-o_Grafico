@@ -16,6 +16,7 @@ type Props = {
   onSchemeChange: (s: Scheme) => void
   profile: Profile
   onShowAnalysis?: () => void
+  onCustomPaletteExtracted?: (swatches: import("@/lib/color").Swatch[]) => void
 }
 
 export function getColorPsychology(h: number) {
@@ -420,8 +421,16 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
           setPickerImageSrc(null)
         }}
         imageSrc={pickerImageSrc}
-        onColorExtracted={(hex) => {
-          onBaseChange(hexToHsl(hex))
+        onColorsExtracted={(hexes) => {
+          if (hexes.length > 0) {
+            const newBase = hexToHsl(hexes[0])
+            onBaseChange(newBase)
+            
+            if (hexes.length > 1 && onCustomPaletteExtracted) {
+              const customSwatches = hexes.map(hex => ({ ...hexToHsl(hex), hex }))
+              onCustomPaletteExtracted(customSwatches)
+            }
+          }
         }}
       />
     </section>
