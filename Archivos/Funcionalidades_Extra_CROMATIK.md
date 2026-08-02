@@ -6,7 +6,7 @@ Todo lo de abajo son ideas que **ningún competidor tiene todas juntas** (Adobe 
 
 ## 🟢 Impacto Alto · Complejidad Baja (Las victorias rápidas)
 
-### 1. Historial de Colores Explorados
+### 1. Historial de Colores Explorados ✅ COMPLETADO
 Conforme el usuario arrastra la rueda o extrae colores, guardar un mini-historial visual (últimos 10 colores) en una tira horizontal debajo de la rueda. Al tocar uno, volver a ese color base sin perder el flujo.
 > **Ni Adobe Color ni Coolors tienen esto.** Evita que el usuario pierda un color que le gustaba hace 3 segundos.
 
@@ -58,7 +58,7 @@ Un generador automático de "tablero de marca" completo (Brand Board) que combin
 Todo exportable como un PDF/PNG premium de una sola página, tipo presentación profesional.
 > **Ni Adobe Color ni Coolors hacen esto.** Esto convierte a CROMATIK en un generador de identidad de marca completo en una sola sesión.
 
-### 9. Extracción Multi-Color de Imagen
+### 9. Extracción Multi-Color de Imagen ✅ COMPLETADO
 Actualmente el escáner extrae **un solo color**. Se podría implementar un modo "Paleta desde Foto" que detecte automáticamente los 5 colores dominantes de cualquier imagen usando algoritmos de clustering (K-Means en Canvas).
 > **Adobe Color tiene algo así**, pero el de CROMATIK podría ser más visual e interactivo, mostrando los clusters de color sobre la imagen.
 
@@ -80,10 +80,10 @@ Un módulo donde el usuario pueda ver cómo se ven sus colores en movimiento: tr
 
 | #  | Feature                          | Impacto | Esfuerzo | Prioridad |
 |----|----------------------------------|---------|----------|-----------|
-| 1  | Historial de Colores             | ⭐⭐⭐    | Bajo     | 🥇         |
+| 1  | Historial de Colores (✅ Listo)   | ⭐⭐⭐    | Bajo     | 🥇         |
 | 3  | Más Mockups (Instagram, Empaque) | ⭐⭐⭐⭐   | Medio    | 🥇         |
 | 8  | Brand Board Generator            | ⭐⭐⭐⭐⭐  | Alto     | 🥇         |
-| 9  | Multi-Color de Imagen            | ⭐⭐⭐⭐   | Medio    | 🥈         |
+| 9  | Multi-Color de Imagen (✅ Listo)  | ⭐⭐⭐⭐   | Medio    | 🥈         |
 | 4  | Generador de Gradientes          | ⭐⭐⭐    | Medio    | 🥈         |
 | 7  | Armonía de Color con IA          | ⭐⭐⭐⭐⭐  | Alto     | 🥈         |
 | 2  | Paletas Trending                 | ⭐⭐⭐    | Bajo     | 🥉         |

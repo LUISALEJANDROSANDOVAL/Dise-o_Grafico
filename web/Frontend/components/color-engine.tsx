@@ -70,10 +70,32 @@ export function getColorPsychology(h: number) {
   }
 }
 
-export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profile, onShowAnalysis }: Props) {
+export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profile, onShowAnalysis, onCustomPaletteExtracted }: Props) {
   const wheelRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const [pickerImageSrc, setPickerImageSrc] = useState<string | null>(null)
+
+  const [history, setHistory] = useState<HSL[]>([base])
+  const skipHistoryRef = useRef(false)
+
+  useEffect(() => {
+    if (skipHistoryRef.current) {
+      skipHistoryRef.current = false
+      return
+    }
+
+    const timer = setTimeout(() => {
+      setHistory((prev) => {
+        const last = prev[prev.length - 1]
+        // Skip if the color is practically identical
+        if (last && Math.abs(last.h - base.h) < 1 && Math.abs(last.s - base.s) < 1 && Math.abs(last.l - base.l) < 1) return prev
+        const next = [...prev, base]
+        if (next.length > 10) return next.slice(next.length - 10)
+        return next
+      })
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [base])
 
   const baseRef = useRef(base)
   useEffect(() => {
@@ -275,15 +297,16 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
                 <g key={i}>
                   <line 
                     x1="50" y1="50" x2={x} y2={y} 
-                    className="stroke-foreground/10 dark:stroke-foreground/10" 
-                    strokeWidth="0.3" 
+                    className="stroke-foreground/40 dark:stroke-foreground/50" 
+                    strokeWidth="0.5" 
+                    strokeDasharray="1.5, 1.5"
                   />
                   <circle 
                     cx={x} cy={y} 
-                    r="1.2" 
+                    r="2.5" 
                     fill={swatch.hex} 
                     className="stroke-background shadow-sm" 
-                    strokeWidth="0.5" 
+                    strokeWidth="0.8" 
                   />
                 </g>
               )
@@ -310,6 +333,30 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
           />
         </motion.div>
       </div>
+
+      {/* Historial de colores (Últimos 10) */}
+      {history.length > 1 && (
+        <div className="flex flex-col gap-1.5 no-print">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            Colores recientes
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {history.map((hColor, i) => (
+              <button
+                key={i}
+                onClick={() => {
+                  skipHistoryRef.current = true
+                  onBaseChange(hColor)
+                }}
+                className="size-6 rounded-full border border-border shadow-sm transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-ring"
+                style={{ backgroundColor: hslToHex(hColor) }}
+                title={hslToHex(hColor)}
+                aria-label={`Volver al color ${hslToHex(hColor)}`}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Lightness slider */}
       <div className="flex flex-col gap-1.5 no-print">
@@ -422,14 +469,15 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
         }}
         imageSrc={pickerImageSrc}
         onColorsExtracted={(hexes) => {
-          if (hexes.length > 0) {
-            const newBase = hexToHsl(hexes[0])
-            onBaseChange(newBase)
-            
-            if (hexes.length > 1 && onCustomPaletteExtracted) {
-              const customSwatches = hexes.map(hex => ({ ...hexToHsl(hex), hex }))
-              onCustomPaletteExtracted(customSwatches)
-            }
+          if (hexes.length > 1 && onCustomPaletteExtracted) {
+            // Multi-color (Auto mode): send 5 colors directly as custom palette
+            const customSwatches = hexes.map(hex => ({ ...hexToHsl(hex), hex }))
+            onCustomPaletteExtracted(customSwatches)
+            // Update the base color so the wheel matches the dominant color
+            onBaseChange(hexToHsl(hexes[0]))
+          } else if (hexes.length === 1) {
+            // Single color (Manual mode): use as base for scheme generation
+            onBaseChange(hexToHsl(hexes[0]))
           }
         }}
       />

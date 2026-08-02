@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react"
 import { createPortal } from "react-dom"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, ScanLine, Maximize, Sparkles, LocateFixed } from "lucide-react"
+import { X, ScanLine, Sparkles, LocateFixed } from "lucide-react"
 
 interface ImagePickerModalProps {
   isOpen: boolean
@@ -12,85 +12,81 @@ interface ImagePickerModalProps {
   onColorsExtracted: (hexes: string[]) => void
 }
 
+/* ─── K-Means Clustering ────────────────────────────────── */
 function extractDominantColors(canvas: HTMLCanvasElement, k: number = 5): string[] {
   const ctx = canvas.getContext("2d", { willReadFrequently: true })
   if (!ctx) return []
   const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data
-  
+
   const pixels: number[][] = []
-  // Downsample to max ~3000 pixels for fast K-Means
-  const step = Math.max(4, Math.floor((data.length / 4) / 3000) * 4) 
-  for(let i=0; i<data.length; i+=step) {
-    if(data[i+3] > 128) { // Ignore transparent pixels
-      pixels.push([data[i], data[i+1], data[i+2]])
-    }
-  }
-  
-  if (pixels.length === 0) return []
-  if (pixels.length < k) {
-    k = pixels.length
+  const step = Math.max(4, Math.floor((data.length / 4) / 3000) * 4)
+  for (let i = 0; i < data.length; i += step) {
+    if (data[i + 3] > 128) pixels.push([data[i], data[i + 1], data[i + 2]])
   }
 
-  // Initialize centroids (pick k random pixels)
-  const centroids: number[][] = []
-  for(let i=0; i<k; i++) {
-     centroids.push(pixels[Math.floor(Math.random() * pixels.length)])
+  if (pixels.length === 0) return []
+  if (pixels.length < k) k = pixels.length
+
+  // K-Means++ initialization for better spread
+  const centroids: number[][] = [pixels[Math.floor(Math.random() * pixels.length)]]
+  for (let c = 1; c < k; c++) {
+    const dists = pixels.map(p => {
+      let minD = Infinity
+      for (const cent of centroids) {
+        const d = (p[0] - cent[0]) ** 2 + (p[1] - cent[1]) ** 2 + (p[2] - cent[2]) ** 2
+        if (d < minD) minD = d
+      }
+      return minD
+    })
+    const total = dists.reduce((a, b) => a + b, 0)
+    let r = Math.random() * total
+    for (let i = 0; i < dists.length; i++) {
+      r -= dists[i]
+      if (r <= 0) { centroids.push(pixels[i]); break }
+    }
+    if (centroids.length === c) centroids.push(pixels[Math.floor(Math.random() * pixels.length)])
   }
 
   let clusters: number[][][] = []
-  for(let iter=0; iter<10; iter++) {
-    clusters = Array.from({length: k}, () => [])
-    for(let i = 0; i < pixels.length; i++) {
-       const p = pixels[i]
-       let minDist = Infinity
-       let closest = 0
-       for(let j=0; j<k; j++) {
-          const d = (p[0]-centroids[j][0])**2 + (p[1]-centroids[j][1])**2 + (p[2]-centroids[j][2])**2
-          if(d < minDist) { minDist = d; closest = j }
-       }
-       clusters[closest].push(p)
+  for (let iter = 0; iter < 15; iter++) {
+    clusters = Array.from({ length: k }, () => [])
+    for (const p of pixels) {
+      let minDist = Infinity, closest = 0
+      for (let j = 0; j < k; j++) {
+        const d = (p[0] - centroids[j][0]) ** 2 + (p[1] - centroids[j][1]) ** 2 + (p[2] - centroids[j][2]) ** 2
+        if (d < minDist) { minDist = d; closest = j }
+      }
+      clusters[closest].push(p)
     }
     let moved = false
-    for(let i=0; i<k; i++) {
-       if(clusters[i].length === 0) continue
-       let sum = [0,0,0]
-       for(let j=0; j<clusters[i].length; j++) { 
-         sum[0]+=clusters[i][j][0]
-         sum[1]+=clusters[i][j][1]
-         sum[2]+=clusters[i][j][2]
-       }
-       const newC = [sum[0]/clusters[i].length, sum[1]/clusters[i].length, sum[2]/clusters[i].length]
-       if(Math.abs(newC[0]-centroids[i][0])>1 || Math.abs(newC[1]-centroids[i][1])>1 || Math.abs(newC[2]-centroids[i][2])>1) moved = true
-       centroids[i] = newC
+    for (let i = 0; i < k; i++) {
+      if (clusters[i].length === 0) continue
+      const sum = [0, 0, 0]
+      for (const p of clusters[i]) { sum[0] += p[0]; sum[1] += p[1]; sum[2] += p[2] }
+      const newC = [sum[0] / clusters[i].length, sum[1] / clusters[i].length, sum[2] / clusters[i].length]
+      if (Math.abs(newC[0] - centroids[i][0]) > 1 || Math.abs(newC[1] - centroids[i][1]) > 1 || Math.abs(newC[2] - centroids[i][2]) > 1) moved = true
+      centroids[i] = newC
     }
-    if(!moved) break
+    if (!moved) break
   }
 
-  return centroids.map((c, i) => ({ c, size: clusters[i].length }))
-                  .sort((a,b) => b.size - a.size)
-                  .map(item => {
-                     // Find closest actual pixel to avoid muddy mathematical averages
-                     let closestPixel = item.c
-                     let minDist = Infinity
-                     for(const p of pixels) {
-                        const d = (p[0]-item.c[0])**2 + (p[1]-item.c[1])**2 + (p[2]-item.c[2])**2
-                        if(d < minDist) { minDist = d; closestPixel = p }
-                     }
-                     const toHex = (v: number) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0")
-                     return `#${toHex(closestPixel[0])}${toHex(closestPixel[1])}${toHex(closestPixel[2])}`
-                  })
+  const toHex = (v: number) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0")
+  return centroids
+    .map((c, i) => ({ c, size: clusters[i]?.length ?? 0 }))
+    .filter(item => item.size > 0)
+    .sort((a, b) => b.size - a.size)
+    .map(item => `#${toHex(item.c[0])}${toHex(item.c[1])}${toHex(item.c[2])}`)
 }
 
-
+/* ─── Modal Component ───────────────────────────────────── */
 export function ImagePickerModal({ isOpen, onClose, imageSrc, onColorsExtracted }: ImagePickerModalProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
 
   const [mode, setMode] = useState<"auto" | "manual">("auto")
   const [mounted, setMounted] = useState(false)
   const [isScanning, setIsScanning] = useState(false)
   const [scannerSize, setScannerSize] = useState(280)
-  
+
   // Manual mode state
   const [previewColor, setPreviewColor] = useState<string | null>(null)
   const [imgPos, setImgPos] = useState({ x: 0, y: 0 })
@@ -101,9 +97,11 @@ export function ImagePickerModal({ isOpen, onClose, imageSrc, onColorsExtracted 
 
   // Auto mode state
   const [autoPalette, setAutoPalette] = useState<string[]>([])
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
 
   useEffect(() => { setMounted(true) }, [])
 
+  // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
       setImgPos({ x: 0, y: 0 })
@@ -111,50 +109,54 @@ export function ImagePickerModal({ isOpen, onClose, imageSrc, onColorsExtracted 
       setPreviewColor(null)
       setIsScanning(false)
       setAutoPalette([])
+      setIsAnalyzing(false)
+      setImgDisplaySize({ w: 0, h: 0 })
     }
-  }, [isOpen, mode])
+  }, [isOpen])
 
-  // Load image and setup canvas
+  // Load image into canvas + run K-Means for auto mode
   useEffect(() => {
-    if (isOpen && imageSrc && canvasRef.current) {
-      const img = new Image()
-      img.crossOrigin = "anonymous"
-      img.onload = () => {
-        if (!canvasRef.current) return
-        
-        // Save full resolution for precision scanner
+    if (!isOpen || !imageSrc) return
+
+    const img = new Image()
+    img.crossOrigin = "anonymous"
+    img.onload = () => {
+      // Draw full-res into hidden canvas for manual pixel picking
+      if (canvasRef.current) {
         canvasRef.current.width = img.naturalWidth
         canvasRef.current.height = img.naturalHeight
         const ctx = canvasRef.current.getContext("2d", { willReadFrequently: true })
         if (ctx) ctx.drawImage(img, 0, 0)
-
-        setImgNaturalSize({ w: img.naturalWidth, h: img.naturalHeight })
-
-        const vw = window.innerWidth
-        const vh = window.innerHeight
-        const maxW = vw * 0.95
-        const maxH = vh * 0.75
-        const scale = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight, 1.5)
-        setImgDisplaySize({ w: img.naturalWidth * scale, h: img.naturalHeight * scale })
-
-        // Pre-calculate K-means if in auto mode
-        if (mode === "auto") {
-           // We scale down heavily for K-Means performance
-           const kCanvas = document.createElement("canvas")
-           const scaleK = Math.min(300 / img.naturalWidth, 300 / img.naturalHeight, 1)
-           kCanvas.width = img.naturalWidth * scaleK
-           kCanvas.height = img.naturalHeight * scaleK
-           const kCtx = kCanvas.getContext("2d", { willReadFrequently: true })
-           if (kCtx) {
-             kCtx.drawImage(img, 0, 0, kCanvas.width, kCanvas.height)
-             const colors = extractDominantColors(kCanvas, 5)
-             setAutoPalette(colors)
-           }
-        }
       }
-      img.src = imageSrc
+
+      setImgNaturalSize({ w: img.naturalWidth, h: img.naturalHeight })
+
+      // Calculate display size
+      const vw = window.innerWidth
+      const vh = window.innerHeight
+      const maxW = vw * 0.9
+      const maxH = vh * 0.6
+      const scale = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight, 1.5)
+      setImgDisplaySize({ w: img.naturalWidth * scale, h: img.naturalHeight * scale })
+
+      // Always pre-calculate K-Means (so switching to auto mode is instant)
+      setIsAnalyzing(true)
+      requestAnimationFrame(() => {
+        const kCanvas = document.createElement("canvas")
+        const scaleK = Math.min(200 / img.naturalWidth, 200 / img.naturalHeight, 1)
+        kCanvas.width = Math.max(1, Math.floor(img.naturalWidth * scaleK))
+        kCanvas.height = Math.max(1, Math.floor(img.naturalHeight * scaleK))
+        const kCtx = kCanvas.getContext("2d", { willReadFrequently: true })
+        if (kCtx) {
+          kCtx.drawImage(img, 0, 0, kCanvas.width, kCanvas.height)
+          const colors = extractDominantColors(kCanvas, 5)
+          setAutoPalette(colors)
+        }
+        setIsAnalyzing(false)
+      })
     }
-  }, [isOpen, imageSrc, mode])
+    img.src = imageSrc
+  }, [isOpen, imageSrc])
 
   // --- Image Drag Handlers (Manual Mode) ---
   const onImgPointerDown = useCallback((e: React.PointerEvent) => {
@@ -233,79 +235,91 @@ export function ImagePickerModal({ isOpen, onClose, imageSrc, onColorsExtracted 
     setPreviewColor(readCenterPixel())
   }, [isOpen, imgPos, readCenterPixel, mode])
 
-  const handleScan = useCallback(() => {
-    setIsScanning(true)
-    setTimeout(() => {
-      if (mode === "auto") {
-        if (autoPalette.length > 0) {
-          onColorsExtracted(autoPalette)
-          onClose()
-        }
-      } else {
+  // Keep latest refs to avoid stale closures in setTimeout
+  const onCloseRef = useRef(onClose)
+  const onColorsExtractedRef = useRef(onColorsExtracted)
+  useEffect(() => { onCloseRef.current = onClose }, [onClose])
+  useEffect(() => { onColorsExtractedRef.current = onColorsExtracted }, [onColorsExtracted])
+
+  const handleExtract = useCallback(() => {
+    try {
+      if (mode === "auto" && autoPalette.length > 0) {
+        console.log("Extracting auto palette:", autoPalette);
+        onColorsExtractedRef.current(autoPalette)
+        console.log("Palette extracted, closing modal...");
+        onCloseRef.current()
+        return
+      }
+
+      if (mode === "manual") {
         const hex = readCenterPixel()
         if (hex) {
-          onColorsExtracted([hex])
-          onClose()
+          onColorsExtractedRef.current([hex])
+          onCloseRef.current()
         } else {
           alert("¡Apunta el escáner dentro de la imagen!")
         }
+        return
       }
-      setIsScanning(false)
-    }, 500)
-  }, [mode, autoPalette, readCenterPixel, onColorsExtracted, onClose])
+    } catch (e: any) {
+      console.error("Error extracting colors:", e)
+      alert("Error: " + e.message)
+    }
+  }, [mode, autoPalette, readCenterPixel])
 
   const half = scannerSize / 2
 
   const modalContent = (
     <AnimatePresence>
       {isOpen && imageSrc && (
-        <div ref={containerRef} className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black overflow-hidden touch-none select-none">
-
-          {/* Header & Mode Toggle */}
-          <div className="absolute top-0 left-0 w-full p-6 z-50 flex flex-col sm:flex-row justify-between items-center pointer-events-none gap-4">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black overflow-hidden touch-none select-none"
+        >
+          {/* ─── Header & Mode Toggle ─── */}
+          <div className="absolute top-0 left-0 w-full p-4 sm:p-6 z-50 flex justify-between items-start pointer-events-none">
             <div className="pointer-events-auto">
-              <h3 className="text-white text-xl font-bold flex items-center gap-2 drop-shadow-md">
-                <Maximize className="w-5 h-5 text-blue-400" />
+              <h3 className="text-white text-lg font-bold flex items-center gap-2 drop-shadow-md">
+                <ScanLine className="w-5 h-5 text-blue-400" />
                 Extraer Colores
               </h3>
             </div>
-            
+
+            {/* Mode Switcher */}
             <div className="pointer-events-auto flex items-center bg-white/10 backdrop-blur-md p-1 rounded-full border border-white/20">
-              <button 
+              <button
                 onClick={() => setMode("auto")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-colors ${mode === "auto" ? "bg-white text-black" : "text-white/70 hover:text-white"}`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-medium transition-all ${mode === "auto" ? "bg-white text-black shadow-md" : "text-white/70 hover:text-white"}`}
               >
-                <Sparkles className="w-4 h-4" /> Automático (IA)
+                <Sparkles className="w-3.5 h-3.5" /> Auto (5)
               </button>
-              <button 
+              <button
                 onClick={() => setMode("manual")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-colors ${mode === "manual" ? "bg-white text-black" : "text-white/70 hover:text-white"}`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-sm font-medium transition-all ${mode === "manual" ? "bg-white text-black shadow-md" : "text-white/70 hover:text-white"}`}
               >
-                <LocateFixed className="w-4 h-4" /> Precisión (1)
+                <LocateFixed className="w-3.5 h-3.5" /> Precisión (1)
               </button>
             </div>
 
-            <button onClick={onClose} className="hidden sm:block p-3 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition-colors pointer-events-auto">
-              <X className="w-6 h-6" />
+            <button onClick={onClose} className="p-2.5 bg-white/10 backdrop-blur-md rounded-full text-white hover:bg-white/20 transition-colors pointer-events-auto">
+              <X className="w-5 h-5" />
             </button>
           </div>
 
           <canvas ref={canvasRef} className="hidden" />
 
-          {/* Draggable Image */}
+          {/* ─── Image ─── */}
           {imgDisplaySize.w > 0 && (
-            <motion.img
+            <img
               src={imageSrc}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className={`absolute shadow-2xl ${mode === "manual" ? "cursor-grab active:cursor-grabbing" : ""}`}
+              className={`absolute rounded-lg shadow-2xl ${mode === "manual" ? "cursor-grab active:cursor-grabbing" : ""}`}
               style={{
                 width: imgDisplaySize.w,
                 height: imgDisplaySize.h,
-                left: mode === "manual" ? `calc(50% - ${imgDisplaySize.w / 2}px + ${imgPos.x}px)` : "50%",
-                top: mode === "manual" ? `calc(50% - ${imgDisplaySize.h / 2}px + ${imgPos.y}px)` : "45%", // shift slightly up in auto mode to make room for palette
-                transform: mode === "auto" ? "translate(-50%, -50%)" : "none"
+                left: `calc(50% - ${imgDisplaySize.w / 2}px + ${mode === "manual" ? imgPos.x : 0}px)`,
+                top: `calc(50% - ${imgDisplaySize.h / 2}px + ${mode === "manual" ? imgPos.y : 0}px - ${mode === "auto" ? 40 : 0}px)`,
               }}
               onPointerDown={onImgPointerDown}
               onPointerMove={onImgPointerMove}
@@ -316,9 +330,10 @@ export function ImagePickerModal({ isOpen, onClose, imageSrc, onColorsExtracted 
             />
           )}
 
-          {/* Manual Mode Overlay & Scanner */}
+          {/* ─── Manual Mode: Scanner Overlay ─── */}
           {mode === "manual" && (
             <>
+              {/* Dark mask (4 rectangles around the scanner hole) */}
               <div className="absolute inset-0 pointer-events-none z-20">
                 <div className="absolute bg-black/50" style={{ top: 0, left: 0, right: 0, height: `calc(50% - ${half}px)` }} />
                 <div className="absolute bg-black/50" style={{ bottom: 0, left: 0, right: 0, height: `calc(50% - ${half}px)` }} />
@@ -326,6 +341,7 @@ export function ImagePickerModal({ isOpen, onClose, imageSrc, onColorsExtracted 
                 <div className="absolute bg-black/50" style={{ top: `calc(50% - ${half}px)`, right: 0, width: `calc(50% - ${half}px)`, height: scannerSize }} />
               </div>
 
+              {/* Scanner frame */}
               <div className="absolute z-30 pointer-events-none" style={{ width: scannerSize, height: scannerSize, left: `calc(50% - ${half}px)`, top: `calc(50% - ${half}px)` }}>
                 <div className="absolute inset-0 border-2 border-white/30 rounded-xl" />
                 <div className="absolute -top-[3px] -left-[3px] size-8 border-t-[5px] border-l-[5px] border-blue-500 rounded-tl-xl" />
@@ -333,6 +349,7 @@ export function ImagePickerModal({ isOpen, onClose, imageSrc, onColorsExtracted 
                 <div className="absolute -bottom-[3px] -left-[3px] size-8 border-b-[5px] border-l-[5px] border-blue-500 rounded-bl-xl" />
                 <div className="absolute -bottom-[3px] -right-[3px] size-8 border-b-[5px] border-r-[5px] border-blue-500 rounded-br-xl" />
 
+                {/* Crosshair */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="relative size-6">
                     <div className="absolute inset-x-0 top-1/2 h-[1.5px] bg-blue-400/90 -translate-y-1/2" />
@@ -341,6 +358,7 @@ export function ImagePickerModal({ isOpen, onClose, imageSrc, onColorsExtracted 
                   </div>
                 </div>
 
+                {/* Preview badge */}
                 {previewColor && (
                   <div className="absolute -bottom-14 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/70 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
                     <div className="size-5 rounded-full border-2 border-white/50 shadow-md" style={{ backgroundColor: previewColor }} />
@@ -348,15 +366,17 @@ export function ImagePickerModal({ isOpen, onClose, imageSrc, onColorsExtracted 
                   </div>
                 )}
 
+                {/* Scan animation */}
                 {isScanning && (
                   <motion.div
                     className="absolute left-0 right-0 h-1 bg-blue-400 shadow-[0_0_15px_rgba(96,165,250,1)] z-30 rounded-full"
                     initial={{ top: 0, opacity: 1 }}
                     animate={{ top: "100%", opacity: 0 }}
-                    transition={{ duration: 0.5, ease: "easeInOut" }}
+                    transition={{ duration: 0.4, ease: "easeInOut" }}
                   />
                 )}
 
+                {/* Resize handle */}
                 <div
                   className="absolute -bottom-4 -right-4 size-10 z-50 pointer-events-auto cursor-nwse-resize flex items-center justify-center"
                   onPointerDown={onResizePointerDown}
@@ -370,35 +390,57 @@ export function ImagePickerModal({ isOpen, onClose, imageSrc, onColorsExtracted 
             </>
           )}
 
-          {/* Auto Mode Palette Preview */}
-          {mode === "auto" && autoPalette.length > 0 && (
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="absolute bottom-32 z-50 pointer-events-auto flex gap-2 p-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl"
-            >
-              {autoPalette.map((hex, i) => (
-                <div key={i} className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-white/50 shadow-inner" style={{ backgroundColor: hex }} />
-                  <span className="text-white/80 font-mono text-xs">{hex.toUpperCase()}</span>
+          {/* ─── Auto Mode: Palette Preview ─── */}
+          {mode === "auto" && (
+            <div className="absolute bottom-28 z-50 pointer-events-auto">
+              {isAnalyzing ? (
+                <div className="flex items-center gap-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl px-6 py-4">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                    className="size-5 border-2 border-white/30 border-t-blue-400 rounded-full"
+                  />
+                  <span className="text-white/80 text-sm font-medium">Analizando colores dominantes…</span>
                 </div>
-              ))}
-            </motion.div>
+              ) : autoPalette.length > 0 ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex gap-3 p-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl"
+                >
+                  {autoPalette.map((hex, i) => (
+                    <div key={i} className="flex flex-col items-center gap-1.5">
+                      <div
+                        className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl border-2 border-white/40 shadow-lg"
+                        style={{ backgroundColor: hex }}
+                      />
+                      <span className="text-white/70 font-mono text-[10px]">{hex.toUpperCase()}</span>
+                    </div>
+                  ))}
+                </motion.div>
+              ) : (
+                <div className="text-white/50 text-sm">No se detectaron colores</div>
+              )}
+            </div>
           )}
 
-          {/* Scan Button */}
-          <div className="absolute bottom-10 z-50 pointer-events-auto">
+          {/* ─── Extract Button ─── */}
+          <div className="absolute bottom-8 z-50 pointer-events-auto">
             <button
-              onClick={handleScan}
-              disabled={isScanning || (mode === "manual" && !previewColor) || (mode === "auto" && autoPalette.length === 0)}
-              className="flex items-center gap-3 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 text-white px-10 py-4 rounded-full font-bold text-lg transition-all active:scale-95 shadow-[0_10px_40px_rgba(37,99,235,0.5)] disabled:opacity-60 disabled:shadow-none"
+              onClick={handleExtract}
+              disabled={isScanning || isAnalyzing || (mode === "manual" && !previewColor) || (mode === "auto" && autoPalette.length === 0)}
+              className="flex items-center gap-3 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 text-white px-8 py-3.5 rounded-full font-bold text-base transition-all active:scale-95 shadow-[0_8px_30px_rgba(37,99,235,0.5)] disabled:opacity-50 disabled:shadow-none"
             >
-              <ScanLine className={`w-6 h-6 ${isScanning ? "animate-pulse" : ""}`} />
-              {isScanning ? "Procesando..." : mode === "auto" ? "Extraer 5 Colores" : "Extraer 1 Color"}
+              <ScanLine className={`w-5 h-5 ${isScanning ? "animate-pulse" : ""}`} />
+              {isScanning
+                ? "Procesando…"
+                : mode === "auto"
+                  ? "Extraer Paleta"
+                  : "Extraer 1 Color"}
             </button>
           </div>
 
-        </div>
+        </motion.div>
       )}
     </AnimatePresence>
   )

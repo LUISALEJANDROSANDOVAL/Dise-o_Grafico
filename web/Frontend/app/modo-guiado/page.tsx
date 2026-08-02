@@ -89,8 +89,8 @@ export default function GuidedModePage() {
     switch (answers.personality) {
       case "energetic": scheme = "complementary"; s = 90; break
       case "trustworthy": scheme = "analogous"; s = 60; break
-      case "innovative": scheme = "triadic"; s = 80; break
-      case "elegant": scheme = "monochromatic"; s = 30; break
+      case "innovative": scheme = "triad"; s = 80; break
+      case "elegant": scheme = "mono"; s = 30; break
       case "friendly": scheme = "analogous"; s = 75; break
     }
 
@@ -256,12 +256,18 @@ export default function GuidedModePage() {
 }
 
 function hslToHex(h: number, s: number, l: number): string {
-  l /= 100
-  const a = (s * Math.min(l, 1 - l)) / 100
-  const f = (n: number) => {
-    const k = (n + h / 30) % 12
-    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1)
-    return Math.round(255 * color).toString(16).padStart(2, "0")
-  }
-  return `#${f(0)}${f(8)}${f(4)}`
+  const sN = s / 100
+  const lN = l / 100
+  const c = (1 - Math.abs(2 * lN - 1)) * sN
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1))
+  const m = lN - c / 2
+  let r = 0, g = 0, b = 0
+  if (h < 60) [r, g, b] = [c, x, 0]
+  else if (h < 120) [r, g, b] = [x, c, 0]
+  else if (h < 180) [r, g, b] = [0, c, x]
+  else if (h < 240) [r, g, b] = [0, x, c]
+  else if (h < 300) [r, g, b] = [x, 0, c]
+  else [r, g, b] = [c, 0, x]
+  const toHex = (v: number) => Math.round((v + m) * 255).toString(16).padStart(2, "0")
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`
 }

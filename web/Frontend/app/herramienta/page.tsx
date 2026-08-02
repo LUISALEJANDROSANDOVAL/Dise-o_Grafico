@@ -65,28 +65,27 @@ function HerramientaContent() {
 
   // Editable copy — lets Designer profile tweak individual swatches.
   const [palette, setPalette] = useState<Swatch[]>(initialSharedPalette || generated)
-  const [customPalette, setCustomPalette] = useState<Swatch[] | null>(null)
   const isFirstRender = useRef(true)
+  const skipNextGenerated = useRef(false)
 
-  // Reset manual edits whenever the base color or scheme changes, except on first load with shared link.
+  // Sync palette with generated when base/scheme change via wheel interaction.
   useEffect(() => {
     if (isFirstRender.current && initialSharedPalette) {
       isFirstRender.current = false
-      // Set the base color to the main color of the shared palette so the wheel matches somewhat
       if (initialSharedPalette.length > 0) {
         setBase(hexToHsl(initialSharedPalette[0].hex))
       }
       return
     }
 
-    if (customPalette) {
-      setPalette(customPalette)
-      setCustomPalette(null)
-    } else {
-      setPalette(generated)
+    if (skipNextGenerated.current) {
+      skipNextGenerated.current = false
+      return
     }
+
+    setPalette(generated)
     isFirstRender.current = false
-  }, [generated, initialSharedPalette, customPalette])
+  }, [generated, initialSharedPalette])
 
   function handleSwatchChange(index: number, hsl: HSL) {
     setPalette((prev) =>
@@ -154,7 +153,10 @@ function HerramientaContent() {
             onSchemeChange={setScheme}
             profile={profile}
             onShowAnalysis={() => setShowFullAnalysis(true)}
-            onCustomPaletteExtracted={(swatches) => setCustomPalette(swatches)}
+            onCustomPaletteExtracted={(swatches) => {
+              skipNextGenerated.current = true
+              setPalette(swatches)
+            }}
           />
         </aside>
 
