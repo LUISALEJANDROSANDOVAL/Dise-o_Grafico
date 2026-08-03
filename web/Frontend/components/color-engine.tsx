@@ -87,8 +87,8 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
     const timer = setTimeout(() => {
       setHistory((prev) => {
         const last = prev[prev.length - 1]
-        // Skip if the color is practically identical
-        if (last && Math.abs(last.h - base.h) < 1 && Math.abs(last.s - base.s) < 1 && Math.abs(last.l - base.l) < 1) return prev
+        // Skip if the color is visually identical
+        if (last && hslToHex(last) === hslToHex(base)) return prev
         const next = [...prev, base]
         if (next.length > 10) return next.slice(next.length - 10)
         return next
@@ -139,7 +139,15 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
     let angle = (Math.atan2(dy, dx) * (180 / Math.PI) + 90) % 360
     if (angle < 0) angle += 360
     const dist = Math.min(1, Math.sqrt(dx * dx + dy * dy) / (rect.width / 2))
-    onBaseChange({ h: Math.round(angle), s: Math.round(35 + dist * 60), l: baseRef.current.l })
+    
+    // If color is currently pure white or black, changing hue on the wheel does nothing visually.
+    // Reset lightness to 50% so the user can actually see the color they are picking.
+    let currentL = baseRef.current.l;
+    if (currentL > 95 || currentL < 5) {
+      currentL = 50;
+    }
+
+    onBaseChange({ h: Math.round(angle), s: Math.round(35 + dist * 60), l: currentL })
     return angle
   }
 
@@ -367,8 +375,8 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
         <input
           id="lightness"
           type="range"
-          min={20}
-          max={80}
+          min={0}
+          max={100}
           value={base.l}
           onChange={(e) => onBaseChange({ ...base, l: Number(e.target.value) })}
           className="h-2 w-full cursor-pointer appearance-none rounded-full bg-muted accent-foreground print:hidden"

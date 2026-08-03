@@ -73,6 +73,7 @@ function HerramientaContent() {
     if (isFirstRender.current && initialSharedPalette) {
       isFirstRender.current = false
       if (initialSharedPalette.length > 0) {
+        skipNextGenerated.current = true
         setBase(hexToHsl(initialSharedPalette[0].hex))
       }
       return

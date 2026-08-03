@@ -2,14 +2,19 @@
 
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowRight, ArrowLeft, Palette, CheckCircle2 } from "lucide-react"
+import { 
+  ArrowRight, ArrowLeft, Palette, CheckCircle2,
+  Laptop, Utensils, Leaf, Gem, BookOpen,
+  Zap, ShieldCheck, Rocket, Crown, Users,
+  Sun, Snowflake, Wand2, Moon
+} from "lucide-react"
 import { useRouter } from "next/navigation"
 
 type Question = {
   id: string
   title: string
   subtitle: string
-  options: { label: string; value: string; icon?: string }[]
+  options: { label: string; value: string; icon?: React.ReactNode }[]
 }
 
 const QUESTIONS: Question[] = [
@@ -18,11 +23,11 @@ const QUESTIONS: Question[] = [
     title: "¿En qué rubro se encuentra tu negocio?",
     subtitle: "Esto nos ayuda a entender los estándares visuales de tu mercado.",
     options: [
-      { label: "Tecnología / Software", value: "tech", icon: "💻" },
-      { label: "Comida / Restaurante", value: "food", icon: "🍔" },
-      { label: "Salud / Bienestar", value: "health", icon: "🌿" },
-      { label: "Lujo / Moda", value: "luxury", icon: "✨" },
-      { label: "Educación / Consultoría", value: "education", icon: "📚" },
+      { label: "Tecnología / Software", value: "tech", icon: <Laptop className="w-5 h-5 text-blue-500" /> },
+      { label: "Comida / Restaurante", value: "food", icon: <Utensils className="w-5 h-5 text-orange-500" /> },
+      { label: "Salud / Bienestar", value: "health", icon: <Leaf className="w-5 h-5 text-green-500" /> },
+      { label: "Lujo / Moda", value: "luxury", icon: <Gem className="w-5 h-5 text-purple-500" /> },
+      { label: "Educación / Consultoría", value: "education", icon: <BookOpen className="w-5 h-5 text-indigo-500" /> },
     ],
   },
   {
@@ -30,11 +35,11 @@ const QUESTIONS: Question[] = [
     title: "¿Qué personalidad define mejor a tu marca?",
     subtitle: "El color transmite emociones antes de que el cliente lea una palabra.",
     options: [
-      { label: "Enérgica y Pasional", value: "energetic", icon: "🔥" },
-      { label: "Confiable y Segura", value: "trustworthy", icon: "🛡️" },
-      { label: "Innovadora y Moderna", value: "innovative", icon: "🚀" },
-      { label: "Elegante y Sofisticada", value: "elegant", icon: "👑" },
-      { label: "Cercana y Amigable", value: "friendly", icon: "👋" },
+      { label: "Enérgica y Pasional", value: "energetic", icon: <Zap className="w-5 h-5 text-red-500" /> },
+      { label: "Confiable y Segura", value: "trustworthy", icon: <ShieldCheck className="w-5 h-5 text-slate-500" /> },
+      { label: "Innovadora y Moderna", value: "innovative", icon: <Rocket className="w-5 h-5 text-cyan-500" /> },
+      { label: "Elegante y Sofisticada", value: "elegant", icon: <Crown className="w-5 h-5 text-amber-500" /> },
+      { label: "Cercana y Amigable", value: "friendly", icon: <Users className="w-5 h-5 text-emerald-500" /> },
     ],
   },
   {
@@ -42,10 +47,10 @@ const QUESTIONS: Question[] = [
     title: "¿Qué tipo de colores te atraen más?",
     subtitle: "Tu gusto personal también es importante para la identidad.",
     options: [
-      { label: "Tonos Cálidos (Rojos, Naranjas, Amarillos)", value: "warm", icon: "☀️" },
-      { label: "Tonos Fríos (Azules, Verdes, Morados)", value: "cool", icon: "❄️" },
-      { label: "Colores Vibrantes y Llamativos", value: "vibrant", icon: "🌈" },
-      { label: "Colores Oscuros y Serios", value: "dark", icon: "🌑" },
+      { label: "Tonos Cálidos (Rojos, Naranjas, Amarillos)", value: "warm", icon: <Sun className="w-5 h-5 text-amber-500" /> },
+      { label: "Tonos Fríos (Azules, Verdes, Morados)", value: "cool", icon: <Snowflake className="w-5 h-5 text-blue-400" /> },
+      { label: "Colores Vibrantes y Llamativos", value: "vibrant", icon: <Wand2 className="w-5 h-5 text-fuchsia-500" /> },
+      { label: "Colores Oscuros y Serios", value: "dark", icon: <Moon className="w-5 h-5 text-slate-700 dark:text-slate-300" /> },
     ],
   },
 ]
@@ -204,7 +209,9 @@ export default function GuidedModePage() {
                           : "border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-blue-300 dark:hover:border-white/20 hover:scale-[1.01]"
                       }`}
                     >
-                      <span className="text-2xl mr-4">{opt.icon}</span>
+                      <div className={`p-2.5 rounded-xl mr-4 transition-colors ${isSelected ? "bg-blue-100 dark:bg-blue-500/20" : "bg-slate-100 dark:bg-white/10"}`}>
+                        {opt.icon}
+                      </div>
                       <span className={`text-lg font-medium ${isSelected ? "text-blue-700 dark:text-blue-400" : "text-slate-700 dark:text-slate-200"}`}>
                         {opt.label}
                       </span>
