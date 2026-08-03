@@ -264,7 +264,7 @@ export function ColorEngine({ base, onBaseChange, scheme, onSchemeChange, profil
           whileTap={isDragging ? { scale: 1.01 } : { scale: 0.99 }}
           animate={{ scale: isDragging ? 1.01 : 1 }}
           transition={{ type: "spring", stiffness: 300, damping: 22 }}
-          className="relative aspect-square w-56 max-w-full touch-none rounded-full sm:w-64 print-visible-wheel"
+          className="relative aspect-square w-56 max-w-full touch-none select-none rounded-full sm:w-64 print-visible-wheel"
           style={{
             background:
               "conic-gradient(from 0deg, #ff0000 0deg, #ffff00 60deg, #00ff00 120deg, #00ffff 180deg, #0000ff 240deg, #ff00ff 300deg, #ff0000 360deg)",

@@ -28,19 +28,11 @@ He revisado exhaustivamente el código base actual del proyecto (CROMATIK) en Ne
 
 Tras la revisión, estas son las **únicas 3 tareas** que restan para finalizar completamente el proyecto web:
 
-1. **RF-18: Cuestionario Rápido / Modo Guiado.**
-   - Un asistente que sugiera esquemas de colores a los microempresarios basándose en preguntas sencillas sobre su negocio (ej. "¿De qué trata tu negocio?", "¿Qué quieres transmitir?"), sin obligarlos a tocar la rueda cromática.
-2. **SEO y Metadatos Dinámicos (OpenGraph).**
-   - Configurar `generateMetadata` en Next.js para que cuando alguien comparta su enlace de paleta (`cromatik.com/p/123`) en WhatsApp o Twitter, aparezca una imagen y título dinámico de los colores elegidos.
-3. **PWA (Progressive Web App).**
+1. **PWA (Progressive Web App).**
    - Archivos `manifest.json` y `service-worker.js` para que la web pueda instalarse como una app nativa en el celular directamente desde el navegador (Add to Home Screen).
 
 ---
 
 ## 🚨 Análisis de Obligatoriedad (Lo que NO puede faltar)
 
-De los 3 puntos restantes, **solo los dos primeros son estrictamente obligatorios (MANDATORY)** para el lanzamiento de la versión 1.0 (MVP) y para cumplir con los objetivos del negocio:
-
-- **OBLIGATORIO - RF-18 (Modo Guiado):** Es vital porque el público objetivo principal de CROMATIK son *emprendedores sin conocimientos técnicos*. Si entran a la app y solo ven un círculo cromático, pueden sentirse abrumados. El "Modo Guiado" es el puente de UX (User Experience) necesario para retenerlos.
-- **OBLIGATORIO - SEO Dinámico (OpenGraph):** Es vital para el crecimiento orgánico (Marketing). La funcionalidad de compartir el enlace (RF-20) pierde su propósito si el enlace compartido se ve como un bloque de texto vacío en redes sociales. Debe mostrar un "preview" visual de los colores elegidos.
-- **OPCIONAL - PWA:** Aunque agrega mucho valor permitiendo la instalación móvil sin pasar por la App Store/Play Store, *no es un requisito bloqueante* para que el sistema core funcione. Puede ser lanzado como una actualización posterior.
+- **OPCIONAL PERO RECOMENDADO - PWA:** Aunque agrega mucho valor permitiendo la instalación móvil sin pasar por la App Store/Play Store, *no es un requisito bloqueante* para que el sistema core funcione. Puede ser lanzado como una actualización posterior. Actualmente, **todos los requisitos funcionales de CROMATIK están completos al 100%.**
